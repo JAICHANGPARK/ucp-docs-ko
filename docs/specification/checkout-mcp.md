@@ -14,17 +14,15 @@
    limitations under the License.
 -->
 
-# Checkout Capability - MCP Binding
+# Checkout Capability - MCP 바인딩
 
-This document specifies the Model Context Protocol (MCP) binding for the
-[Checkout Capability](checkout.md).
+이 문서는 [Checkout Capability](checkout.md)의 Model Context Protocol(MCP) 바인딩을 정의합니다.
 
-## Protocol Fundamentals
+## 프로토콜 기본 사항
 
 ### Discovery
 
-Businesses advertise MCP transport availability through their UCP profile at
-`/.well-known/ucp`.
+business는 `/.well-known/ucp`의 UCP 프로필을 통해 MCP 전송 지원 여부를 광고합니다.
 
 ```json
 {
@@ -73,10 +71,10 @@ Businesses advertise MCP transport availability through their UCP profile at
 }
 ```
 
-### Request Metadata
+### 요청 메타데이터
 
-MCP clients **MUST** include a `meta` object in every request containing
-protocol metadata:
+MCP 클라이언트는 프로토콜 메타데이터를 담은 `meta` 객체를 모든 요청에
+**반드시(MUST)** 포함해야 합니다.
 
 ```json
 {
@@ -98,54 +96,54 @@ protocol metadata:
 }
 ```
 
-The `meta["ucp-agent"]` field is **required** on all requests to enable
-[capability negotiation](overview.md#negotiation-protocol). The
-`complete_checkout` and `cancel_checkout` operations also require
-`meta["idempotency-key"]` for retry safety. Platforms **MAY** include
-additional metadata fields.
+모든 요청에서 `meta["ucp-agent"]` 필드는
+[capability negotiation](overview.md#negotiation-protocol)을 위해 **필수(required)** 입니다.
+또한 `complete_checkout` 및 `cancel_checkout` 연산은 재시도 안전성을 위해
+`meta["idempotency-key"]`를 요구합니다.
+platform은 추가 메타데이터 필드를 포함할 수 있습니다(**MAY**).
 
 ## Tools
 
-UCP Capabilities map 1:1 to MCP Tools.
+UCP Capability는 MCP Tool과 1:1로 매핑됩니다.
 
-### Identifier Pattern
+### 식별자 패턴
 
-MCP tools separate resource identification from payload data:
+MCP tool은 리소스 식별과 페이로드 데이터를 분리합니다.
 
-* **Requests:** For operations on existing checkouts (`get`, `update`,
-    `complete`, `cancel`), a top-level `id` parameter identifies the target
-    resource. The `checkout` object in the request payload **MUST NOT** contain
-    an `id` field.
-* **Responses:** All responses include `checkout.id` as part of the full resource state.
-* **Create:** The `create_checkout` operation does not require an `id` in the request, and the response includes the newly assigned `checkout.id`.
+* **요청(Requests):** 기존 checkout 대상 연산(`get`, `update`,
+  `complete`, `cancel`)은 최상위 `id` 파라미터로 대상 리소스를 식별합니다.
+  요청 페이로드의 `checkout` 객체에는 `id` 필드가 있으면 안 됩니다(**MUST NOT**).
+* **응답(Responses):** 모든 응답은 전체 리소스 상태의 일부로 `checkout.id`를 포함합니다.
+* **Create:** `create_checkout` 연산은 요청에 `id`가 필요 없고,
+  응답에 새로 할당된 `checkout.id`가 포함됩니다.
 
-| Tool                | Operation                                          | Description                |
+| Tool | 연산 | 설명 |
 | :------------------ | :------------------------------------------------- | :------------------------- |
-| `create_checkout`   | [Create Checkout](checkout.md#create-checkout)     | Create a checkout session. |
-| `get_checkout`      | [Get Checkout](checkout.md#get-checkout)           | Get a checkout session.    |
-| `update_checkout`   | [Update Checkout](checkout.md#update-checkout)     | Update a checkout session. |
-| `complete_checkout` | [Complete Checkout](checkout.md#complete-checkout) | Place the order.           |
-| `cancel_checkout`   | [Cancel Checkout](checkout.md#cancel-checkout)     | Cancel a checkout session. |
+| `create_checkout` | [Create Checkout](checkout.md#create-checkout) | checkout 세션 생성 |
+| `get_checkout` | [Get Checkout](checkout.md#get-checkout) | checkout 세션 조회 |
+| `update_checkout` | [Update Checkout](checkout.md#update-checkout) | checkout 세션 갱신 |
+| `complete_checkout` | [Complete Checkout](checkout.md#complete-checkout) | 주문 확정 |
+| `cancel_checkout` | [Cancel Checkout](checkout.md#cancel-checkout) | checkout 세션 취소 |
 
 ### `create_checkout`
 
-Maps to the [Create Checkout](checkout.md#create-checkout) operation.
+[Create Checkout](checkout.md#create-checkout) 연산에 매핑됩니다.
 
-#### Input Schema
+#### 입력 스키마
 
-* `checkout` ([Checkout](checkout.md#create-checkout)): **Required**. Contains
-    the initial checkout session data and optional extensions.
-    * Extensions (Optional):
-        * `dev.ucp.shopping.buyer_consent`: [Buyer Consent](buyer-consent.md)
-        * `dev.ucp.shopping.fulfillment`: [Fulfillment](fulfillment.md)
-        * `dev.ucp.shopping.discount`: [Discount](discount.md)
-        * `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](ap2-mandates.md)
+* `checkout` ([Checkout](checkout.md#create-checkout)): **Required**.
+  초기 checkout 세션 데이터와 선택 확장을 포함합니다.
+  * 확장(선택):
+    * `dev.ucp.shopping.buyer_consent`: [Buyer Consent](buyer-consent.md)
+    * `dev.ucp.shopping.fulfillment`: [Fulfillment](fulfillment.md)
+    * `dev.ucp.shopping.discount`: [Discount](discount.md)
+    * `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](ap2-mandates.md)
 
-#### Output Schema
+#### 출력 스키마
 
-* [Checkout](checkout.md#create-checkout) object.
+* [Checkout](checkout.md#create-checkout) 객체
 
-#### Example
+#### 예시
 
 === "Request"
 
@@ -339,36 +337,36 @@ Maps to the [Create Checkout](checkout.md#create-checkout) operation.
 
 ### `get_checkout`
 
-Maps to the [Get Checkout](checkout.md#get-checkout) operation.
+[Get Checkout](checkout.md#get-checkout) 연산에 매핑됩니다.
 
-#### Input Schema
+#### 입력 스키마
 
-* `id` (String): **Required**. The ID of the checkout session.
+* `id` (String): **Required**. checkout 세션 ID.
 
-#### Output Schema
+#### 출력 스키마
 
-* [Checkout](checkout.md#get-checkout) object.
+* [Checkout](checkout.md#get-checkout) 객체.
 
 ### `update_checkout`
 
-Maps to the [Update Checkout](checkout.md#update-checkout) operation.
+[Update Checkout](checkout.md#update-checkout) 연산에 매핑됩니다.
 
-#### Input Schema
+#### 입력 스키마
 
-* `id` (String): **Required**. The ID of the checkout session to update.
+* `id` (String): **Required**. 갱신 대상 checkout 세션 ID.
 * `checkout` ([Checkout](checkout.md#update-checkout)): **Required**.
-    Contains the updated checkout session data.
-    * Extensions (Optional):
-        * `dev.ucp.shopping.buyer_consent`: [Buyer Consent](buyer-consent.md)
-        * `dev.ucp.shopping.fulfillment`: [Fulfillment](fulfillment.md)
-        * `dev.ucp.shopping.discount`: [Discount](discount.md)
-        * `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](ap2-mandates.md)
+  갱신할 checkout 세션 데이터를 포함합니다.
+  * 확장(선택):
+    * `dev.ucp.shopping.buyer_consent`: [Buyer Consent](buyer-consent.md)
+    * `dev.ucp.shopping.fulfillment`: [Fulfillment](fulfillment.md)
+    * `dev.ucp.shopping.discount`: [Discount](discount.md)
+    * `dev.ucp.shopping.ap2_mandate`: [AP2 Mandates](ap2-mandates.md)
 
-#### Output Schema
+#### 출력 스키마
 
-* [Checkout](checkout.md#update-checkout) object.
+* [Checkout](checkout.md#update-checkout) 객체.
 
-#### Example
+#### 예시
 
 === "Request"
 
@@ -561,54 +559,52 @@ Maps to the [Update Checkout](checkout.md#update-checkout) operation.
 
 ### `complete_checkout`
 
-Maps to the [Complete Checkout](checkout.md#complete-checkout) operation.
+[Complete Checkout](checkout.md#complete-checkout) 연산에 매핑됩니다.
 
-#### Input Schema
+#### 입력 스키마
 
-* `meta` (Object): **Required**. Request metadata containing:
-    * `ucp-agent` (Object): **Required**. Platform agent identification.
-    * `idempotency-key` (String, UUID): **Required**. Unique key for retry safety.
-* `id` (String): **Required**. The ID of the checkout session.
+* `meta` (Object): **Required**. 아래를 포함한 요청 메타데이터
+  * `ucp-agent` (Object): **Required**. platform 에이전트 식별 정보
+  * `idempotency-key` (String, UUID): **Required**. 재시도 안전성을 위한 고유 키
+* `id` (String): **Required**. checkout 세션 ID
 * `checkout` ([Checkout](checkout.md#complete-checkout)): **Required**.
-    Contains payment credentials and other finalization data to execute the transaction.
+  결제 자격증명과 최종 확정 데이터를 포함해 실제 거래를 실행합니다.
 
-#### Output Schema
+#### 출력 스키마
 
-* [Checkout](checkout.md#complete-checkout) object, containing a partial
-   `order` that holds only `id` and `permalink_url`.
+* [Checkout](checkout.md#complete-checkout) 객체. `order`에는 `id`와
+  `permalink_url`만 포함된 partial order가 담깁니다.
 
 ### `cancel_checkout`
 
-Maps to the [Cancel Checkout](checkout.md#cancel-checkout) operation.
+[Cancel Checkout](checkout.md#cancel-checkout) 연산에 매핑됩니다.
 
-#### Input Schema
+#### 입력 스키마
 
-* `meta` (Object): **Required**. Request metadata containing:
-    * `ucp-agent` (Object): **Required**. Platform agent identification.
-    * `idempotency-key` (String, UUID): **Required**. Unique key for retry safety.
-* `id` (String): **Required**. The ID of the checkout session.
+* `meta` (Object): **Required**. 아래를 포함한 요청 메타데이터
+  * `ucp-agent` (Object): **Required**. platform 에이전트 식별 정보
+  * `idempotency-key` (String, UUID): **Required**. 재시도 안전성을 위한 고유 키
+* `id` (String): **Required**. checkout 세션 ID
 
-#### Output Schema
+#### 출력 스키마
 
-* [Checkout](checkout.md#cancel-checkout) object with `status: canceled`.
+* `status: canceled`를 갖는 [Checkout](checkout.md#cancel-checkout) 객체.
 
-## Error Handling
+## 오류 처리
 
-UCP distinguishes between protocol errors and business outcomes. See the
-[Core Specification](overview.md#error-handling) for the complete error code
-registry and transport binding examples.
+UCP는 프로토콜 오류와 비즈니스 결과를 구분합니다.
+전체 오류 코드 레지스트리와 전송 바인딩 예시는
+[Core Specification](overview.md#error-handling)을 참고하세요.
 
-* **Protocol errors**: Transport-level failures (authentication, rate limiting,
-    unavailability) that prevent request processing. Returned as JSON-RPC
-    `error` with code `-32000` (or `-32001` for discovery errors).
-* **Business outcomes**: Application-level results from successful request
-    processing, returned as JSON-RPC `result` with UCP envelope and `messages`.
+* **프로토콜 오류**: 인증/레이트리밋/서비스 불가처럼 요청 처리를 막는 전송 계층 실패.
+  JSON-RPC `error`로 반환되며 코드 `-32000`(discovery 오류는 `-32001`)를 사용
+* **비즈니스 결과**: 요청 처리 후의 애플리케이션 결과.
+  UCP envelope과 `messages`를 포함한 JSON-RPC `result`로 반환
 
-### Business Outcomes
+### 비즈니스 결과
 
-Business outcomes (including errors like unavailable merchandise) are returned
-as JSON-RPC `result` with `structuredContent` containing the UCP envelope and
-`messages`:
+비즈니스 결과(예: 상품 재고 부족)는 `structuredContent`에
+UCP envelope과 `messages`를 담아 JSON-RPC `result`로 반환됩니다.
 
 ```json
 {
@@ -650,38 +646,36 @@ as JSON-RPC `result` with `structuredContent` containing the UCP envelope and
 }
 ```
 
-## Conformance
+## 적합성(Conformance)
 
-A conforming MCP transport implementation **MUST**:
+적합한 MCP 전송 구현은 다음을 **반드시(MUST)** 만족해야 합니다.
 
-1. Implement JSON-RPC 2.0 protocol correctly.
-2. Provide all core checkout tools defined in this specification.
-3. Return errors per the [Core Specification](overview.md#error-handling).
-4. Return business outcomes as JSON-RPC `result` with UCP envelope and
-    `messages` array.
-5. Validate tool inputs against UCP schemas.
-6. Support HTTP transport with streaming.
+1. JSON-RPC 2.0 프로토콜을 올바르게 구현한다.
+2. 이 명세에서 정의한 모든 핵심 checkout tool을 제공한다.
+3. [Core Specification](overview.md#error-handling)에 따른 오류를 반환한다.
+4. 비즈니스 결과를 UCP envelope 및 `messages` 배열이 포함된 JSON-RPC `result`로 반환한다.
+5. tool 입력을 UCP 스키마에 맞춰 검증한다.
+6. 스트리밍을 지원하는 HTTP 전송을 지원한다.
 
-## Implementation
+## 구현
 
-UCP operations are defined using [OpenRPC](https://open-rpc.org/) (JSON-RPC
-schema format). The [MCP specification](https://modelcontextprotocol.io/)
-requires all tool invocations to use a `tools/call` method with the operation
-name and arguments wrapped in `params`. Implementers **MUST** apply this
-transformation:
+UCP 연산은 [OpenRPC](https://open-rpc.org/)(JSON-RPC 스키마 형식)로 정의됩니다.
+[MCP specification](https://modelcontextprotocol.io/)은 모든 tool 호출이
+연산 이름과 인자를 `params` 안에 감싼 `tools/call` 메서드를 사용하도록 요구합니다.
+구현체는 아래 변환을 **반드시(MUST)** 적용해야 합니다.
 
 | OpenRPC  | MCP                |
 |:---------|:-------------------|
 | `method` | `params.name`      |
 | `params` | `params.arguments` |
 
-**Param conventions:**
+**파라미터 규칙:**
 
-* `meta` contains request metadata
-* `id` identifies the target resource (path parameter equivalent)
-* `checkout` contains the domain payload (body equivalent)
+* `meta`: 요청 메타데이터
+* `id`: 대상 리소스 식별자(path parameter와 동등)
+* `checkout`: 도메인 페이로드(body와 동등)
 
-**Example:** Given the `complete_checkout` operation defined in OpenRPC:
+**예시:** OpenRPC에서 `complete_checkout`가 다음과 같이 정의되어 있을 때:
 
 ```json
 {
@@ -697,7 +691,7 @@ transformation:
 }
 ```
 
-Implementers **MUST** expose this as an MCP `tools/call` endpoint:
+구현체는 이를 MCP `tools/call` 엔드포인트로 아래처럼 노출해야 합니다(**MUST**).
 
 ```json
 {
