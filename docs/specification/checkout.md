@@ -14,7 +14,7 @@
    limitations under the License.
 -->
 
-# 체크아웃(Checkout) Capability
+# 체크아웃 기능
 
 * **Capability 이름:** `dev.ucp.shopping.checkout`
 
@@ -205,7 +205,7 @@ business는 표준 오류를 `severity: recoverable`로 표시하는 것이 **�
 예: `out_of_stock`는 사전에 구체 UX가 필요하고,
 `payment_required`는 제출 시점에 일반적으로 처리할 수 있습니다.
 
-## Continue URL
+## 연속 URL(Continue URL) { #continue-url }
 
 `continue_url` 필드는 플랫폼 UI에서 business UI로 체크아웃을 핸드오프하여,
 구매자가 체크아웃 세션을 이어서 완료할 수 있게 합니다.
@@ -235,7 +235,7 @@ https://business.example.com/checkout-sessions/{checkout_id}
 * 단순하고 안전하며 대부분 구현에 권장
 * URL 수명은 보통 `expires_at`에 연동
 
-#### Checkout Permalink
+#### 체크아웃 퍼머링크 { #checkout-permalink }
 
 체크아웃 상태를 URL에 직접 인코딩해 서버 측 영속성 없이 재구성할 수 있는 stateless URL.
 business는 체크아웃 핸드오프 및 빠른 진입을 지원하기 위해 이 형식 구현을
@@ -250,7 +250,7 @@ business는 체크아웃 핸드오프 및 빠른 진입을 지원하기 위해 �
 
 (상위 가이드라인에 더해)
 
-### Platform
+### 플랫폼 { #platform }
 
 * **MAY** 에이전트를 활용해 체크아웃 세션을 보조할 수 있습니다.
   (예: 아이템 추가, 이행 주소 선택)
@@ -266,7 +266,7 @@ business는 체크아웃 핸드오프 및 빠른 진입을 지원하기 위해 �
   platform이 구성한 checkout permalink보다 business 제공 `continue_url`을 우선하는 것이
   **권장(SHOULD)** 됩니다.
 
-### Business
+### 비즈니스 { #business }
 
 * 체크아웃 완료 후 확인 이메일을 **반드시(MUST)** 발송해야 합니다.
 * 정확한 오류 메시지를 제공하는 것이 **권장(SHOULD)** 됩니다.
@@ -277,7 +277,7 @@ business는 체크아웃 핸드오프 및 빠른 진입을 지원하기 위해 �
 * 모든 비종료 체크아웃 응답에서 `continue_url` 제공이 **권장(SHOULD)** 됩니다.
 * 체크아웃 세션이 "completed" 상태에 도달하면 불변(immutable)으로 간주됩니다.
 
-## Capability 스키마 정의
+## 기능(Capability) 스키마 정의
 
 {{ schema_fields('checkout_resp', 'checkout') }}
 
@@ -293,7 +293,7 @@ Checkout capability는 다음 논리 연산을 정의합니다.
 | **Complete Checkout** | 체크아웃을 최종 확정하고 주문 접수 |
 | **Cancel Checkout** | 체크아웃 세션 취소 |
 
-### Create Checkout
+### 체크아웃 생성 { #create-checkout }
 
 사용자가 구매 의사를 표현했을 때(예: Buy 클릭),
 아이템 상세를 포함해 체크아웃 세션을 시작하기 위해 platform이 호출합니다.
@@ -304,7 +304,7 @@ business가 피드로 제공한 상품 데이터(가격/제목 등)는 응답에
 
 {{ method_fields('create_checkout', 'rest.openapi.json', 'checkout') }}
 
-### Get Checkout
+### 체크아웃 조회 { #get-checkout }
 
 체크아웃 리소스의 최신 상태를 제공합니다. 취소/완료 이후 무엇을 반환할지는
 business 정책에 달려 있습니다(예: 장기간 상태 유지 또는 특정 TTL 후 만료되어
@@ -314,7 +314,7 @@ platform은 체크아웃 세션 생성 시 business가 `expires_at`로 제공한
 
 {{ method_fields('get_checkout', 'rest.openapi.json', 'checkout') }}
 
-### Update Checkout
+### 체크아웃 업데이트 { #update-checkout }
 
 체크아웃 리소스를 전체 교체(full replacement)합니다.
 platform은 write-only 필드 업데이트를 포함한 전체 checkout 리소스를
@@ -323,7 +323,7 @@ business 측 기존 체크아웃 세션 상태를 대체합니다.
 
 {{ method_fields('update_checkout', 'rest.openapi.json', 'checkout') }}
 
-### Complete Checkout
+### 체크아웃 완료 { #complete-checkout }
 
 최종 주문 확정 호출입니다.
 사용자가 선택한 아이템에 대해 결제 및 주문 확정을 의사결정했을 때 호출합니다.
@@ -338,7 +338,7 @@ business 측 기존 체크아웃 세션 상태를 대체합니다.
 
 {{ method_fields('complete_checkout', 'rest.openapi.json', 'checkout') }}
 
-### Cancel Checkout
+### 체크아웃 취소 { #cancel-checkout }
 
 취소 가능한 경우 체크아웃 세션 취소에 사용합니다.
 체크아웃 세션을 취소할 수 없는 경우(예: 이미 canceled 또는 completed),
@@ -359,11 +359,11 @@ business는 작업이 허용되지 않음을 나타내는 오류를 반환하는
 
 ## 엔터티
 
-### Buyer
+### 구매자(Buyer)
 
 {{ schema_fields('buyer', 'checkout') }}
 
-### Context
+### 컨텍스트(Context)
 
 Context 신호는 잠정적 힌트입니다.
 business는 권위 있는 데이터(예: 주소)가 없을 때 이 값을 활용하는 것이 **권장(SHOULD)** 되며,
@@ -372,43 +372,43 @@ business는 권위 있는 데이터(예: 주소)가 없을 때 이 값을 활용
 
 {{ schema_fields('context', 'checkout') }}
 
-### Fulfillment Option
+### 이행 옵션(Fulfillment Option)
 
 {{ extension_schema_fields('fulfillment.json#/$defs/fulfillment_option', 'checkout') }}
 
-### Item
+### 항목(Item)
 
-#### Item Create Request
+#### 항목 생성 요청
 
 {{ schema_fields('types/item_create_req', 'checkout') }}
 
-#### Item Update Request
+#### 항목 업데이트 요청
 
 {{ schema_fields('types/item_update_req', 'checkout') }}
 
-#### Item Response
+#### 항목 응답
 
 {{ schema_fields('types/item_resp', 'checkout') }}
 
-### Line Item
+### 라인 아이템(Line Item)
 
-#### Line Item Create Request
+#### 라인 아이템 생성 요청
 
 {{ schema_fields('types/line_item_create_req', 'checkout') }}
 
-#### Line Item Update Request
+#### 라인 아이템 업데이트 요청
 
 {{ schema_fields('types/line_item_update_req', 'checkout') }}
 
-#### Line Item Response
+#### 라인 아이템 응답
 
 {{ schema_fields('types/line_item_resp', 'checkout') }}
 
-### Link
+### 링크(Link)
 
 {{ schema_fields('types/link', 'checkout') }}
 
-#### Well-Known Link Types
+#### Well-Known URI 링크 타입
 
 business는 거래와 관련된 링크를 가능한 한 모두 제공하는 것이 **권장(SHOULD)** 됩니다.
 아래는 권장 well-known 타입입니다.
@@ -425,52 +425,52 @@ business는 도메인별 요구를 위해 사용자 정의 타입을 정의할 �
 platform은 알 수 없는 타입을 `title` 필드로 표시하거나 생략하는 방식으로
 유연하게 처리하는 것이 **권장(SHOULD)** 됩니다.
 
-### Message
+### 메시지(Message)
 
 {{ schema_fields('message', 'checkout') }}
 
-### Message Error
+### 메시지 오류
 
 {{ schema_fields('types/message_error', 'checkout') }}
 
-### Message Info
+### 메시지 정보
 
 {{ schema_fields('types/message_info', 'checkout') }}
 
-### Message Warning
+### 메시지 경고
 
 {{ schema_fields('types/message_warning', 'checkout') }}
 
-### Payment
+### 결제(Payment)
 
 {{ schema_fields('payment', 'checkout') }}
 
-### Payment Instrument
+### 결제 수단(Payment Instrument)
 
 {{ schema_fields('payment_instrument', 'checkout') }}
 
-### Payment Credential
+### 결제 자격증명(Payment Credential)
 
 {{ schema_fields('payment_credential', 'checkout') }}
 
-### Postal Address
+### 우편 주소(Postal Address)
 
 {{ schema_fields('postal_address', 'checkout') }}
 
-### Response
+### 응답(Response)
 
 {{ extension_schema_fields('capability.json#/$defs/response_schema', 'checkout') }}
 
-### Total
+### 합계(Total)
 
-#### Total Response
+#### 합계 응답
 
 {{ schema_fields('types/total_resp', 'checkout') }}
 
-### UCP Response Checkout
+### UCP 응답 체크아웃
 
 {{ extension_schema_fields('ucp.json#/$defs/response_checkout_schema', 'checkout') }}
 
-### Order Confirmation
+### 주문 확인
 
 {{ schema_fields('order_confirmation', 'checkout') }}

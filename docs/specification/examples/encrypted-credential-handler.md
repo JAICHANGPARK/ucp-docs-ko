@@ -14,7 +14,7 @@
    limitations under the License.
 -->
 
-# Encrypted Credential Handler
+# 암호화 자격증명 핸들러
 
 * **Handler Name:** `com.example.encrypted_credential`
 * **Type:** Payment Handler Example
@@ -40,7 +40,7 @@
 * **단순한 아키텍처:** 토큰 저장/토큰-자격증명 매핑 불필요
 * **비즈니스 키 주도:** 비즈니스가 자체 복호화 키를 관리
 
-### Quick Start
+### 빠른 시작
 
 | If you are a...                        | Start here                                    |
 | :------------------------------------- | :-------------------------------------------- |
@@ -90,11 +90,11 @@
 
 ---
 
-## Business 통합
+## 비즈니스 통합
 
 ### 사전 조건
 
-#### CRITICAL: 카드 자격증명은 규정 준수 필수
+#### 중요: 카드 자격증명은 규정 준수 필수
 
 이 핸들러를 수락하기 전에,
 비즈니스는 플랫폼에 공개 암호화 키를 등록해야 합니다.
@@ -115,7 +115,7 @@ PCI DSS를 **MUST** 준수해야 합니다. 여기에는 다음이 포함됩니�
 | `identity.access_token` | 온보딩 시 플랫폼이 할당한 비즈니스 식별자                 |
 | Public key registered   | 플랫폼이 암호화용 비즈니스 공개키를 저장                  |
 
-### Handler Configuration
+### 핸들러 구성
 
 비즈니스는 플랫폼 handler를 광고합니다.
 `business_id`는 암호화에 사용할 공개키를 조회하기 위한 비즈니스 식별자입니다.
@@ -136,7 +136,7 @@ PCI DSS를 **MUST** 준수해야 합니다. 여기에는 다음이 포함됩니�
 카드 자격증명을 로컬 복호화하는 순간 PCI DSS 준수가 필요합니다.
 다른 자격증명 타입은 각 타입별 규제 요건을 따릅니다.
 
-#### Business Config (Discovery)
+#### 비즈니스 구성(디스커버리)
 
 | Field           | Type   | Required | Description                                         |
 | :-------------- | :----- | :------- | :-------------------------------------------------- |
@@ -144,7 +144,7 @@ PCI DSS를 **MUST** 준수해야 합니다. 여기에는 다음이 포함됩니�
 | `business_id`   | string | Yes      | 플랫폼이 할당한 비즈니스 식별자                     |
 | `public_key_id` | string | Yes      | 등록된 비즈니스 공개키 식별자                       |
 
-#### Example Business Handler Declaration
+#### 비즈니스 핸들러 선언 예시
 
 ```json
 {
@@ -169,7 +169,7 @@ PCI DSS를 **MUST** 준수해야 합니다. 여기에는 다음이 포함됩니�
 }
 ```
 
-#### Response Config (Checkout)
+#### 응답 구성(체크아웃)
 
 response config에는 사용된 암호화 정보가 포함됩니다.
 
@@ -180,7 +180,7 @@ response config에는 사용된 암호화 정보가 포함됩니다.
 | `encryption_algorithm` | string | Yes      | 사용 알고리즘 (예: `RSA-OAEP-256`)    |
 | `key_id`               | string | Yes      | 암호화에 사용된 키 식별자             |
 
-#### Example Response Config
+#### 응답 구성 예시
 
 ```json
 {
@@ -205,7 +205,7 @@ response config에는 사용된 암호화 정보가 포함됩니다.
 
 ---
 
-## Platform 통합
+## 플랫폼 통합
 
 ### 사전 조건
 
@@ -224,12 +224,12 @@ response config에는 사용된 암호화 정보가 포함됩니다.
 | Key storage | 비즈니스 identity와 공개키 매핑 관리                             |
 | Encryption  | 비즈니스 공개키로 credential + binding context 암호화           |
 
-### Handler Configuration (Platform)
+### 핸들러 구성(플랫폼)
 
 플랫폼은 UCP 프로필의 `payment_handlers` 레지스트리에서
 `platform_config`를 사용해 이 핸들러를 광고합니다.
 
-#### Platform Config (Discovery)
+#### 플랫폼 구성(디스커버리)
 
 | Field                  | Type   | Required | Description                                                |
 | :--------------------- | :----- | :------- | :--------------------------------------------------------- |
@@ -237,7 +237,7 @@ response config에는 사용된 암호화 정보가 포함됩니다.
 | `platform_id`          | string | Yes      | 플랫폼 식별자                                              |
 | `supported_algorithms` | array  | Yes      | 지원 암호화 알고리즘 (예: `['RSA-OAEP-256']`)             |
 
-#### Example Platform Handler Declaration
+#### 플랫폼 핸들러 선언 예시
 
 ```json
 {
@@ -262,7 +262,7 @@ response config에는 사용된 암호화 정보가 포함됩니다.
 }
 ```
 
-### Credential 암호화
+### 자격증명 암호화
 
 플랫폼 애플리케이션은 결제 흐름을 오케스트레이션하지만,
 **원본 자격증명에는 접근하지 않습니다**.
@@ -275,7 +275,7 @@ response config에는 사용된 암호화 정보가 포함됩니다.
 
 이 분리 구조는 플랫폼 애플리케이션 자체가 원본 PAN을 처리하지 않도록 보장합니다.
 
-### Checkout 제출
+### 체크아웃 제출
 
 플랫폼 애플리케이션은 vaulting service에서 받은 암호화 credential로 checkout을 제출합니다.
 
@@ -313,7 +313,7 @@ Content-Type: application/json
 
 ---
 
-## Security Considerations
+## 보안 고려사항
 
 | Requirement | Description |
 | :---------- | :---------- |
@@ -328,7 +328,7 @@ Content-Type: application/json
 
 ---
 
-## References
+## 참고자료
 
 * **Identity Schema:** `https://ucp.dev/schemas/shopping/types/payment_identity.json`
 * **Instrument Schema:** `https://ucp.dev/schemas/shopping/types/card_payment_instrument.json`

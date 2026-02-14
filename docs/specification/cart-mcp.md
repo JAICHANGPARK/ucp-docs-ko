@@ -14,13 +14,13 @@
    limitations under the License.
 -->
 
-# Cart Capability - MCP 바인딩
+# 장바구니 기능 - MCP 바인딩
 
 이 문서는 [Cart Capability](cart.md)의 Model Context Protocol(MCP) 바인딩을 정의합니다.
 
 ## 프로토콜 기본 사항
 
-### Discovery
+### 디스커버리
 
 business는 `/.well-known/ucp`의 UCP 프로필을 통해 MCP 전송 사용 가능 여부를 광고합니다.
 
@@ -84,7 +84,7 @@ MCP 클라이언트는 모든 요청에 프로토콜 메타데이터를 담은 `
 [capability negotiation](overview.md#negotiation-protocol)을 위해 **필수(required)** 입니다.
 platform은 추가 메타데이터 필드를 포함할 수 있습니다(**MAY**).
 
-## Tools
+## 도구(Tools)
 
 UCP Capability는 MCP Tool과 1:1로 매핑됩니다.
 

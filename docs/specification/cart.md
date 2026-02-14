@@ -14,9 +14,9 @@
    limitations under the License.
 -->
 
-# Cart Capability
+# 장바구니 기능
 
-* **Capability Name:** `dev.ucp.shopping.cart`
+* **기능 이름:** `dev.ucp.shopping.cart`
 * **Version:** `DRAFT`
 
 ## 개요
@@ -43,17 +43,17 @@ Cart는 다음을 지원합니다.
   컨텍스트 기반 가격 추정 제공
 * **공유(Sharing)**: `continue_url`을 통한 cart 공유 및 복구
 
-## Cart vs Checkout
+## 장바구니 vs 체크아웃 { #cart-vs-checkout }
 
-| Aspect | Cart | Checkout |
-| ------ | ---- | -------- |
-| **Purpose** | 구매 전 탐색 | 구매 확정 |
-| **Payment** | 없음 | 필수(handler, instrument) |
-| **Status** | 이진 상태(존재/미존재) | 라이프사이클(`incomplete` → `completed`) |
-| **Complete Operation** | 없음 | 있음 |
-| **Totals** | 추정치(부분적일 수 있음) | 최종 가격 |
+| 항목 | 장바구니 | 체크아웃 |
+| ---- | -------- | -------- |
+| **목적** | 구매 전 탐색 | 구매 확정 |
+| **결제** | 없음 | 필수(handler, instrument) |
+| **상태** | 이진 상태(존재/미존재) | 라이프사이클(`incomplete` → `completed`) |
+| **완료 연산** | 없음 | 있음 |
+| **합계** | 추정치(부분적일 수 있음) | 최종 가격 |
 
-## Cart-to-Checkout 변환
+## 장바구니-체크아웃 변환 { #cart-to-checkout-conversion }
 
 Cart capability가 협상되면,
 플랫폼은 Create Checkout 요청에 `cart_id`를 제공하여 cart를 checkout으로 변환할 수 있습니다.
@@ -115,22 +115,22 @@ checkout payload의 중복 필드는 **MUST** 무시해야 합니다.
     [cart lifecycle requirements](#cart-to-checkout-conversion)을 준수하는 것을
     **SHOULD** 권장합니다.
 
-## Cart 스키마 정의
+## 장바구니 스키마 정의
 
 {{ schema_fields('cart_resp', 'cart') }}
 
-## 작업(Operation)
+## 작업(Operations)
 
 Cart capability는 다음 논리 작업을 정의합니다.
 
-| Operation | Description |
+| 작업 | 설명 |
 | :--- | :--- |
-| **Create Cart** | 새 cart 세션을 생성합니다. |
-| **Get Cart** | cart 세션의 현재 상태를 조회합니다. |
-| **Update Cart** | cart 세션을 업데이트합니다. |
-| **Cancel Cart** | cart 세션을 취소합니다. |
+| **장바구니 생성** | 새 cart 세션을 생성합니다. |
+| **장바구니 조회** | cart 세션의 현재 상태를 조회합니다. |
+| **장바구니 업데이트** | cart 세션을 업데이트합니다. |
+| **장바구니 취소** | cart 세션을 취소합니다. |
 
-### Create Cart
+### 장바구니 생성 { #create-cart }
 
 라인 아이템과 선택적 buyer/context 정보를 포함해 새 cart 세션을 생성합니다.
 (로컬라이즈드 가격 추정 용도)
@@ -138,7 +138,7 @@ Cart capability는 다음 논리 작업을 정의합니다.
 * [REST Binding](cart-rest.md#create-cart)
 * [MCP Binding](cart-mcp.md#create_cart)
 
-### Get Cart
+### 장바구니 조회 { #get-cart }
 
 cart 세션의 최신 상태를 조회합니다.
 cart가 존재하지 않거나 만료/취소된 경우 `NOT_FOUND`를 반환합니다.
@@ -146,7 +146,7 @@ cart가 존재하지 않거나 만료/취소된 경우 `NOT_FOUND`를 반환합�
 * [REST Binding](cart-rest.md#get-cart)
 * [MCP Binding](cart-mcp.md#get_cart)
 
-### Update Cart
+### 장바구니 업데이트 { #update-cart }
 
 cart 세션 전체를 교체합니다.
 플랫폼은 전체 cart 리소스를 **MUST** 전송해야 하며,
@@ -155,7 +155,7 @@ cart 세션 전체를 교체합니다.
 * [REST Binding](cart-rest.md#update-cart)
 * [MCP Binding](cart-mcp.md#update_cart)
 
-### Cancel Cart
+### 장바구니 취소 { #cancel-cart }
 
 cart 세션을 취소합니다.
 비즈니스는 삭제 전 cart 상태를 **MUST** 반환해야 합니다.
@@ -164,34 +164,34 @@ cart 세션을 취소합니다.
 * [REST Binding](cart-rest.md#cancel-cart)
 * [MCP Binding](cart-mcp.md#cancel_cart)
 
-## 엔터티
+## 엔터티(Entities)
 
 Cart는 [Checkout](checkout.md)과 동일한 엔터티 스키마를 재사용합니다.
 이를 통해 cart를 checkout 세션으로 변환할 때 데이터 구조 일관성이 유지됩니다.
 
-### Line Item
+### 라인 아이템(Line Item)
 
-#### Line Item Create Request
+#### 라인 아이템 생성 요청
 
 {{ schema_fields('types/line_item_create_req', 'checkout') }}
 
-#### Line Item Update Request
+#### 라인 아이템 업데이트 요청
 
 {{ schema_fields('types/line_item_update_req', 'checkout') }}
 
-#### Line Item Response
+#### 라인 아이템 응답
 
 {{ schema_fields('types/line_item_resp', 'checkout') }}
 
-### Buyer
+### 구매자(Buyer)
 
 {{ schema_fields('buyer', 'checkout') }}
 
-### Context
+### 컨텍스트(Context)
 
 {{ schema_fields('context', 'checkout') }}
 
-### Total
+### 합계(Total)
 
 {{ schema_fields('types/total_resp', 'checkout') }}
 
@@ -199,22 +199,22 @@ Cart는 [Checkout](checkout.md)과 동일한 엔터티 스키마를 재사용합
 플랫폼은 cart totals를 추정치로 간주해야 하며,
 정확한 세금은 checkout 단계에서 계산됩니다.
 
-### Message
+### 메시지(Message)
 
 {{ schema_fields('message', 'checkout') }}
 
-#### Message Error
+#### 메시지 오류
 
 {{ schema_fields('types/message_error', 'checkout') }}
 
-#### Message Info
+#### 메시지 정보
 
 {{ schema_fields('types/message_info', 'checkout') }}
 
-#### Message Warning
+#### 메시지 경고
 
 {{ schema_fields('types/message_warning', 'checkout') }}
 
-### Link
+### 링크(Link)
 
 {{ schema_fields('types/link', 'checkout') }}

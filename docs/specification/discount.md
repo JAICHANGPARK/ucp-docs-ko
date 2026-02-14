@@ -14,7 +14,7 @@
    limitations under the License.
 -->
 
-# Discount Extension
+# 할인 확장
 
 ## 개요
 
@@ -32,7 +32,7 @@ Discount extension은 비즈니스가 checkout 세션에서 할인 코드를 지
 
 - Checkout Capability
 
-## Discovery
+## 디스커버리
 
 비즈니스는 프로필에서 discount 지원을 광고합니다.
 
@@ -58,23 +58,23 @@ Discount extension은 비즈니스가 checkout 세션에서 할인 코드를 지
 
 이 capability가 활성화되면 checkout은 `discounts` 객체로 확장됩니다.
 
-### Discounts Object
+### 할인 객체(Discounts Object)
 
 {{ extension_schema_fields('discount.json#/$defs/discounts_object', 'discount') }}
 
-### Applied Discount
+### 적용 할인(Applied Discount)
 
 {{ extension_schema_fields('discount.json#/$defs/applied_discount', 'discount') }}
 
-### Allocation
+### 할당(Allocation)
 
 {{ extension_schema_fields('discount.json#/$defs/allocation', 'discount') }}
 
-## Allocation 상세
+## 할당(Allocation) 상세
 
 `applied` 배열은 할인이 어떻게 계산되고 분배되었는지를 설명합니다.
 
-### Allocation Method
+### 할당 방식(Allocation Method)
 
 `method` 필드는 할인 계산 방식을 나타냅니다.
 
@@ -97,7 +97,7 @@ Discount B (priority: 2): $10 off → $80 - $10 = $70
 퍼센트 할인은 적용 순서에 따라 복합 계산 결과가 달라지므로
 순서가 중요합니다.
 
-### Allocations Array
+### 할당 배열(Allocations Array)
 
 `allocations` 배열은 각 할인 금액이 어디에 반영되었는지 분해해 보여주며,
 대상 식별에는 JSONPath를 사용합니다.
@@ -113,7 +113,7 @@ Discount B (priority: 2): $10 off → $80 - $10 = $70
 
 **Invariant:** `allocations[].amount`의 합은 `applied_discount.amount`와 같습니다.
 
-## 작업(Operation)
+## 작업(Operations)
 
 할인 코드는 표준 checkout create/update 작업으로 제출됩니다.
 
@@ -174,7 +174,7 @@ Discount B (priority: 2): $10 off → $80 - $10 = $70
 - 플랫폼이 제거할 수 없음
 - 투명성 확보를 위해 노출됨(플랫폼이 적용 이유 설명 가능)
 
-## Line Items 및 Totals에 미치는 영향
+## 라인 아이템 및 합계(Totals)에 미치는 영향
 
 적용 할인은 core checkout 필드에 반영되며,
 두 가지 서로 다른 total type을 사용합니다.
@@ -353,7 +353,7 @@ line item에 할당되는 품목 할인(20% off)과,
 }
 ```
 
-### allocations를 포함한 중첩 할인
+### 할당(allocations)을 포함한 중첩 할인
 
 여러 할인이 전체 allocation 내역과 함께 적용되는 예시입니다.
 

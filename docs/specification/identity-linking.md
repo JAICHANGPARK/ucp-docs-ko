@@ -14,9 +14,9 @@
    limitations under the License.
 -->
 
-# Identity Linking Capability
+# 신원 연결 기능
 
-* **Capability Name:** `dev.ucp.common.identity_linking`
+* **기능 이름:** `dev.ucp.common.identity_linking`
 
 ## 개요
 
@@ -103,7 +103,7 @@ Identity Linking capability는 **플랫폼**(예: Google, agentic 서비스)이
         지원을 **SHOULD** 권장합니다.
         ([Cross-Account protection 참고](https://developers.google.com/identity/account-linking/unlinking#cross-account_protection_risc))
 
-## Scopes
+## 스코프(Scopes)
 
 비즈니스의 실제 지원 여부와 무관하게,
 사용자에게 UCP에 필요할 수 있는 모든 scope 접근을 플랫폼이 요청하도록 권장합니다.
@@ -133,7 +133,7 @@ Get, Create, Update, Delete, Cancel, Complete 모두를 허용해야 합니다.
 
 ## 예시
 
-### Authorization server metadata
+### 인가 서버 메타데이터
 
 `/.well-known/oauth-authorization-server`에 호스팅되어야 하는
 [RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414){target="_blank"} 기준

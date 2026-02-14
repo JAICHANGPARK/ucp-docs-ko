@@ -14,9 +14,9 @@
    limitations under the License.
 -->
 
-# 주문(Order) Capability
+# 주문 기능
 
-* **Capability 이름:** `dev.ucp.shopping.order`
+* **기능 이름:** `dev.ucp.shopping.order`
 
 ## 개요
 
@@ -95,11 +95,11 @@
 
 ## 스키마
 
-### Order
+### 주문(Order)
 
 {{ schema_fields('order', 'order') }}
 
-### Order Line Item
+### 주문 라인 아이템(Order Line Item)
 
 라인 아이템은 체크아웃에서 구매한 내용과 현재 상태를 반영합니다.
 상태 및 수량 카운트는 이벤트 로그를 기준으로 계산되어야 합니다.
@@ -123,14 +123,14 @@ else if (fulfilled > 0) → "partial"
 else → "processing"
 ```
 
-### Expectation
+### 기대치(Expectation)
 
 기대치는 아이템이 언제/어떻게 전달되는지에 대한 구매자 관점의 묶음입니다.
 이는 구매자에게 제공하는 현재 약속을 나타내며, 주문 이후 분할/병합/조정될 수 있습니다.
 
 {{ schema_fields('expectation', 'order') }}
 
-### Fulfillment Event
+### 이행 이벤트(Fulfillment Event)
 
 이벤트는 실제 배송 과정을 기록하는 append-only 레코드입니다. `type` 필드는
 개방형 문자열로, 비즈니스가 이행 프로세스에 맞춰 값을 정의할 수 있습니다.
@@ -140,7 +140,7 @@ else → "processing"
 예시: `processing`, `shipped`, `in_transit`, `delivered`, `failed_attempt`,
 `canceled`, `undeliverable`, `returned_to_sender` 등.
 
-### Adjustment
+### 조정(Adjustment)
 
 조정은 이행과 독립적으로 존재하는 다형성(polymorphic) 이벤트입니다.
 `type` 필드는 개방형 문자열로, 비즈니스 요구에 맞게 정의할 수 있습니다.
@@ -256,7 +256,7 @@ else → "processing"
 | :-------------- | :----- | :--------- | :--- |
 | [Order Event Webhook](#order-event-webhook) | `POST` | 플랫폼 제공 URL | 비즈니스가 주문 라이프사이클 이벤트를 플랫폼으로 전송 |
 
-### Order Event Webhook
+### 주문 이벤트 웹훅 { #order-event-webhook }
 
 비즈니스는 파트너 온보딩 중 플랫폼이 제공한 웹훅 URL로 주문 이벤트를 POST합니다.
 URL 형식은 플랫폼마다 다를 수 있습니다.
@@ -334,22 +334,22 @@ URL 형식은 플랫폼마다 다를 수 있습니다.
 
 ## 엔터티
 
-### Item Response
+### 항목 응답(Item Response)
 
 {{ schema_fields('types/item_resp', 'order') }}
 
-### Postal Address
+### 우편 주소(Postal Address)
 
 {{ schema_fields('postal_address', 'order') }}
 
-### Response
+### 응답(Response)
 
 {{ extension_schema_fields('capability.json#/$defs/response_schema', 'order') }}
 
-### Total Response
+### 합계 응답(Total Response)
 
 {{ schema_fields('types/total_resp', 'order') }}
 
-### UCP Response Order
+### UCP 주문 응답
 
 {{ extension_schema_fields('ucp.json#/$defs/response_order_schema', 'order') }}

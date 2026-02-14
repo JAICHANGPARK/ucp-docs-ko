@@ -50,7 +50,7 @@ checkout capability 엔드포인트는 business 프로필의 `rest.endpoint` 필
 
 ## 예시
 
-### Checkout 생성 { #create-checkout }
+### 체크아웃 생성 { #create-checkout }
 
 === "Request"
 
@@ -163,7 +163,7 @@ checkout capability 엔드포인트는 business 프로필의 `rest.endpoint` 필
     }
     ```
 
-### Checkout 업데이트 { #update-checkout }
+### 체크아웃 업데이트 { #update-checkout }
 
 #### 구매자 정보 업데이트
 
@@ -293,7 +293,7 @@ checkout 상태를 점진적으로 구성할 수 있습니다. 각 PUT은 세션
     }
     ```
 
-#### Fulfillment 업데이트
+#### 주문 이행(Fulfillment) 업데이트
 
 Fulfillment는 checkout capability의 확장입니다. 대부분의 필드는
 구매자 입력(희망 fulfillment 타입 및 주소 등)을 바탕으로 business가 계산해 제공합니다.
@@ -496,7 +496,7 @@ Fulfillment는 checkout capability의 확장입니다. 대부분의 필드는
     }
     ```
 
-#### Fulfillment 선택 업데이트
+#### 주문 이행(Fulfillment) 선택 업데이트
 
 초기 `fulfillment` 데이터 설정 이후, 선택값을 변경하기 위한 후속 호출입니다.
 
@@ -690,7 +690,7 @@ Fulfillment는 checkout capability의 확장입니다. 대부분의 필드는
     }
     ```
 
-### Checkout 완료 { #complete-checkout }
+### 체크아웃 완료 { #complete-checkout }
 
 business가 `buyer` 및 주소(`fulfillment_address`, `billing_address`) 필수 여부를
 강제하는 로직을 가진 경우, `messages`를 통해 해당 요구사항을 명시하는 적절한 지점입니다.
@@ -885,7 +885,7 @@ business가 `buyer` 및 주소(`fulfillment_address`, `billing_address`) 필수 
     }
     ```
 
-### Checkout 조회 { #get-checkout }
+### 체크아웃 조회 { #get-checkout }
 
 === "Request"
 
@@ -1037,7 +1037,7 @@ business가 `buyer` 및 주소(`fulfillment_address`, `billing_address`) 필수 
     }
     ```
 
-### Checkout 취소 { #cancel-checkout }
+### 체크아웃 취소 { #cancel-checkout }
 
 === "Request"
 

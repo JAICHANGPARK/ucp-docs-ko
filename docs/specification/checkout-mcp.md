@@ -14,13 +14,13 @@
    limitations under the License.
 -->
 
-# Checkout Capability - MCP 바인딩
+# 체크아웃 기능 - MCP 바인딩
 
 이 문서는 [Checkout Capability](checkout.md)의 Model Context Protocol(MCP) 바인딩을 정의합니다.
 
 ## 프로토콜 기본 사항
 
-### Discovery
+### 디스커버리
 
 business는 `/.well-known/ucp`의 UCP 프로필을 통해 MCP 전송 지원 여부를 광고합니다.
 
@@ -102,7 +102,7 @@ MCP 클라이언트는 프로토콜 메타데이터를 담은 `meta` 객체를 �
 `meta["idempotency-key"]`를 요구합니다.
 platform은 추가 메타데이터 필드를 포함할 수 있습니다(**MAY**).
 
-## Tools
+## 도구(Tools)
 
 UCP Capability는 MCP Tool과 1:1로 매핑됩니다.
 

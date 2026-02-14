@@ -14,7 +14,7 @@
    limitations under the License.
 -->
 
-# Processor Tokenizer Payment Handler
+# 프로세서 토크나이저 결제 핸들러
 
 * **Handler Name:** `com.example.processor_tokenizer`
 * **Type:** Payment Handler Example
@@ -96,7 +96,7 @@
 구성값에 따라 플랫폼은 "PSP Mode"(identity 전송) 또는
 "Direct Mode"(암묵적 identity)로 동작합니다.
 
-### Business Config (Discovery)
+### 비즈니스 구성(디스커버리)
 
 비즈니스는 discovery 단계에서 토큰화 endpoint와 identity를 광고합니다.
 핸들러 명세(`spec` 필드 참조)는 `/tokenize` endpoint URL을 문서화합니다.
@@ -106,7 +106,7 @@
 | `environment` | string | Yes      | API 환경 (`sandbox` 또는 `production`)      |
 | `business_id` | string | Yes      | processor 측 비즈니스 식별자                |
 
-#### Example Business Handler Declaration
+#### 비즈니스 핸들러 선언 예시
 
 ```json
 {
@@ -130,7 +130,7 @@
 }
 ```
 
-### Response Config (Checkout)
+### 응답 구성(체크아웃)
 
 response config에는 이 checkout에서 사용 가능한 런타임 정보가 포함됩니다.
 
@@ -140,7 +140,7 @@ response config에는 이 checkout에서 사용 가능한 런타임 정보가 �
 | `business_id`        | string | Yes      | 비즈니스 식별자                              |
 | `supported_networks` | array  | No       | 해당 거래에서 지원되는 카드 네트워크         |
 
-#### Example Response Config
+#### 응답 구성 예시
 
 ```json
 {
@@ -152,7 +152,7 @@ response config에는 이 checkout에서 사용 가능한 런타임 정보가 �
 }
 ```
 
-## Platform 통합
+## 플랫폼 통합
 
 ### 사전 조건
 
@@ -173,7 +173,7 @@ response config에는 이 checkout에서 사용 가능한 런타임 정보가 �
 
 ### 결제 프로토콜
 
-#### Step 1: Handler 탐색
+#### 1단계: 핸들러 탐색
 
 플랫폼은 processor tokenizer handler를 식별하고,
 비즈니스의 구성 정보를 가져옵니다.
@@ -197,13 +197,13 @@ response config에는 이 checkout에서 사용 가능한 런타임 정보가 �
 }
 ```
 
-#### Step 2: 민감 데이터 수집
+#### 2단계: 민감 데이터 수집
 
 플랫폼의 **규정 준수형 보안 결제 자격증명 제공자**가
 사용자의 민감 결제 데이터를 수집합니다
 (예: 민감 결제 수단 정보가 플랫폼에 닿지 않도록 하는 규정 준수 결제 폼).
 
-#### Step 3: 데이터 토큰화
+#### 3단계: 데이터 토큰화
 
 플랫폼의 payment credential provider가 구성된 `endpoint`를 호출합니다.
 
@@ -218,7 +218,7 @@ Response:
 }
 ```
 
-### Step 4: Checkout 완료
+### 4단계: 체크아웃 완료
 
 플랫폼은 토큰을 제출합니다.
 
@@ -258,7 +258,7 @@ Content-Type: application/json
 
 ## 구현 가이드
 
-### Scenario A: 엔터프라이즈 구현(Self-Hosted)
+### 시나리오 A: 엔터프라이즈 구현(Self-Hosted)
 
 * **역할:** 비즈니스가 이 명세를 구현합니다.
 * **요구사항:**
@@ -269,7 +269,7 @@ Content-Type: application/json
     비즈니스는 PCI DSS를 **MUST** 준수해야 합니다.
     다른 자격증명 타입도 각 타입별 규제 요건을 따릅니다.
 
-### Scenario B: PSP 구현(Third-Party)
+### 시나리오 B: PSP 구현(Third-Party)
 
 * **역할:** PSP가 이 명세를 구현합니다.
 * **요구사항:**
@@ -281,7 +281,7 @@ Content-Type: application/json
 
 ---
 
-## Security Considerations
+## 보안 고려사항
 
 | Requirement | Description |
 | :---------- | :---------- |

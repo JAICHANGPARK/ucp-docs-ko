@@ -77,7 +77,7 @@
 +------------------------------------------------------------------------------+
 ```
 
-### Participants
+### 참여자(Participants)
 
 **정의:** 결제 핸들러 생명주기에 참여하는 서로 다른 행위자.
 모든 핸들러는 최소 2개의 참여자(business, platform)를 가지며,
@@ -102,7 +102,7 @@
 | **Tokenizer** | 원본 자격증명을 보관하고 토큰 자격증명 발급 |
 | **PSP**       | business를 대신해 checkout instrument로 결제 처리 |
 
-### Prerequisites
+### 사전 요구사항(Prerequisites)
 
 **정의:** 참여자가 핸들러 흐름에 들어가기 전에 완료해야 하는 온보딩/설정/구성.
 
@@ -141,7 +141,7 @@ PREREQUISITES(participant, onboarding_input) → prerequisites_output
 - 원본 자격증명을 받는 참여자(business, PSP 등)는 보통 온보딩에서
   보안 책임 수락 절차를 거치며, 자격증명 처리 및 준수 책임을 명시적으로 수락해야 함
 
-### Handler Declaration
+### 핸들러 선언(Handler Declaration)
 
 **정의:** business가 이 핸들러 지원을 알리고 platform이 호출할 수 있도록 광고하는 설정.
 
@@ -185,7 +185,7 @@ business prerequisites 출력 및 원하는 설정에 따라 각각을 만드는
 
 ---
 
-#### Handler Declaration Variants
+#### 핸들러 선언 변형
 
 `PaymentHandler` 스키마는 컨텍스트별로 3가지 변형을 정의합니다.
 기술적으로는 `id`와 `version`만 필수지만,
@@ -251,7 +251,7 @@ business prerequisites 출력 및 원하는 설정에 따라 각각을 만드는
 
 ---
 
-#### Defining the Schema
+#### 스키마 정의
 
 `schema` 필드는 핸들러 전용 형태를 정의하는 JSON schema를 가리킵니다.
 작성자는 보통 형태별로 파일을 분리하고 참조합니다.
@@ -339,7 +339,7 @@ business prerequisites 출력 및 원하는 설정에 따라 각각을 만드는
 
 ---
 
-#### Config Shapes
+#### 구성 스키마 형태
 
 각 변형은 컨텍스트에 맞는 전용 config 스키마를 가집니다.
 
@@ -428,7 +428,7 @@ business prerequisites 출력 및 원하는 설정에 따라 각각을 만드는
 
 ---
 
-#### Instrument Shapes
+#### 결제 수단 스키마 형태
 
 **기본 Instrument 스키마:**
 
@@ -502,7 +502,7 @@ UCP는 `card` 같은 공통 결제 instrument의 기본 스키마를 제공합�
 
 ---
 
-#### Credential Shapes
+#### 자격증명 스키마 형태
 
 **기본 Credential 스키마:**
 
@@ -578,7 +578,7 @@ UCP는 공통 결제 credential의 기본 스키마를 제공합니다.
 }
 ```
 
-### Instrument Acquisition
+### 결제 수단 획득
 
 **정의:** platform이 business checkout에 제출 가능한 payment instrument를 획득하기 위해
 따르는 프로토콜.
@@ -609,7 +609,7 @@ INSTRUMENT_ACQUISITION(
 - 사용 가능한 `config`와 `checkout`을 바탕으로,
   보안상 핵심인 checkout/business별 credential binding을 만드는 방법
 
-### Processing
+### 처리(Processing)
 
 **정의:** 참여자(보통 business 또는 PSP)가 전달받은 payment instrument를 처리하고
 거래를 완료하기 위해 수행하는 단계.
@@ -633,13 +633,13 @@ PROCESSING(
 | `transaction_context` | checkout 총액, line item 등 |
 | `processing_result` | 결제 상세를 포함한 성공/실패 결과 |
 
-#### Error Handling
+#### 오류 처리
 
 명세는 공통 실패(예: Declined, Insufficient Funds, Network Error)를
 표준 UCP Error 정의로 매핑하는 규칙을 **반드시(MUST)** 정의해야 합니다.
 이렇게 해야 기반 처리기가 달라도 플랫폼이 구매자에게 일관되고 현지화 가능한 오류 UX를 제공할 수 있습니다.
 
-### Key Definitions
+### 핵심 정의
 
 | Term | Definition |
 | :---------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -659,32 +659,32 @@ PROCESSING(
 
 결제 핸들러 명세를 공개하기 전 아래를 확인하세요.
 
-### Structure
+### 구조
 
 - [ ] 표준 템플릿 구조를 사용한다
 - [ ] 모든 [REQUIRED] 섹션이 존재한다
 - [ ] 해당되는 [CONDITIONAL] 섹션이 존재한다
 
-### Participants
+### 참여자
 
 - [ ] 모든 참여자가 나열되어 있다
 - [ ] 각 참여자의 역할이 명확히 설명되어 있다
 - [ ] 필요 시 "Business"와 "Merchant" 용어 차이를 명시했다
 
-### Prerequisites
+### 사전 요구사항
 
 - [ ] prerequisites가 필요한 각 참여자의 절차를 문서화했다
 - [ ] 온보딩 입력을 명시했다
 - [ ] prerequisites output(identity + 추가 config)을 설명했다
 - [ ] identity가 `PaymentIdentity` 구조(`access_token`)에 매핑된다
 
-### Handler Declaration
+### 핸들러 선언
 
 - [ ] identity 스키마를 문서화했다(기본 또는 확장)
 - [ ] config 스키마를 문서화했다(해당 시), environment 포함
 - [ ] instrument 스키마를 문서화했다(기본 또는 확장)
 
-### Instrument Acquisition
+### 결제 수단 획득
 
 - [ ] 프로토콜 단계를 명확히 나열했다
 - [ ] 논리 흐름을 실제 프로토콜에 매핑했다
@@ -692,20 +692,20 @@ PROCESSING(
 - [ ] binding 요구사항을 명시했다
 - [ ] Checkout Payment Instrument 생성 방식/형태를 정의했다
 
-### Processing
+### 처리
 
 - [ ] 처리 단계를 명확히 나열했다
 - [ ] 검증 요구사항을 명시했다
 - [ ] 오류 처리 및 매핑을 다뤘다
 
-### Security
+### 보안
 
 - [ ] 보안 요구사항을 나열했다
 - [ ] binding 검증을 필수로 요구했다
 - [ ] 자격증명 처리 지침을 제공했다
 - [ ] (해당 시) 토큰 만료 정책을 정의했다
 
-### General
+### 일반
 
 - [ ] 핸들러 이름이 reverse-DNS 규칙을 따른다
 - [ ] 버전이 YYYY-MM-DD 형식을 따른다

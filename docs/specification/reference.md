@@ -19,7 +19,7 @@
 이 페이지는 UCP 내에서 사용되는 모든 capability 데이터 모델과 타입에 대한
 참조 정보를 제공합니다.
 
-## Capability 스키마
+## 기능(Capability) 스키마
 
 {{ auto_generate_schema_reference('.', 'reference', include_extensions=False) }}
 
@@ -47,31 +47,31 @@
 
 {{ extension_schema_fields('ucp.json#/$defs/business_schema', 'reference') }}
 
-### Checkout 응답 메타데이터
+### 체크아웃 응답 메타데이터
 
 checkout 응답에 포함되는 `ucp` 객체입니다.
 
 {{ extension_schema_fields('ucp.json#/$defs/response_checkout_schema', 'reference') }}
 
-### Order 응답 메타데이터
+### 주문 응답 메타데이터
 
 order 응답 또는 이벤트에 포함되는 `ucp` 객체입니다.
 
 {{ extension_schema_fields('ucp.json#/$defs/response_order_schema', 'reference') }}
 
-### Capability
+### 기능(Capability)
 
 이 객체는 단일 capability 또는 extension을 설명합니다.
 이 객체는 discovery 프로필과 응답의 `capabilities` 배열에 나타나며,
 컨텍스트에 따라 필수 필드가 약간 다릅니다.
 
-#### Capability (Discovery)
+#### 기능(Capability) - 디스커버리
 
 discovery 프로필에서의 형식입니다.
 
 {{ extension_schema_fields('capability.json#/$defs/platform_schema', 'reference') }}
 
-#### Capability (Response)
+#### 기능(Capability) - 응답
 
 응답 메시지에서의 형식입니다.
 
