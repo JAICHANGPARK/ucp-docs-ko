@@ -1,8 +1,8 @@
 ---
 hide:
   - toc
-title: Universal Commerce Protocol
-description: The common language for platforms, agents and businesses.
+title: 유니버설 커머스 프로토콜
+description: 플랫폼, 에이전트, 비즈니스를 위한 공통 언어.
 image: assets/banner.png
 ---
 
@@ -27,10 +27,10 @@ image: assets/banner.png
     <div class="hero-content">
       <h1>Universal Commerce<br>Protocol</h1>
       <p class="hero-subheading">
-        The common language for platforms, agents and businesses.
+        플랫폼, 에이전트, 비즈니스를 위한 공통 언어.
       </p>
       <p class="hero-description">
-        UCP defines building blocks for agentic commerce—from discovering and buying to post purchase experiences—allowing the ecosystem to interoperate through one standard, without custom builds.
+        UCP는 탐색과 구매부터 구매 이후 경험까지 에이전트 커머스를 위한 구성 요소를 정의하여, 생태계가 개별 맞춤 통합 없이 하나의 표준으로 상호운용되도록 합니다.
       </p>
     </div>
     <div class="hero-image">
@@ -41,29 +41,29 @@ image: assets/banner.png
   <div class="promo-card-wrapper">
 
     <div class="promo-card">
-      <h3>Learn</h3>
-      <p>Protocol overview, core concepts, and design principles</p>
+      <h3>학습하기</h3>
+      <p>프로토콜 개요, 핵심 개념, 설계 원칙</p>
       <a href="specification/overview/" class="promo-button">
-        Read the docs
+        문서 보기
       </a>
     </div>
 
     <div class="promo-card">
-      <h3>Implement</h3>
-      <p>GitHub repo, technical spec, SDKs, and reference implementations</p>
+      <h3>구현하기</h3>
+      <p>GitHub 저장소, 기술 명세, SDK, 레퍼런스 구현</p>
       <a href="https://github.com/Universal-Commerce-Protocol/ucp"
          class="promo-button" target="_blank">
-        View on GitHub
+        GitHub에서 보기
       </a>
     </div>
 
   </div>
 
   <div class="partners-intro-wrapper">
-    <h2>Co-developed and adopted by industry leaders</h2>
+    <h2>업계 리더들과 공동 개발 및 채택</h2>
 
     <p>
-      UCP was built by the industry, for the industry to solve for fragmented commerce journeys that lead to abandoned carts and frustrated shoppers, and enable agentic commerce.
+      UCP는 업계가 업계를 위해 만들었습니다. 장바구니 이탈과 사용자 불편을 유발하는 파편화된 커머스 여정을 해결하고, 에이전트 커머스를 가능하게 하기 위함입니다.
     </p>
 
     <div class="partners-logo-row">
@@ -91,13 +91,13 @@ image: assets/banner.png
   </div>
 
   <div class="flexibility-section">
-    <h2>Built for flexibility, security, and scale</h2>
+    <h2>유연성, 보안, 확장성을 위한 설계</h2>
     <p>
-      Agentic commerce demands interoperability. UCP is built on industry standards — REST and JSON-RPC transports;
+      에이전트 커머스는 상호운용성을 요구합니다. UCP는 업계 표준인 REST 및 JSON-RPC 전송을 기반으로 구축되었고,
       <a href="https://ap2-protocol.org/" target="_blank">Agent Payments Protocol (AP2)</a>,
-      <a href="https://a2a-protocol.org/latest/" target="_blank">Agent2Agent (A2A)</a>, and
+      <a href="https://a2a-protocol.org/latest/" target="_blank">Agent2Agent (A2A)</a>, 및
       <a href="https://modelcontextprotocol.io/docs/getting-started/intro" target="_blank">Model Context Protocol (MCP)</a>
-      support built-in — so different systems can work together without custom integration.
+      을 기본 지원하므로 서로 다른 시스템이 별도 커스텀 통합 없이 함께 동작할 수 있습니다.
     </p>
   </div>
 
@@ -108,9 +108,9 @@ image: assets/banner.png
         <img src="assets/Icon=Extensible.svg" alt="Scalable" width="72">
       </div>
       <div>
-        <h3>Scalable and universal</h3>
+        <h3>확장 가능하고 범용적</h3>
         <p>
-          Surface-agnostic design that can scale to support any commerce entity (from small businesses to enterprise scale) and all modalities (chat, visual commerce, voice, etc).
+          어떤 커머스 주체(소상공인부터 엔터프라이즈까지)와 모든 상호작용 방식(채팅, 비주얼 커머스, 음성 등)을 지원하도록 확장 가능한 서피스 독립 설계입니다.
         </p>
       </div>
     </div>
@@ -120,9 +120,9 @@ image: assets/banner.png
         <img src="assets/Icon=Merchant_at_the_Center.svg" alt="Merchants" width="72">
       </div>
       <div>
-        <h3>Businesses at the center</h3>
+        <h3>비즈니스 중심 설계</h3>
         <p>
-          Built to facilitate commerce, ensuring retailers retain control of their business rules and remain the Merchant of Record with full ownership of the customer relationship.
+          커머스를 원활하게 지원하도록 설계되어, 리테일러가 비즈니스 규칙 통제권을 유지하고 고객 관계의 완전한 소유권을 가진 Merchant of Record로 남을 수 있습니다.
         </p>
       </div>
     </div>
@@ -132,9 +132,9 @@ image: assets/banner.png
         <img src="assets/Icon=Open_Source.svg" alt="Simple" width="72">
       </div>
       <div>
-        <h3>Open and extensible</h3>
+        <h3>개방형 및 확장형</h3>
         <p>
-          Open and extensible by design, enabling development of community-driven capabilities and extensions across verticals.
+          설계 단계부터 개방성과 확장성을 갖추어, 다양한 산업 영역에서 커뮤니티 주도의 capability 및 extension 개발을 가능하게 합니다.
         </p>
       </div>
     </div>
@@ -144,9 +144,9 @@ image: assets/banner.png
         <img src="assets/Icon=Secure_and_Private.svg" alt="Secure" width="72">
       </div>
       <div>
-        <h3>Secure and private</h3>
+        <h3>안전하고 프라이버시 중심</h3>
         <p>
-          Built on proven security standards for account linking (OAuth 2.0) and secure payment (AP2) via payment mandates and verifiable credentials.
+          계정 연동(OAuth 2.0)과 안전한 결제(AP2)를 위한 검증된 보안 표준(결제 mandate 및 검증 가능한 자격증명 기반) 위에 구축되었습니다.
         </p>
       </div>
     </div>
@@ -156,9 +156,9 @@ image: assets/banner.png
         <img src="assets/Icon=Frictionless_Payments.svg" alt="Frictionless" width="72">
       </div>
       <div>
-        <h3>Frictionless payments</h3>
+        <h3>마찰 없는 결제</h3>
         <p>
-          Open wallet ecosystem with interoperability between providers to ensure buyers can pay with their preferred payment methods.
+          제공자 간 상호운용이 가능한 개방형 지갑 생태계를 통해 사용자가 선호하는 결제 수단으로 결제할 수 있게 합니다.
         </p>
       </div>
     </div>
@@ -166,10 +166,10 @@ image: assets/banner.png
   </div>
 
   <section class="action-carousel-section">
-    <h2>See it in action</h2>
+    <h2>동작 예시 보기</h2>
     <p>
-      UCP is designed to facilitate the entire commerce lifecycle, from initial product discovery and search to final sale and post-purchase support.
-  The protocol's initial launch focuses on three core capabilities: Checkout, Identity Linking, and Order Management.
+      UCP는 초기 상품 탐색과 검색부터 최종 판매 및 구매 후 지원까지, 커머스 전체 라이프사이클을 지원하도록 설계되었습니다.
+  프로토콜의 초기 릴리스는 Checkout, Identity Linking, Order Management의 세 가지 핵심 capability에 집중합니다.
     </p>
     <div class="carousel-tabs">
       <button class="tab-btn active" onclick="openTab(event, 'tab-checkout')">Checkout</button>
@@ -183,10 +183,10 @@ image: assets/banner.png
           <div class="icon-placeholder">
             <img src="assets/updated-icon.svg" alt="UCP Icon">
           </div>
-          <div class="pane-eyebrow">SEE IT IN ACTION</div>
+          <div class="pane-eyebrow">동작 예시</div>
           <h3>Checkout</h3>
-          <p>Support complex cart logic, dynamic pricing, tax calculations, and more across millions of businesses through unified checkout sessions.</p>
-          <a href="specification/checkout-rest/" class="learn-more-btn">Learn more</a>
+          <p>통합 checkout 세션을 통해 수백만 비즈니스에 걸쳐 복잡한 cart 로직, 동적 가격, 세금 계산 등을 지원합니다.</p>
+          <a href="specification/checkout-rest/" class="learn-more-btn">자세히 보기</a>
         </div>
         <div class="pane-visuals">
           <div class="image-container">
@@ -267,10 +267,10 @@ image: assets/banner.png
           <div class="icon-placeholder">
             <img src="assets/updated-icon.svg" alt="Universal Commerce Protocol icon">
           </div>
-          <div class="pane-eyebrow">SEE IT IN ACTION</div>
+          <div class="pane-eyebrow">동작 예시</div>
           <h3>Identity Linking</h3>
-          <p>OAuth 2.0 standard enables agents to maintain secure, authorized relationships without sharing credentials.</p>
-          <a href="specification/identity-linking/" class="learn-more-btn">Learn more</a>
+          <p>OAuth 2.0 표준을 통해 에이전트는 자격증명을 공유하지 않고도 안전하고 권한이 부여된 관계를 유지할 수 있습니다.</p>
+          <a href="specification/identity-linking/" class="learn-more-btn">자세히 보기</a>
         </div>
         <div class="pane-visuals">
           <div class="image-container">
@@ -311,10 +311,10 @@ image: assets/banner.png
             <div class="icon-placeholder">
               <img src="assets/updated-icon.svg" alt="UCP Icon">
           </div>
-          <div class="pane-eyebrow">SEE IT IN ACTION</div>
+          <div class="pane-eyebrow">동작 예시</div>
           <h3>Order</h3>
-          <p>From purchase confirmation to delivery. Real-time webhooks power status updates, shipment tracking, and return processing across every channel.</p>
-          <a href="specification/order/" class="learn-more-btn">Learn more</a>
+          <p>구매 확정부터 배송까지. 실시간 webhook으로 상태 업데이트, 배송 추적, 반품 처리를 모든 채널에서 지원합니다.</p>
+          <a href="specification/order/" class="learn-more-btn">자세히 보기</a>
         </div>
         <div class="pane-visuals">
           <div class="image-container">
@@ -404,50 +404,50 @@ image: assets/banner.png
       <div class="two-column-promo-item-icon-wrapper">
         <img src="assets/native_checkout.svg" alt="Native Checkout feature icon" width="96" class="two-column-promo-item-icon">
       </div>
-      <h3>Power native checkout</h3>
+      <h3>네이티브 checkout 구현</h3>
       <p>
-        Integrate and negotiate directly with a seller's checkout API to power native UI and workflows for your platform.
+        판매자의 checkout API와 직접 연동 및 협상하여, 플랫폼에 맞는 네이티브 UI와 워크플로를 구현할 수 있습니다.
       </p>
-      <a href="specification/checkout-rest/" class="promo-button">See how it works</a>
+      <a href="specification/checkout-rest/" class="promo-button">작동 방식 보기</a>
     </div>
 
     <div class="two-column-promo-item">
       <div class="two-column-promo-item-icon-wrapper">
         <img src="assets/embedded_checkout.svg" alt="Embedded Option feature icon" width="96" class="two-column-promo-item-icon">
       </div>
-      <h3>Embed business checkout</h3>
+      <h3>비즈니스 checkout 임베드</h3>
       <p>
-        Embed and render business checkout UI to support complex checkout flows, with advanced capabilities like bidirectional communication, and payment and shipping address delegation.
+        비즈니스 checkout UI를 임베드/렌더링하여, 양방향 통신, 결제 및 배송 주소 위임 같은 고급 capability가 필요한 복잡한 checkout 흐름을 지원합니다.
       </p>
-      <a href="specification/embedded-checkout/" class="promo-button">Learn more</a>
+      <a href="specification/embedded-checkout/" class="promo-button">자세히 보기</a>
     </div>
 
   </div>
 
   <div class="lifecycle-container">
 
-    <h2>Designed for the entire commerce ecosystem</h2>
+    <h2>커머스 생태계 전체를 위한 설계</h2>
 
     <div class="lifecycle-container-row">
       <div class="lifecycle-container-item">
         <div class="lifecycle-container-item-img-wrapper">
           <img src="assets/Content=Developers.svg" alt="Content illustration for Developers" class="lifecycle-container-item-img">
         </div>
-        <h3>For Developers</h3>
+        <h3>개발자용</h3>
         <p>
-          Build the future of commerce on an open foundation. Join our community in evolving an open-source standard designed for the next generation of digital commerce.
+          개방형 기반 위에서 커머스의 미래를 구축하세요. 차세대 디지털 커머스를 위한 오픈소스 표준을 함께 발전시키는 커뮤니티에 참여하세요.
         </p>
-        <a href="specification/overview/" class="lifecycle-container-item-link">View the technical spec</a>
+        <a href="specification/overview/" class="lifecycle-container-item-link">기술 명세 보기</a>
       </div>
       <div class="lifecycle-container-item">
         <div class="lifecycle-container-item-img-wrapper">
           <img src="assets/Content=Retailers.svg" alt="Content illustration for Businesses" class="lifecycle-container-item-img">
         </div>
-        <h3>For Businesses</h3>
+        <h3>비즈니스용</h3>
         <p>
-          UCP empowers retailers to meet customers wherever they are—AI assistants, shopping agents, embedded experiences—without rebuilding your checkout for each. You remain the Merchant of Record and your business logic stays intact.
+          UCP는 리테일러가 AI 어시스턴트, 쇼핑 에이전트, 임베디드 경험 등 어디서든 고객을 만날 수 있게 하며, 채널마다 checkout을 다시 만들 필요가 없습니다. Merchant of Record 지위와 비즈니스 로직을 그대로 유지할 수 있습니다.
         </p>
-        <a href="https://developers.google.com/merchant/ucp/" target="_blank" class="lifecycle-container-item-link">Integrate with UCP</a>
+        <a href="https://developers.google.com/merchant/ucp/" target="_blank" class="lifecycle-container-item-link">UCP 연동하기</a>
       </div>
     </div>
     <div class="lifecycle-container-row">
@@ -455,28 +455,28 @@ image: assets/banner.png
         <div class="lifecycle-container-item-img-wrapper">
           <img src="assets/Content=AI_Platforms.svg" alt="Content illustration for AI Platforms" class="lifecycle-container-item-img">
         </div>
-        <h3>For AI Platforms</h3>
+        <h3>AI 플랫폼용</h3>
         <p>
-          Simplify business onboarding with standardized APIs and provide your audience with an integrated shopping experience. Compatible with MCP, A2A, and existing agent frameworks.
+          표준화된 API로 비즈니스 온보딩을 단순화하고, 사용자에게 통합 쇼핑 경험을 제공합니다. MCP, A2A, 기존 에이전트 프레임워크와 호환됩니다.
         </p>
-        <a href="documentation/core-concepts/" class="lifecycle-container-item-link">Learn more about UCP core concepts</a>
+        <a href="documentation/core-concepts/" class="lifecycle-container-item-link">UCP 핵심 개념 자세히 보기</a>
       </div>
       <div class="lifecycle-container-item">
         <div class="lifecycle-container-item-img-wrapper">
           <img src="assets/Content=Payment_Providers.svg" alt="Content illustration for Payment Providers" class="lifecycle-container-item-img">
         </div>
-        <h3>For Payment Providers</h3>
+        <h3>결제 제공자용</h3>
         <p>
-          Universal payments that are provable—every authorization backed by cryptographic proof of user consent. Open, modular payment handler design enables open interoperability and choice of payment methods.
+          검증 가능한 유니버설 결제: 모든 승인은 사용자 동의의 암호학적 증명으로 뒷받침됩니다. 개방형 모듈식 payment handler 설계로 상호운용성과 결제수단 선택권을 보장합니다.
         </p>
-        <a href="documentation/ucp-and-ap2/" class="lifecycle-container-item-link">Learn more about UCP and AP2</a>
+        <a href="documentation/ucp-and-ap2/" class="lifecycle-container-item-link">UCP와 AP2 자세히 보기</a>
       </div>
 
     </div>
   </div>
 
   <div class="partner-carousel">
-    <h2>Endorsed across the ecosystem</h2>
+    <h2>생태계 전반의 지지</h2>
 
     <div class="partner-track">
       <div class="partner-logo">
@@ -711,13 +711,13 @@ image: assets/banner.png
   <div class="get-started-container">
 
     <div class="get-started-container-intro">
-      <h2>Get started today</h2>
+      <h2>지금 시작하세요</h2>
 
       <p>
-        UCP is an open standard designed to let AI agents, apps, businesses, and payment providers interact seamlessly without needing custom, one-off integrations for every connection. We actively seek your feedback and contributions to help build the future of commerce.
+        UCP는 AI 에이전트, 앱, 비즈니스, 결제 제공자가 연결마다 일회성 커스텀 통합 없이도 자연스럽게 상호작용할 수 있도록 설계된 개방형 표준입니다. 커머스의 미래를 함께 만들기 위해 여러분의 피드백과 기여를 기다립니다.
       </p>
       <p>
-        The complete technical specification, documentation, and reference implementations are hosted in our public GitHub repository.
+        전체 기술 명세, 문서, 레퍼런스 구현은 공개 GitHub 저장소에서 확인할 수 있습니다.
       </p>
     </div>
 
@@ -726,22 +726,22 @@ image: assets/banner.png
         <div class="get-started-container-step-icon-wrapper">
           <img src="assets/Icon=Download.svg" alt="Download icon for code samples" class="get-started-container-step-icon">
         </div>
-        <h3><a href="https://github.com/Universal-Commerce-Protocol/samples" target="_blank">Download</a></h3>
-        <p>Download and run our code samples</p>
+        <h3><a href="https://github.com/Universal-Commerce-Protocol/samples" target="_blank">다운로드</a></h3>
+        <p>코드 샘플을 내려받아 실행해 보세요</p>
       </div>
       <div class="get-started-container-step">
         <div class="get-started-container-step-icon-wrapper">
           <img src="assets/Icon=Experiment.svg" alt="Experiment" class="get-started-container-step-icon">
         </div>
-        <h3><a href="https://ucp.dev/playground/" target="_blank">Experiment</a></h3>
-        <p>Experiment with the protocol and its different agent roles</p>
+        <h3><a href="https://ucp.dev/playground/" target="_blank">실험하기</a></h3>
+        <p>프로토콜과 다양한 에이전트 역할을 직접 실험해 보세요</p>
       </div>
       <div class="get-started-container-step">
         <div class="get-started-container-step-icon-wrapper">
           <img src="assets/Icon=Contribute.svg" alt="Contribute" class="get-started-container-step-icon">
         </div>
-        <h3><a href="https://github.com/Universal-Commerce-Protocol/ucp/blob/main/CONTRIBUTING.md" target="_blank">Contribute</a></h3>
-        <p>Contribute your feedback and code to the public repository</p>
+        <h3><a href="https://github.com/Universal-Commerce-Protocol/ucp/blob/main/CONTRIBUTING.md" target="_blank">기여하기</a></h3>
+        <p>공개 저장소에 피드백과 코드를 기여해 주세요</p>
       </div>
     </div>
     <div class="get-started-container-repo-link">
@@ -749,7 +749,7 @@ image: assets/banner.png
         <svg height="24" width="24" viewBox="0 0 16 16" version="1.1" fill="currentColor">
           <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
         </svg>
-        Visit the GitHub repository
+        GitHub 저장소 방문
       </a>
     </div>
 
