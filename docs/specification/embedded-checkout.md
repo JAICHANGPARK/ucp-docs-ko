@@ -14,81 +14,75 @@
    limitations under the License.
 -->
 
-# Checkout Capability - EP Binding
+# 체크아웃 기능 - EP 바인딩
 
-## Introduction
+## 소개
 
-Embedded Checkout Protocol (ECP) is a checkout-specific implementation of
-UCP's Embedded Protocol (EP) transport binding that enables a
-**host** to embed a **business's** checkout interface, receive events as the
-buyer interacts with the checkout, and delegate key user actions such as address
-and payment selection. ECP is a transport binding (like REST)—it defines **how**
-to communicate, not **what** data exists.
+Embedded Checkout Protocol(ECP)은 UCP Embedded Protocol(EP) 전송 바인딩의
+checkout 특화 구현입니다. **host**가 **business**의 checkout UI를 임베드하고,
+구매자 상호작용 이벤트를 수신하며, 주소/결제 선택 같은 핵심 사용자 동작을 위임받아
+처리할 수 있게 합니다. ECP는 REST와 같은 전송 바인딩으로, **무엇**을 담는지가 아니라
+**어떻게** 통신하는지를 정의합니다.
 
-### W3C Payment Request Conceptual Alignment
+### W3C Payment Request 개념 정렬
 
-ECP draws inspiration from the
-**[W3C Payment Request API](https://www.w3.org/TR/payment-request/){ target="_blank" }**,
-adapting its mental model for embedded checkout scenarios. Developers familiar
-with Payment Request will recognize similar patterns, though the execution model
-differs:
+ECP는
+**[W3C Payment Request API](https://www.w3.org/TR/payment-request/){ target="_blank" }**
+에서 개념적 영감을 받아 임베디드 체크아웃 시나리오에 맞게 재해석되었습니다.
+Payment Request에 익숙한 개발자라면 유사한 패턴을 볼 수 있지만, 실행 모델은 다릅니다.
 
-**W3C Payment Request:** Browser-controlled. The business calls `show()` and the
-browser renders a native payment sheet. Events flow from the payment handler to
-the business.
+**W3C Payment Request:** 브라우저 주도 모델입니다.
+Business가 `show()`를 호출하면 브라우저가 네이티브 결제 시트를 렌더링하고,
+이벤트는 payment handler에서 business 방향으로 흐릅니다.
 
-**Embedded Checkout:** Business-controlled. The host embeds the business's
-checkout UI in an iframe/webview. Events flow bidirectionally, with optional
-delegation allowing the host to handle specific interactions natively.
+**Embedded Checkout:** Business 주도 모델입니다.
+Host가 business checkout UI를 iframe/webview에 임베드하며,
+이벤트는 양방향으로 흐릅니다. 선택적 delegation을 통해 특정 상호작용을 host가 네이티브로 처리할 수 있습니다.
 
 <!-- cSpell:ignore paymentmethodchange -->
-| Concept                   | W3C Payment Request              | Embedded Checkout                                                   |
+| 개념                       | W3C Payment Request              | Embedded Checkout                                                   |
 | :------------------------ | :------------------------------- | :------------------------------------------------------------------ |
-| **Initialization**        | `new PaymentRequest()`           | Load embedded context with `continue_url`                           |
-| **UI Ready**              | `show()` returns Promise         | `ec.start` notification                                             |
-| **Payment Method Change** | `paymentmethodchange` event      | `ec.payment.change` notification                                    |
-| **Address Change**        | `shippingaddresschange` event    | `ec.fulfillment.change` and `ec.fulfillment.address_change_request` |
-| **Submit Payment**        | User accepts → `PaymentResponse` | Delegated `ec.payment.credential_request`                           |
-| **Completion**            | `response.complete()`            | `ec.complete` notification                                          |
-| **Errors/Messages**       | Promise rejection                | `ec.messages.change` notification                                   |
+| **초기화**                | `new PaymentRequest()`           | `continue_url`로 임베디드 컨텍스트 로드                             |
+| **UI 준비 완료**          | `show()`가 Promise 반환          | `ec.start` 알림                                                     |
+| **결제수단 변경**         | `paymentmethodchange` 이벤트     | `ec.payment.change` 알림                                            |
+| **주소 변경**             | `shippingaddresschange` 이벤트   | `ec.fulfillment.change`, `ec.fulfillment.address_change_request`    |
+| **결제 제출**             | 사용자 수락 → `PaymentResponse`  | 위임된 `ec.payment.credential_request`                              |
+| **완료**                  | `response.complete()`            | `ec.complete` 알림                                                  |
+| **오류/메시지**           | Promise reject                   | `ec.messages.change` 알림                                           |
 
-**Key difference:** In W3C Payment Request, the browser orchestrates the payment
-flow. In Embedded Checkout, the business orchestrates within the embedded
-context, optionally delegating specific UI (payment method selection, address
-picker) to the host for native experiences.
+**핵심 차이:** W3C Payment Request에서는 브라우저가 결제 흐름을 오케스트레이션합니다.
+Embedded Checkout에서는 business가 임베디드 컨텍스트 안에서 흐름을 오케스트레이션하며,
+필요 시 특정 UI(결제수단 선택, 주소 선택)를 host에 위임해 네이티브 경험을 제공할 수 있습니다.
 
-## Terminology & Actors
+## 용어와 참여자
 
-### Commerce Roles
+### 커머스 역할
 
-- **Business:** The seller providing goods/services and the checkout
-    experience.
-- **Buyer:** The end user making a purchase.
+- **Business:** 상품/서비스와 checkout 경험을 제공하는 판매자.
+- **Buyer:** 실제 구매를 수행하는 최종 사용자.
 
-### Technical Components
+### 기술 컴포넌트
 
-- **Host:** The application embedding the checkout (e.g., AI Agent app,
-    Super
-    App, Browser). Responsible for the **Payment Handler** and user
-    authentication.
-- **Embedded Checkout:** The business's checkout interface rendered in an
-    iframe or webview. Responsible for the checkout flow and order creation.
-- **Payment Handler:** The secure component that performs user authentication
-    (biometric/PIN) and credential issuance.
+- **Host:** checkout을 임베드하는 애플리케이션(예: AI Agent 앱, 슈퍼앱, 브라우저).
+  **Payment Handler** 및 사용자 인증을 담당합니다.
+- **Embedded Checkout:** iframe/webview로 렌더링되는 business checkout UI.
+  checkout 흐름과 주문 생성을 담당합니다.
+- **Payment Handler:** 사용자 인증(생체/PIN)과 credential 발급을 수행하는 보안 컴포넌트.
 
-## Requirements
+## 요구사항
 
-### Discovery
+### 디스커버리
 
-ECP availability is signaled at two levels: service-level discovery declares
-capability, checkout responses confirm availability and allowed per-session configuration.
+ECP 지원 여부는 두 단계에서 신호됩니다.
+service-level discovery에서 capability 지원을 선언하고,
+checkout 응답에서 세션별 지원 여부와 허용 delegation을 확정합니다.
 
-#### Service-Level Discovery
+#### 서비스 레벨 디스커버리
 
-When a business advertises the `embedded` transport in their `/.well-known/ucp`
-profile, they declare support for the Embedded Checkout Protocol.
+Business가 `/.well-known/ucp` profile에서 `embedded` 전송을 광고하면,
+Embedded Checkout Protocol 지원을 선언한 것입니다.
 
-**Service Discovery Example:**
+**서비스 디스커버리 예시:**
 
 ```json
 {
@@ -116,17 +110,17 @@ profile, they declare support for the Embedded Checkout Protocol.
 }
 ```
 
-When `embedded` is absent from the service definition, the business only
-supports redirect-based checkout continuation via `continue_url`.
+service 정의에 `embedded`가 없으면,
+business는 `continue_url` 기반 리다이렉트 checkout 연속만 지원합니다.
 
-#### Per-Checkout Configuration
+#### 체크아웃별 구성
 
-Service-level discovery declares that a business supports ECP, but does not
-guarantee that every checkout session will enable it. Businesses **MUST** include
-an embedded service binding with `config.delegate` in checkout responses to
-indicate ECP availability and allowed delegations for a specific session.
+service-level discovery는 business의 ECP 지원 사실만 알릴 뿐,
+모든 checkout 세션에서 항상 활성화됨을 보장하지는 않습니다.
+Business는 특정 세션의 ECP 가능 여부와 허용 delegation을 표시하기 위해
+checkout 응답에 `config.delegate`를 포함한 embedded service binding을 넣어야 합니다(**MUST**).
 
-**Checkout Response Example:**
+**Checkout 응답 예시:**
 
 ```json
 {
@@ -152,64 +146,56 @@ indicate ECP availability and allowed delegations for a specific session.
 }
 ```
 
-The `config.delegate` array confirms the delegations the business accepted for
-this checkout session—the intersection of what the host requested via
-`ec_delegate` and what the business allows. This may vary based on:
+`config.delegate` 배열은 해당 checkout 세션에서 business가 수용한 delegation을 나타냅니다.
+즉, host가 `ec_delegate`로 요청한 항목과 business 허용 정책의 교집합입니다.
+이 값은 다음에 따라 달라질 수 있습니다.
 
-- **Cart contents**: Some products may require business-handled payment flows
-- **Agent authorization**: Authenticated agents may receive more delegations
-- **Business policy**: Risk rules, regional restrictions, etc.
+- **장바구니 구성**: 일부 상품은 business 처리 결제 흐름이 필요할 수 있음
+- **에이전트 권한**: 인증된 에이전트는 더 많은 delegation을 받을 수 있음
+- **비즈니스 정책**: 리스크 규칙, 지역 제한 등
 
-When an embedded service binding with `config.delegate` is present:
+`config.delegate`가 포함된 embedded service binding이 존재하면:
 
-- ECP is available for this checkout via `continue_url`
-- `config.delegate` confirms which delegations the business accepted
-- This mirrors the `delegate` field in the `ec.ready` handshake
+- `continue_url`을 통한 ECP checkout이 가능함
+- `config.delegate`로 business 수용 delegation을 확인 가능
+- 이는 `ec.ready` 핸드셰이크의 `delegate` 필드와 대응됨
 
-When the embedded service binding is absent from a checkout response (even if
-service-level discovery advertises embedded support), the checkout only supports
-redirect-based continuation via `continue_url`.
+checkout 응답에 embedded service binding이 없으면
+(service-level discovery에서 embedded 지원을 광고했더라도),
+해당 checkout은 `continue_url` 기반 리다이렉트 연속만 지원합니다.
 
-### Loading an Embedded Checkout URL
+### 임베디드 Checkout URL 로딩
 
-When a host receives a checkout response with an embedded service binding, it
-**MAY** initiate an ECP session by loading the `continue_url` in an embedded
-context.
+Host가 embedded service binding이 포함된 checkout 응답을 받으면,
+`continue_url`을 임베디드 컨텍스트로 로드해 ECP 세션을 시작할 수 있습니다(**MAY**).
 
-Before loading the embedded context, the host **SHOULD**:
+임베디드 로드 전에 host는 다음을 수행하는 것이 권장됩니다(**SHOULD**).
 
-1. Check `config.delegate` for available delegations
-2. Prepare handlers for delegations the host wants to support
-3. Optionally prepare authentication credentials if required by the business
+1. `config.delegate`에서 사용 가능한 delegation 확인
+2. host가 지원하려는 delegation에 대한 handler 준비
+3. business 요구 시 인증 자격증명 사전 준비
 
-To initiate the session, the host **MUST** augment the `continue_url` with ECP
-query parameters using the `ec_` prefix.
+세션 시작 시 host는 `ec_` 접두사 ECP 쿼리 파라미터를 `continue_url`에 추가해야 합니다(**MUST**).
 
-All ECP parameters are passed via URL query string, not HTTP headers, to ensure
-maximum compatibility across different embedding environments. Parameters use
-the `ec_` prefix to avoid namespace pollution and clearly distinguish ECP
-parameters from business-specific query parameters:
+모든 ECP 파라미터는 다양한 임베딩 환경 호환성을 위해 HTTP 헤더가 아닌 URL query string으로 전달됩니다.
+`ec_` 접두사를 사용해 네임스페이스 오염을 피하고 business 고유 파라미터와 구분합니다.
 
-- `ec_version` (string, **REQUIRED**): The UCP version for this session
-    (format: `YYYY-MM-DD`). Must match the version from the checkout response.
-- `ec_auth` (string, **OPTIONAL**): Authentication token in business-defined
-    format
-- `ec_delegate` (string, **OPTIONAL**): Comma-delimited list of delegations
-    the host wants to handle. **SHOULD** be a subset of `config.delegate`
-    from the embedded service binding.
-- `ec_color_scheme` (string, **OPTIONAL**): The color scheme preference for
-    the checkout UI. Valid values: `light`, `dark`. When not provided, the
-    Embedded Checkout follows system preference.
+- `ec_version`(string, **REQUIRED**): 세션 UCP 버전(`YYYY-MM-DD`), checkout 응답 버전과 일치해야 함
+- `ec_auth`(string, **OPTIONAL**): business가 정의한 형식의 인증 토큰
+- `ec_delegate`(string, **OPTIONAL**): host가 처리하려는 delegation의 쉼표 구분 목록.
+  embedded service binding의 `config.delegate` 부분집합이어야 합니다(**SHOULD**).
+- `ec_color_scheme`(string, **OPTIONAL**): checkout UI 색상 선호값(`light`, `dark`).
+  생략 시 Embedded Checkout은 시스템 선호를 따릅니다.
 
-#### Authentication
+#### 인증(Authentication)
 
-**Token Format:**
+**토큰 형식:**
 
-- The `auth` parameter format is entirely business-defined
-- Common formats include JWT, OAuth tokens, API keys, or session identifiers
-- Businesses **MUST** document their expected token format and validation process
+- `auth` 파라미터 형식은 business가 정의합니다.
+- 일반적으로 JWT, OAuth 토큰, API 키, 세션 식별자 등을 사용합니다.
+- Business는 기대 토큰 형식과 검증 절차를 문서화해야 합니다(**MUST**).
 
-**Example (Informative - JWT-based):**
+**예시(참고용 - JWT 기반):**
 
 ```json
 // One possible implementation using JWT
@@ -225,246 +211,224 @@ parameters from business-specific query parameters:
 }
 ```
 
-Businesses **MUST** validate authentication according to their security
-requirements.
+Business는 자체 보안 요구사항에 따라 인증을 검증해야 합니다(**MUST**).
 
-**Example initialization with authentication:**
+**인증 포함 초기화 예시:**
 
 ```text
 https://example.com/checkout/abc123?ec_version=2026-01-11&ec_auth=eyJ...
 ```
 
-Note: All query parameter values must be properly URL-encoded per RFC 3986.
+참고: 모든 쿼리 파라미터 값은 RFC 3986에 따라 URL 인코딩되어야 합니다.
 
-#### Delegation
+#### 위임(Delegation)
 
-The optional `ec_delegate` parameter declares which operations the host wants
-to handle natively, instead of having a buyer handle them in the Embedded
-Checkout UI. Each delegation identifier maps to a corresponding `_request`
-message following a consistent pattern: `ec.{delegation}_request`
+선택 파라미터 `ec_delegate`는 구매자가 Embedded Checkout UI에서 직접 처리하는 대신
+host가 네이티브로 처리하고 싶은 연산을 선언합니다.
+각 delegation 식별자는 `ec.{delegation}_request` 패턴의 `_request` 메시지에 매핑됩니다.
 
-**Example delegation identifiers:**
+**delegation 식별자 예시:**
 
-| `ec_delegate` value          | Corresponding message                   |
+| `ec_delegate` 값             | 대응 메시지                              |
 | ---------------------------- | --------------------------------------- |
 | `payment.instruments_change` | `ec.payment.instruments_change_request` |
 | `payment.credential`         | `ec.payment.credential_request`         |
 | `fulfillment.address_change` | `ec.fulfillment.address_change_request` |
 
-Extensions define their own delegation identifiers; see each extension's
-specification for available options.
+확장은 자체 delegation 식별자를 정의할 수 있으며,
+사용 가능한 옵션은 각 확장 명세를 참고하세요.
 
 ```text
 ?ec_version=2026-01-11&ec_delegate=payment.instruments_change,payment.credential,fulfillment.address_change
 ```
 
-#### Color Scheme
+#### 컬러 스킴
 
-The optional `ec_color_scheme` parameter allows the host to specify which color
-scheme the Embedded Checkout should use, enabling visual consistency between
-the host application and the checkout UI.
+선택 파라미터 `ec_color_scheme`은 host 앱과 checkout UI의 시각적 일관성을 위해
+Embedded Checkout 색상 스킴을 host가 지정할 수 있게 합니다.
 
-**Valid Values:**
+**허용 값:**
 
-| Value   | Description                                          |
-| :------ | :--------------------------------------------------- |
-| `light` | Use light color scheme (light background, dark text) |
-| `dark`  | Use dark color scheme (dark background, light text)  |
+| 값      | 설명                                          |
+| :------ | :-------------------------------------------- |
+| `light` | 라이트 스킴(밝은 배경, 어두운 텍스트) 사용     |
+| `dark`  | 다크 스킴(어두운 배경, 밝은 텍스트) 사용       |
 
-**Default Behavior:**
+**기본 동작:**
 
-When `ec_color_scheme` is not provided, the Embedded Checkout can
-use the buyer's system preference via the
+`ec_color_scheme`이 없으면 Embedded Checkout은
+다음 수단을 통해 구매자 시스템 선호를 사용할 수 있습니다.
 [`prefers-color-scheme`](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme)
-media query or the
+미디어 쿼리 또는
 [`Sec-CH-Prefers-Color-Scheme`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Sec-CH-Prefers-Color-Scheme)
-HTTP client hint, and **SHOULD** listen for changes and update accordingly.
+HTTP client hint를 활용할 수 있으며,
+변경 감지 후 즉시 반영하는 것이 권장됩니다(**SHOULD**).
 
-**Implementation Notes:**
+**구현 참고사항:**
 
-- By default, the Embedded Checkout **SHOULD** respect the buyer's system
-  color scheme preference and listen for changes to update accordingly
-- When `ec_color_scheme` is explicitly provided, it **MUST** override the
-  system preference, be applied immediately upon load, and be enforced
-  for the duration of the session.
-- Businesses **MAY** ignore unsupported values
+- 기본적으로 Embedded Checkout은 구매자 시스템 색상 선호를 따르고 변경을 감지해 반영하는 것이 권장됩니다(**SHOULD**).
+- `ec_color_scheme`이 명시되면 시스템 선호보다 우선 적용되어야 하며(**MUST**),
+  로드 즉시 반영되고 세션 동안 유지되어야 합니다.
+- 지원하지 않는 값은 무시할 수 있습니다(**MAY**).
 
-**Example:**
+**예시:**
 
 ```text
 https://example.com/checkout/abc123?ec_version=2026-01-11&ec_color_scheme=dark
 ```
 
-#### Delegation Negotiation
+#### 위임(Delegation) 협상
 
-Delegation follows a narrowing chain from business policy to final acceptance:
+Delegation은 business 정책에서 최종 수락으로 좁혀지는 체인을 따릅니다.
 
 ```text
 config.delegate ⊇ ec_delegate ⊇ ec.ready delegate
 ```
 
-1. **Business allows** (`config.delegate` in checkout response): The set of
-    delegations the business permits for this checkout session
-2. **Host requests** (`ec_delegate` URL parameter): The subset the host wants
-    to handle natively
-3. **ECP accepts** (`delegate` in `ec.ready`): The final subset the Embedded
-    Checkout will actually delegate
+1. **Business 허용**(checkout 응답의 `config.delegate`): 해당 세션에서 business가 허용하는 delegation 집합
+2. **Host 요청**(`ec_delegate` URL 파라미터): host가 네이티브 처리하려는 부분집합
+3. **ECP 수락**(`ec.ready`의 `delegate`): Embedded Checkout이 실제 위임할 최종 부분집합
 
-Each stage is a subset of the previous:
+각 단계는 이전 단계의 부분집합입니다.
 
-- The host **SHOULD** only request delegations present in `config.delegate`
-- The business **SHOULD NOT** accept delegations not present in
-    `config.delegate` and **MUST** confirm accepted delegations in `ec.ready`
+- host는 `config.delegate`에 있는 항목만 요청해야 합니다(**SHOULD**).
+- business는 `config.delegate`에 없는 항목을 수락하지 않아야 하며(**SHOULD NOT**),
+  수락한 delegation을 `ec.ready`에서 확인해야 합니다(**MUST**).
 
-### Delegation Contract
+### 위임 계약
 
-Delegation creates a binding contract between the host and Embedded Checkout.
-However, the Embedded Checkout **MAY** restrict delegation to authenticated or
-approved hosts based on business policy.
+Delegation은 host와 Embedded Checkout 사이의 구속력 있는 계약을 형성합니다.
+다만 business 정책에 따라 Embedded Checkout은 인증/승인된 host에만 delegation을 제한할 수 있습니다(**MAY**).
 
-#### Delegation Acceptance
+#### 위임(Delegation) 수락
 
-The Embedded Checkout determines which delegations to honor based on:
+Embedded Checkout은 다음 기준으로 수용 delegation을 결정합니다.
 
-- Authentication status (via `ec_auth` parameter)
-- host authorization level
-- Business policy
+- 인증 상태(`ec_auth` 파라미터)
+- host 권한 수준
+- business 정책
 
-The Embedded Checkout **MUST** indicate accepted delegations in the `ec.ready`
-request via the `delegate` field (see [`ec.ready`](#ecready)). If a
-requested delegation is not accepted, the Embedded Checkout **MUST** handle that
-capability using its own UI.
+Embedded Checkout은 수락 delegation을 `ec.ready` 요청의 `delegate` 필드로 표시해야 합니다(**MUST**).
+([`ec.ready`](#ecready) 참고)
+요청 delegation이 수락되지 않으면 해당 capability는 Embedded Checkout 자체 UI로 처리해야 합니다(**MUST**).
 
-#### Binding Requirements
+#### 바인딩 요구사항
 
-**Once delegation is accepted**, both parties enter a binding contract:
+**delegation이 수락되면**, 양측은 구속 계약 상태에 들어갑니다.
 
-**Embedded Checkout responsibilities:**
+**Embedded Checkout 책임:**
 
-1. **MUST** fire the appropriate `{action}_request` message when that action is
-    triggered
-2. **MUST** wait for the host's response before proceeding
-3. **MUST NOT** show its own UI for that delegated action
+1. 해당 동작이 트리거되면 적절한 `{action}_request` 메시지를 전송해야 합니다(**MUST**).
+2. 진행 전 host 응답을 대기해야 합니다(**MUST**).
+3. 위임된 동작에 대해 자체 UI를 표시해서는 안 됩니다(**MUST NOT**).
 
-**Host responsibilities:**
+**Host 책임:**
 
-1. **MUST** respond to every `{action}_request` message it receives
-2. **MUST** respond with an appropriate error if the user cancels
-3. **SHOULD** show loading/processing states while handling delegation
+1. 수신한 모든 `{action}_request`에 응답해야 합니다(**MUST**).
+2. 사용자가 취소하면 적절한 오류로 응답해야 합니다(**MUST**).
+3. delegation 처리 중 로딩/처리 상태를 보여주는 것이 권장됩니다(**SHOULD**).
 
-#### 3.3.3 Delegation Flow
+#### 3.3.3 위임 흐름
 
-1. **Request**: Embedded Checkout sends an `ec.{capability}.{action}_request`
-    message with current state (includes `id`)
-2. **Native UI**: Host presents native UI for the delegated action
-3. **Response**: host sends back a JSON-RPC response with matching `id` and
-    `result` or `error`
-4. **Update**: Embedded Checkout updates its state and may send subsequent
-    change notifications
+1. **Request**: Embedded Checkout이 현재 상태(`id` 포함)와 함께 `ec.{capability}.{action}_request` 메시지 전송
+2. **Native UI**: Host가 위임 동작에 대한 네이티브 UI 제공
+3. **Response**: Host가 동일 `id`를 가진 JSON-RPC `result` 또는 `error` 응답 반환
+4. **Update**: Embedded Checkout이 상태를 갱신하고 후속 change 알림을 보낼 수 있음
 
-See [Payment Extension](#payment-extension) and
-[Fulfillment Extension](#fulfillment-extension) for
-capability-specific delegation details.
+[Payment Extension](#payment-extension) 및
+[Fulfillment Extension](#fulfillment-extension)에서
+capability별 delegation 상세를 확인할 수 있습니다.
 
-### Navigation Constraints
+### 내비게이션 제약
 
-When checkout is rendered in embedded mode, the implementation **SHOULD**
-prevent off-checkout navigation to maintain a focused checkout experience.
-The embedded view is intended to provide a checkout flow, not a general-purpose
-browser.
+checkout이 embedded 모드로 렌더링될 때는
+집중된 checkout 경험을 위해 checkout 외부 이동을 제한하는 것이 권장됩니다(**SHOULD**).
+임베디드 뷰는 범용 브라우저가 아니라 checkout 흐름 제공이 목적입니다.
 
-**Navigation Requirements:**
+**내비게이션 요구사항:**
 
-- The embedded checkout **SHOULD** block or intercept navigation attempts to
-    URLs outside the checkout flow
-- The embedded checkout **SHOULD** remove or disable UI elements that would
-    navigate away from checkout (e.g., external links, navigation bars)
-- The embedder **MAY** implement additional navigation restrictions at the
-    container level
+- embedded checkout은 checkout 흐름 외 URL로의 이동 시도를 차단/가로채는 것이 권장됩니다(**SHOULD**).
+- checkout 이탈을 유도하는 UI 요소(외부 링크, 내비게이션 바 등)는 제거/비활성화하는 것이 권장됩니다(**SHOULD**).
+- embedder는 컨테이너 레벨에서 추가 내비게이션 제한을 둘 수 있습니다(**MAY**).
 
-**Permitted Exceptions:** The following navigation scenarios **MAY** be allowed
-when required for checkout completion:
+**허용 예외:** checkout 완료를 위해 필요하면 다음 내비게이션 시나리오는 허용할 수 있습니다(**MAY**).
 
-- Payment provider redirects: off-site payment flows
-- 3D Secure verification: card authentication frames and redirects
-- Bank authorization: open banking or similar authorization flows
-- Identity verification: KYC/AML compliance checks when required
+- 결제 제공자 리다이렉트: 오프사이트 결제 흐름
+- 3D Secure 검증: 카드 인증 프레임/리다이렉트
+- 은행 인가: 오픈뱅킹 등 인가 흐름
+- 신원 검증: 필요 시 KYC/AML 준수 점검
 
-These exceptions **SHOULD** return the user to the checkout flow upon
-completion.
+이 예외 흐름은 완료 후 사용자를 checkout 흐름으로 복귀시키는 것이 권장됩니다(**SHOULD**).
 
-## Transport & Messaging
+## 전송 및 메시징
 
-### Message Format
+### 메시지 포맷
 
-All ECP messages **MUST** use JSON-RPC 2.0 format
-([RFC 7159](https://datatracker.ietf.org/doc/html/rfc7159)). Each message **MUST** contain:
+모든 ECP 메시지는 JSON-RPC 2.0 형식을 사용해야 합니다(**MUST**).
+([RFC 7159](https://datatracker.ietf.org/doc/html/rfc7159))
+각 메시지는 다음을 포함해야 합니다(**MUST**).
 
 - `jsonrpc`: **MUST** be `"2.0"`
-- `method`: The message name (e.g., `"ec.start"`)
-- `params`: Message-specific payload (may be empty object)
-- `id`: (Optional) Present only for requests that expect responses
+- `method`: 메시지 이름(예: `"ec.start"`)
+- `params`: 메시지별 payload(빈 객체 가능)
+- `id`: (선택) 응답이 필요한 요청에서만 존재
 
-### Message Types
+### 메시지 타입
 
-**Requests** (with `id` field):
+**요청(Request, `id` 포함):**
 
-- Require a response from the receiver
-- **MUST** include a unique `id` field
-- Receiver **MUST** respond with matching `id`
-- Response **MUST** be either a `result` or `error` object
-- Used for operations requiring acknowledgment or data
+- 수신자의 응답이 필요함
+- 고유 `id` 필드를 포함해야 함(**MUST**)
+- 수신자는 동일 `id`로 응답해야 함(**MUST**)
+- 응답은 `result` 또는 `error` 객체여야 함(**MUST**)
+- 확인/데이터가 필요한 연산에 사용됨
 
-**Notifications** (without `id` field):
+**알림(Notification, `id` 없음):**
 
-- Informational only, no response expected
-- **MUST NOT** include an `id` field
-- Receiver **MUST NOT** send a response
-- Used for state updates and informational events
+- 정보 전달용이며 응답을 기대하지 않음
+- `id` 필드를 포함하면 안 됨(**MUST NOT**)
+- 수신자는 응답을 보내면 안 됨(**MUST NOT**)
+- 상태 업데이트 및 안내 이벤트에 사용됨
 
-### Response Handling
+### 응답 처리
 
-For requests (messages with `id`), receivers **MUST** respond with either:
+요청(`id`가 있는 메시지)의 경우 수신자는 다음 둘 중 하나로 응답해야 합니다(**MUST**).
 
-**Success Response:**
+**성공 응답:**
 
 ```json
 { "jsonrpc": "2.0", "id": "...", "result": {...} }
 ```
 
-**Error Response:**
+**오류 응답:**
 
 ```json
 { "jsonrpc": "2.0", "id": "...", "error": {...} }
 ```
 
-### Communication Channels
+### 통신 채널
 
-#### Communication Channel for Web-Based Hosts
+#### 웹 기반 Host 통신 채널
 
-When the host is a web application, communication starts using `postMessage`
-between the host and Checkout windows. The host **MUST** listen for
-`postMessage` calls from the embedded window, and when a message is received,
-they **MUST** validate the origin matches the `checkout_url` used to start the
-checkout.
+host가 웹 애플리케이션일 때는 host와 checkout window 간 `postMessage`로 통신이 시작됩니다.
+host는 임베디드 window의 `postMessage`를 수신해야 하며(**MUST**),
+메시지 수신 시 origin이 checkout 시작에 사용한 `checkout_url`과 일치하는지 검증해야 합니다(**MUST**).
 
-Upon validation, the host **MAY** create a `MessageChannel`, and transfer one of
-its ports in the result of the [`ec.ready` response](#ecready). When a host
-responds with a `MessagePort`, all subsequent messages **MUST** be sent over
-that channel. Otherwise, the host and business **MUST** continue using
-`postMessage()` between their `window` objects, including origin validation.
+검증 후 host는 `MessageChannel`을 생성할 수 있으며(**MAY**),
+[`ec.ready` 응답](#ecready) 결과에서 포트 하나를 전달할 수 있습니다.
+host가 `MessagePort`로 응답한 경우 이후 모든 메시지는 해당 채널을 통해 전송되어야 합니다(**MUST**).
+그렇지 않으면 host와 business는 origin 검증을 포함해 `window` 객체 간 `postMessage()`를 계속 사용해야 합니다(**MUST**).
 
-#### Communication Channel for Native Hosts
+#### 네이티브 Host 통신 채널
 
-When the host is a native application, they MUST inject globals into the
-Embedded Checkout that allows `postMessage` communication between the web and
-native environments. The host **MUST** create at least one of the following
-globals:
+host가 네이티브 앱일 때는 웹/네이티브 환경 간 `postMessage` 통신이 가능하도록
+Embedded Checkout에 전역 객체를 주입해야 합니다(**MUST**).
+host는 다음 전역 객체 중 최소 하나를 생성해야 합니다(**MUST**).
 
 - `window.EmbeddedCheckoutProtocolConsumer` (preferred)
 - `window.webkit.messageHandlers.EmbeddedCheckoutProtocolConsumer`
 
-This object **MUST** implement the following interface:
+이 객체는 다음 인터페이스를 구현해야 합니다(**MUST**).
 
 ```javascript
 {
@@ -472,68 +436,59 @@ This object **MUST** implement the following interface:
 }
 ```
 
-Where `message` is a JSON-stringified JSON-RPC 2.0 message. The host **MUST**
-parse the JSON string before processing.
+여기서 `message`는 JSON 문자열화된 JSON-RPC 2.0 메시지입니다.
+host는 처리 전에 JSON 문자열을 파싱해야 합니다(**MUST**).
 
-For messages traveling from the host to the Embedded Checkout, the host **MUST**
-inject JavaScript in the webview that will call
-`window.EmbeddedCheckoutProtocol.postMessage()` with the JSON RPC message. The
-Embedded Checkout **MUST** initialize this global object — and start listening
-for `postMessage()` calls — before the `ec.ready` message is sent.
+host에서 Embedded Checkout으로 가는 메시지의 경우 host는 webview에 JavaScript를 주입해
+`window.EmbeddedCheckoutProtocol.postMessage()`로 JSON-RPC 메시지를 전달해야 합니다(**MUST**).
+Embedded Checkout은 `ec.ready` 전송 전에 이 전역 객체를 초기화하고
+`postMessage()` 수신 대기를 시작해야 합니다(**MUST**).
 
-## Message API Reference
+## 메시지 API 레퍼런스
 
-### Message Categories
+### 메시지 분류
 
-#### Core Messages
+#### 코어 메시지
 
-Core messages are defined by the ECP specification and **MUST** be supported by
-all implementations. All messages are sent from Embedded Checkout to host.
+코어 메시지는 ECP 명세에서 정의되며 모든 구현이 지원해야 합니다(**MUST**).
+모든 메시지는 Embedded Checkout에서 host 방향으로 전송됩니다.
 
-| Category         | Purpose                                                 | Pattern      | Core Messages                                                                        |
+| 분류             | 목적                                                     | 패턴         | 코어 메시지                                                                          |
 | :--------------- | :------------------------------------------------------ | :----------- | :----------------------------------------------------------------------------------- |
-| **Handshake**    | Establish connection between host and Embedded Checkout | Request      | `ec.ready`                                                                           |
-| **Lifecycle**    | Inform of checkout state transitions                    | Notification | `ec.start`, `ec.complete`                                                            |
-| **State Change** | Inform of checkout field changes                        | Notification | `ec.line_items.change`, `ec.buyer.change`, `ec.payment.change`, `ec.messages.change` |
+| **Handshake**    | host와 Embedded Checkout 연결 수립                      | Request      | `ec.ready`                                                                           |
+| **Lifecycle**    | checkout 상태 전이 알림                                 | Notification | `ec.start`, `ec.complete`                                                            |
+| **State Change** | checkout 필드 변경 알림                                 | Notification | `ec.line_items.change`, `ec.buyer.change`, `ec.payment.change`, `ec.messages.change` |
 
-#### Extension Messages
+#### Extension 메시지
 
-Extensions **MAY** extend the Embedded protocol by defining additional messages.
-Extension messages **MUST** follow the naming convention:
+확장은 추가 메시지 정의를 통해 Embedded 프로토콜을 확장할 수 있습니다(**MAY**).
+확장 메시지는 다음 네이밍 규칙을 따라야 합니다(**MUST**).
 
-- **Notifications**: `ec.{capability}.change` — state change notifications (no
-    `id`)
-- **Delegation requests**: `ec.{capability}.{action}_request` — requires
-    response (has `id`)
+- **알림(Notification)**: `ec.{capability}.change` - 상태 변경 알림(`id` 없음)
+- **위임 요청**: `ec.{capability}.{action}_request` - 응답 필요(`id` 있음)
 
-Where:
+각 구성요소 의미:
 
-- `{capability}` matches the capability identifier from discovery
-- `{action}` describes the specific action being delegated (e.g.,
-    `instruments_change`, `address_change`)
-- `_request` suffix signals this is a delegation point requiring a response
+- `{capability}`: discovery에서 합의된 capability 식별자
+- `{action}`: 위임되는 구체 동작(예: `instruments_change`, `address_change`)
+- `_request` 접미사: 응답이 필요한 delegation 지점임을 의미
 
-### Handshake Messages
+### 핸드셰이크 메시지
 
 #### `ec.ready`
 
-Upon rendering, the Embedded Checkout **MUST** broadcast readiness to the parent
-context using the `ec.ready` message. This message initializes a secure
-communication channel between the host and Embedded Checkout, communicates which
-delegations were accepted, and allows the host to provide additional,
-display-only state for the checkout that was not communicated over UCP checkout
-actions.
+렌더링 시 Embedded Checkout은 `ec.ready` 메시지로 상위 컨텍스트에 준비 완료를 브로드캐스트해야 합니다(**MUST**).
+이 메시지는 host와 Embedded Checkout 사이의 보안 통신 채널을 초기화하고,
+수락된 delegation을 전달하며, UCP checkout action으로 전달되지 않은 표시 전용 상태를 host가 제공할 수 있게 합니다.
 
-- **Direction:** Embedded Checkout → host
-- **Type:** Request
-- **Payload:**
-    - `delegate` (array of strings, **REQUIRED**): List of delegation
-        identifiers accepted by the Embedded Checkout. **MUST** be a subset of
-        both `ec_delegate` (what host requested) and `config.delegate` from the
-        checkout response (what business allows). An empty array means no
-        delegations were accepted.
+- **방향:** Embedded Checkout → host
+- **유형:** Request
+- **페이로드:**
+    - `delegate`(문자열 배열, **REQUIRED**): Embedded Checkout이 수락한 delegation 식별자 목록.
+      `ec_delegate`(host 요청)와 checkout 응답의 `config.delegate`(business 허용)의 공통 부분집합이어야 합니다(**MUST**).
+      빈 배열은 delegation 미수락을 의미합니다.
 
-**Example Message (no delegations accepted):**
+**메시지 예시(수락 delegation 없음):**
 
 ```json
 {
@@ -546,7 +501,7 @@ actions.
 }
 ```
 
-**Example Message (delegations accepted):**
+**메시지 예시(delegation 수락):**
 
 ```json
 {
@@ -559,23 +514,17 @@ actions.
 }
 ```
 
-The `ec.ready` message is a request, which means that the host **MUST** respond
-to complete the handshake.
+`ec.ready`는 request이므로 host는 핸드셰이크 완료를 위해 응답해야 합니다(**MUST**).
 
-- **Direction:** host → Embedded Checkout
-- **Type:** Response
-- **Result Payload:**
-    - `upgrade` (object, **OPTIONAL**): An object describing how the Embedded
-        Checkout should update the communication channel it uses to communicate
-        with the host.
-    - `checkout` (object, **OPTIONAL**): Additional, display-only state for
-        the checkout that was not communicated over UCP checkout actions. This
-        is used to populate the checkout UI, and may only be used to populate
-        the following fields, under specific conditions:
-        - `payment.instruments`: can be overwritten when the host and Embedded
-            Checkout both accept the `payment.instruments_change` delegation.
+- **방향:** host → Embedded Checkout
+- **유형:** Response
+- **결과 페이로드:**
+    - `upgrade`(object, **OPTIONAL**): Embedded Checkout이 host와 통신할 채널을 어떻게 갱신할지 설명하는 객체
+    - `checkout`(object, **OPTIONAL**): UCP checkout action으로 전달되지 않은 표시 전용 추가 상태.
+      checkout UI 표시값 채우기에 사용되며, 조건부로 다음 필드에만 적용할 수 있습니다.
+        - `payment.instruments`: host와 Embedded Checkout이 모두 `payment.instruments_change` delegation을 수락한 경우 덮어쓰기 가능
 
-**Example Message:**
+**메시지 예시:**
 
 ```json
 {
@@ -585,13 +534,12 @@ to complete the handshake.
 }
 ```
 
-Hosts **MAY** respond with an `upgrade` field to update the communication
-channel between host and Embedded Checkout. Currently, this object only supports
-a `port` field, which **MUST** be a `MessagePort` object, and **MUST** be
-transferred to the embedded checkout context (e.g., with `{transfer: [port2]}`
-on the host's `iframe.contentWindow.postMessage()` call):
+host는 host-Embedded Checkout 통신 채널 갱신을 위해 `upgrade` 필드로 응답할 수 있습니다(**MAY**).
+현재 이 객체는 `port` 필드만 지원하며, 이는 `MessagePort` 객체여야 하고(**MUST**),
+임베디드 checkout 컨텍스트로 전달되어야 합니다(**MUST**).
+(예: host의 `iframe.contentWindow.postMessage()` 호출에서 `{transfer: [port2]}` 사용)
 
-**Example Message:**
+**메시지 예시:**
 
 ```json
 {
@@ -605,18 +553,14 @@ on the host's `iframe.contentWindow.postMessage()` call):
 }
 ```
 
-When the host responds with an `upgrade` object, the Embedded Checkout **MUST**
-discard any other information in the message, send a new `ec.ready` message
-over the upgraded communication channel, and wait for a new response. All
-subsequent messages **MUST** be sent only over the upgraded communication
-channel.
+host가 `upgrade` 객체로 응답하면 Embedded Checkout은 메시지 내 다른 정보는 무시하고,
+업그레이드된 채널에서 새 `ec.ready`를 보내고 새 응답을 대기해야 합니다(**MUST**).
+이후 모든 메시지는 업그레이드된 채널로만 전송되어야 합니다(**MUST**).
 
-The host **MAY** also respond with a `checkout` object, which will be used to
-populate the checkout UI according to the delegation contract between host and
-business.
+host는 `checkout` 객체로도 응답할 수 있으며(**MAY**),
+해당 값은 host-business delegation 계약에 따라 checkout UI 표시값 채우기에 사용됩니다.
 
-**Example Message: Providing payment instruments, including display
-information:**
+**메시지 예시: 표시 정보를 포함한 결제수단 제공**
 
 ```json
 {
@@ -648,19 +592,18 @@ information:**
 }
 ```
 
-### Lifecycle Messages
+### 라이프사이클 메시지
 
 #### `ec.start`
 
-Signals that checkout is visible and ready for interaction.
+checkout이 화면에 표시되어 상호작용 준비가 되었음을 알립니다.
 
-- **Direction:** Embedded Checkout → host
-- **Type:** Notification
-- **Payload:**
-    - `checkout`: The latest state of the checkout, using the same structure
-        as the `checkout` object in UCP responses.
+- **방향:** Embedded Checkout → host
+- **유형:** Notification
+- **페이로드:**
+    - `checkout`: UCP 응답의 `checkout` 객체와 동일 구조의 최신 checkout 상태
 
-**Example Message:**
+**메시지 예시:**
 
 ```json
 {
@@ -690,15 +633,14 @@ Signals that checkout is visible and ready for interaction.
 
 #### `ec.complete`
 
-Indicates successful checkout completion.
+checkout이 성공적으로 완료되었음을 알립니다.
 
-- **Direction:** Embedded Checkout → host
-- **Type:** Notification
-- **Payload:**
-    - `checkout`: The latest state of the checkout, using the same structure
-        as the `checkout` object in UCP responses.
+- **방향:** Embedded Checkout → host
+- **유형:** Notification
+- **페이로드:**
+    - `checkout`: UCP 응답의 `checkout` 객체와 동일 구조의 최신 checkout 상태
 
-**Example Message:**
+**메시지 예시:**
 
 ```json
 {
@@ -717,23 +659,22 @@ Indicates successful checkout completion.
 }
 ```
 
-### State Change Messages
+### 상태 변경 메시지
 
-State change messages inform the embedder of changes that have already occurred
-in the checkout interface. These are informational only. The checkout has
-already applied the changes and rendered the updated UI.
+상태 변경 메시지는 checkout UI에서 **이미 반영된** 변경 사항을 embedder에 알립니다.
+이 메시지는 정보 전달용이며, checkout은 변경 내용을 이미 적용하고 UI를 갱신한 상태입니다.
 
 #### `ec.line_items.change`
 
-Line items have been modified (quantity changed, items added/removed) in the
-checkout UI.
+checkout UI에서 line item이 변경되었음을 알립니다.
+(수량 변경, 항목 추가/삭제 등)
 
-- **Direction:** Embedded Checkout → host
-- **Type:** Notification
-- **Payload:**
-    - `checkout`: The latest state of the checkout
+- **방향:** Embedded Checkout → host
+- **유형:** Notification
+- **페이로드:**
+    - `checkout`: checkout 최신 상태
 
-**Example Message:**
+**메시지 예시:**
 
 ```json
 {
@@ -757,14 +698,14 @@ checkout UI.
 
 #### `ec.buyer.change`
 
-Buyer information has been updated in the checkout UI.
+checkout UI에서 buyer 정보가 갱신되었음을 알립니다.
 
-- **Direction:** Embedded Checkout → host
-- **Type:** Notification
-- **Payload:**
-    - `checkout`: The latest state of the checkout
+- **방향:** Embedded Checkout → host
+- **유형:** Notification
+- **페이로드:**
+    - `checkout`: checkout 최신 상태
 
-**Example Message:**
+**메시지 예시:**
 
 ```json
 {
@@ -785,15 +726,15 @@ Buyer information has been updated in the checkout UI.
 
 #### `ec.messages.change`
 
-Checkout messages have been updated. Messages include errors, warnings, and
-informational notices about the checkout state.
+checkout 메시지가 갱신되었음을 알립니다.
+메시지에는 오류, 경고, 안내성 정보가 포함될 수 있습니다.
 
-- **Direction:** Embedded Checkout → host
-- **Type:** Notification
-- **Payload:**
-    - `checkout`: The latest state of the checkout
+- **방향:** Embedded Checkout → host
+- **유형:** Notification
+- **페이로드:**
+    - `checkout`: checkout 최신 상태
 
-**Example Message:**
+**메시지 예시:**
 
 ```json
 {
@@ -824,58 +765,50 @@ informational notices about the checkout state.
 
 #### `ec.payment.change`
 
-Payment state has been updated. See [`ec.payment.change`](#ecpaymentchange) for
-full documentation.
+결제 상태가 갱신되었음을 알립니다.
+자세한 내용은 [`ec.payment.change`](#ecpaymentchange)를 참고하세요.
 
-## Payment Extension
+## 결제 확장
 
-The payment extension defines how a host can use state change notifications and
-delegation requests to orchestrate user escalation flows. When a checkout URL
-includes `ec_delegate=payment.instruments_change,payment.credential`, the host
-gains control over payment method selection and token acquisition, providing
-state updates to the Embedded Checkout in response.
+결제 확장은 host가 상태 변경 알림과 delegation 요청을 활용해
+사용자 개입 흐름(escalation flow)을 오케스트레이션하는 방식을 정의합니다.
+checkout URL에 `ec_delegate=payment.instruments_change,payment.credential`가 포함되면,
+host가 결제수단 선택과 토큰 획득 제어권을 갖고 그 결과를 Embedded Checkout에 상태 업데이트로 전달합니다.
 
-### Payment Overview & Host Choice
+### 결제 개요 및 Host 선택
 
-Payment delegation allows for two different patterns of orchestrating the host
-and Embedded Checkout:
+결제 delegation은 host와 Embedded Checkout 사이에 두 가지 오케스트레이션 패턴을 제공합니다.
 
-**Option A: Host Delegates to Embedded Checkout** The host does NOT include
-payment delegation in the URL. The Embedded Checkout handles payment selection
-and processing using its own UI and payment flows. This is the standard,
-non-delegated flow.
+**옵션 A: Host가 Embedded Checkout에 위임**
+host가 URL에 결제 delegation을 넣지 않습니다.
+Embedded Checkout이 자체 UI/흐름으로 결제수단 선택과 결제 처리를 수행합니다.
+이는 표준 비위임 흐름입니다.
 
-**Option B: Host Takes Control** The host includes
-`ec_delegate=payment.instruments_change,payment.credential` in the Checkout URL,
-informing the Embedded Checkout to delegate payment UI and token acquisition to
-the host. When delegated:
+**옵션 B: Host가 제어권 획득**
+host가 checkout URL에 `ec_delegate=payment.instruments_change,payment.credential`를 포함해
+결제 UI와 토큰 획득을 host로 위임하도록 Embedded Checkout에 알립니다.
+위임된 경우:
 
-- **Embedded Checkout responsibilities**:
-    - Display current payment method with a change intent (e.g., "Change
-        Payment Method" button)
-    - Wait for a response to the `ec.payment.credential_request` message
-        before submitting the payment
-- **Host responsibilities**:
-    - Respond to the `ec.payment.instruments_change_request` by rendering
-        native UI for the buyer to select alternative payment methods, then
-        respond with the selected method
-    - Respond to the `ec.payment.credential_request` by obtaining a payment
-        token for the selected payment method, and sending that token to the
-        Embedded Checkout
+- **Embedded Checkout 책임:**
+    - 현재 결제수단과 변경 의도 UI(예: "결제수단 변경" 버튼) 표시
+    - 결제 제출 전에 `ec.payment.credential_request` 응답 대기
+- **Host 책임:**
+    - `ec.payment.instruments_change_request` 수신 시 구매자용 네이티브 선택 UI를 띄우고 선택 결과로 응답
+    - `ec.payment.credential_request` 수신 시 선택된 결제수단 토큰을 획득해 Embedded Checkout에 전달
 
-### Payment Message API Reference
+### 결제 메시지 API 레퍼런스
 
 #### `ec.payment.change`
 
-Informs the host that something has changed in the payment section of the
-checkout UI, such as a new payment method being selected.
+checkout UI의 결제 섹션에서 변경이 발생했음을 host에 알립니다.
+(예: 새로운 결제수단 선택)
 
-- **Direction:** Embedded Checkout → host
-- **Type:** Notification
-- **Payload:**
-    - `checkout`: The latest state of the checkout
+- **방향:** Embedded Checkout → host
+- **유형:** Notification
+- **페이로드:**
+    - `checkout`: checkout 최신 상태
 
-**Example Message:**
+**메시지 예시:**
 
 ```json
 {
@@ -902,14 +835,14 @@ checkout UI, such as a new payment method being selected.
 
 #### `ec.payment.instruments_change_request`
 
-Requests the host to present payment instrument selection UI.
+host에 결제수단 선택 UI 제공을 요청합니다.
 
-- **Direction:** Embedded Checkout → host
-- **Type:** Request
-- **Payload:**
-    - `checkout`: The latest state of the checkout
+- **방향:** Embedded Checkout → host
+- **유형:** Request
+- **페이로드:**
+    - `checkout`: checkout 최신 상태
 
-**Example Message:**
+**메시지 예시:**
 
 ```json
 {
@@ -929,19 +862,17 @@ Requests the host to present payment instrument selection UI.
 }
 ```
 
-The host **MUST** respond with either an error, or the newly-selected payment
-instruments. In successful responses, the host **MUST** respond with a partial
-update to the `checkout` object, with only the `payment.instruments` field updated. The Embedded Checkout **MUST**
-treat this update as a PUT-style change by entirely replacing the existing state
-for the provided fields, rather than attempting to merge the new data with
-existing state.
+host는 오류 또는 새로 선택된 결제수단으로 응답해야 합니다(**MUST**).
+성공 응답에서는 `checkout` 객체의 `payment.instruments`만 포함한 부분 업데이트로 응답해야 합니다(**MUST**).
+Embedded Checkout은 이를 병합이 아닌 PUT 스타일 교체로 처리해야 합니다(**MUST**).
+즉, 제공된 필드의 기존 상태를 완전히 대체해야 합니다.
 
-- **Direction:** host → Embedded Checkout
-- **Type:** Response
-- **Payload:**
-    - `checkout`: The update to apply to the checkout object
+- **방향:** host → Embedded Checkout
+- **유형:** Response
+- **페이로드:**
+    - `checkout`: checkout 객체에 적용할 업데이트
 
-**Example Success Response:**
+**성공 응답 예시:**
 
 ```json
 {
@@ -974,7 +905,7 @@ existing state.
 }
 ```
 
-**Example Error Response:**
+**오류 응답 예시:**
 
 ```json
 {
@@ -989,15 +920,14 @@ existing state.
 
 #### `ec.payment.credential_request`
 
-Requests a credential for the selected payment instrument during checkout
-submission.
+checkout 제출 시 선택된 결제수단에 대한 자격증명(credential)을 요청합니다.
 
-- **Direction:** Embedded Checkout → Host
-- **Type:** Request
-- **Payload:**
-    - `checkout`: The latest state of the checkout
+- **방향:** Embedded Checkout → Host
+- **유형:** Request
+- **페이로드:**
+    - `checkout`: checkout 최신 상태
 
-**Example Message:**
+**메시지 예시:**
 
 ```json
 {
@@ -1023,20 +953,18 @@ submission.
 }
 ```
 
-The host **MUST** respond with either an error, or the credential for the
-selected payment instrument. In successful responses, the host **MUST** supply a
-partial update to the `checkout` object, updating the instrument with
-`selected: true` with the new `credentials` field. The Embedded Checkout
-**MUST** treat this update as a PUT-style change by entirely replacing the
-existing state for `payment.instruments`, rather than attempting to merge the
-new data with existing state.
+host는 오류 또는 선택된 결제수단의 credential로 응답해야 합니다(**MUST**).
+성공 응답에서는 `selected: true`인 instrument에 새 `credentials` 필드를 반영한
+`checkout` 부분 업데이트를 제공해야 합니다(**MUST**).
+Embedded Checkout은 이를 병합이 아닌 PUT 스타일 교체로 처리해
+`payment.instruments` 기존 상태를 완전히 대체해야 합니다(**MUST**).
 
-- **Direction:** host → Embedded Checkout
-- **Type:** Response
-- **Payload:**
-    - `checkout`: The update to apply to the checkout object
+- **방향:** host → Embedded Checkout
+- **유형:** Response
+- **페이로드:**
+    - `checkout`: checkout 객체에 적용할 업데이트
 
-**Example Success Response:**
+**성공 응답 예시:**
 
 ```json
 {
@@ -1072,7 +1000,7 @@ new data with existing state.
 }
 ```
 
-**Example Error Response:**
+**오류 응답 예시:**
 
 ```json
 {
@@ -1085,63 +1013,59 @@ new data with existing state.
 }
 ```
 
-**Host responsibilities during payment token delegation:**
+**결제 토큰 delegation 중 host 책임:**
 
-1. **Confirmation:** Host displays the Trusted Payment UI (Payment Sheet /
-    Biometric Prompt). The host **MUST NOT** silently release a token based
-    solely on the message.
-2. **Auth:** host performs User Authorization via the Payment Handler.
-3. **AP2 Integration (Optional):** If `ucp.ap2_mandate` is active (see
-    **[AP2 extension](https://ap2-extension.org/)**), the host generates the
-    `payment_mandate` here using trusted user interface.
+1. **확인:** Host는 신뢰 결제 UI(Payment Sheet/생체인증 프롬프트)를 표시해야 합니다.
+   메시지 수신만으로 토큰을 묵시적으로 발급해서는 안 됩니다(**MUST NOT**).
+2. **인증:** Host는 Payment Handler를 통해 사용자 인증을 수행합니다.
+3. **AP2 통합(선택):** `ucp.ap2_mandate`가 활성화된 경우
+   (**[AP2 extension](https://ap2-extension.org/)** 참고),
+   host는 신뢰 UI에서 `payment_mandate`를 생성합니다.
 
-## Fulfillment Extension
+## Fulfillment 확장
 
-The fulfillment extension defines how a host can delegate address selection to
-provide a native address picker experience. When a checkout URL includes
-`ec_delegate=fulfillment.address_change`, the host gains control over shipping
-address selection, providing address updates to the Embedded Checkout in
-response.
+fulfillment 확장은 host가 주소 선택을 위임받아
+네이티브 주소 선택기 경험을 제공하는 방식을 정의합니다.
+checkout URL에 `ec_delegate=fulfillment.address_change`가 포함되면,
+host는 배송지 선택 제어권을 갖고 결과 주소 업데이트를 Embedded Checkout에 반환합니다.
 
-### Fulfillment Overview & Host Choice
+### Fulfillment 개요 및 Host 선택
 
-Fulfillment delegation allows for two different patterns:
+fulfillment delegation에는 두 가지 패턴이 있습니다.
 
-**Option A: Host Delegates to Embedded Checkout** The host does NOT include
-fulfillment delegation in the URL. The Embedded Checkout handles address input
-using its own UI and address forms. This is the standard, non-delegated flow.
+**옵션 A: Host가 Embedded Checkout에 위임**
+host가 URL에 fulfillment delegation을 넣지 않습니다.
+Embedded Checkout이 자체 주소 UI/폼으로 주소 입력을 처리합니다.
+이는 표준 비위임 흐름입니다.
 
-**Option B: host Takes Control** The host includes
-`ec_delegate=fulfillment.address_change` in the Checkout URL, informing the
-Embedded Checkout to delegate address selection UI to the host. When delegated:
+**옵션 B: Host가 제어권 획득**
+host가 checkout URL에 `ec_delegate=fulfillment.address_change`를 포함해
+주소 선택 UI를 host에 위임하도록 Embedded Checkout에 알립니다.
+위임된 경우:
 
-**Embedded Checkout responsibilities**:
+**Embedded Checkout 책임:**
 
-- Display current shipping address with a change intent (e.g., "Change
-    Address" button)
-- Send `ec.fulfillment.address_change_request` when the buyer triggers address
-    change
-- Update shipping options based on the address returned by the host
+- 현재 배송지와 변경 의도 UI(예: "주소 변경" 버튼) 표시
+- 구매자가 주소 변경을 트리거하면 `ec.fulfillment.address_change_request` 전송
+- host가 반환한 주소를 바탕으로 배송 옵션 갱신
 
-**Host responsibilities**:
+**Host 책임:**
 
-- Respond to the `ec.fulfillment.address_change_request` by rendering native
-    UI for the buyer to select or enter a shipping address
-- Respond with the selected address in UCP PostalAddress format
+- `ec.fulfillment.address_change_request`에 대해 구매자 주소 선택/입력을 위한 네이티브 UI 제공 후 응답
+- 선택된 주소를 UCP PostalAddress 형식으로 응답
 
-### Fulfillment Message API Reference
+### Fulfillment 메시지 API 레퍼런스
 
 #### `ec.fulfillment.change`
 
-Informs the host that the fulfillment details have been changed in the checkout
-UI.
+checkout UI에서 fulfillment 상세가 변경되었음을 host에 알립니다.
 
-- **Direction:** Embedded Checkout → Host
-- **Type:** Notification
+- **방향:** Embedded Checkout → Host
+- **유형:** Notification
 - **Payload:**
-    - `checkout`: The latest state of the checkout
+    - `checkout`: checkout 최신 상태
 
-**Example Message:**
+**메시지 예시:**
 
 ```json
 {
@@ -1162,15 +1086,14 @@ UI.
 
 #### `ec.fulfillment.address_change_request`
 
-Requests the host to present address selection UI for a shipping fulfillment
-method.
+배송 fulfillment 방식에 대한 주소 선택 UI를 host에 요청합니다.
 
-- **Direction:** Embedded Checkout → Host
-- **Type:** Request
+- **방향:** Embedded Checkout → Host
+- **유형:** Request
 - **Payload:**
-    - `checkout`: The latest state of the checkout
+    - `checkout`: checkout 최신 상태
 
-**Example Message:**
+**메시지 예시:**
 
 ```json
 {
@@ -1204,20 +1127,19 @@ method.
 }
 ```
 
-The host **MUST** respond with either an error, or the newly-selected address.
-In successful responses, the host **MUST** respond with an updated
-`fulfillment.methods` object, updating the `selected_destination_id` and
-`destinations` fields for fulfillment methods, and otherwise preserving the
-existing state. The Embedded Checkout **MUST** treat this update as a PUT-style
-change by entirely replacing the existing state for `fulfillment.methods`,
-rather than attempting to merge the new data with existing state.
+host는 오류 또는 새로 선택된 주소로 응답해야 합니다(**MUST**).
+성공 응답에서는 `fulfillment.methods`를 갱신해
+`selected_destination_id`와 `destinations`를 업데이트하고,
+그 외 상태는 유지해야 합니다(**MUST**).
+Embedded Checkout은 이를 병합이 아닌 PUT 스타일 교체로 처리해
+`fulfillment.methods` 기존 상태를 완전히 대체해야 합니다(**MUST**).
 
-- **Direction:** host → Embedded Checkout
-- **Type:** Response
+- **방향:** host → Embedded Checkout
+- **유형:** Response
 - **Payload:**
-    - `checkout`: The update to apply to the checkout object
+    - `checkout`: checkout 객체에 적용할 업데이트
 
-**Example Success Response:**
+**성공 응답 예시:**
 
 ```json
 {
@@ -1247,7 +1169,7 @@ rather than attempting to merge the new data with existing state.
 }
 ```
 
-**Example Error Response:**
+**오류 응답 예시:**
 
 ```json
 {
@@ -1260,114 +1182,102 @@ rather than attempting to merge the new data with existing state.
 }
 ```
 
-### Address Format
+### 주소 포맷
 
-The address object uses the UCP
-[PostalAddress](site:specification/checkout/#postal-address) format:
+주소 객체는 UCP
+[PostalAddress](site:specification/checkout/#postal-address) 형식을 사용합니다.
 
 {{ schema_fields('postal_address', 'embedded-checkout') }}
 
-## Security & Error Handling
+## 보안 및 오류 처리
 
-### Error Codes
+### 오류 코드
 
-Responses to delegation request messages from the
-embedded checkout may resolve to errors. The message responder **SHOULD** use
-error codes mapped to
-**[W3C DOMException](https://webidl.spec.whatwg.org/#idl-DOMException)** names
-where possible.
+embedded checkout의 delegation 요청에 대한 응답은 오류로 귀결될 수 있습니다.
+응답자는 가능하면
+**[W3C DOMException](https://webidl.spec.whatwg.org/#idl-DOMException)** 이름에
+매핑된 오류 코드를 사용하는 것이 권장됩니다(**SHOULD**).
 
-| Code                  | Description                                                                                                                                    |
-| :-------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |
-| `abort_error`         | The user cancelled the interaction (e.g., closed the sheet).                                                                                   |
-| `security_error`      | The host origin validation failed.                                                                                                             |
-| `not_supported_error` | The requested payment method is not supported by the host.                                                                                     |
-| `invalid_state_error` | Handshake was attempted out of order.                                                                                                          |
-| `not_allowed_error`   | The request was missing valid User Activation (see [Prevention of Unsolicited Payment Requests](#prevention-of-unsolicited-payment-requests)). |
+| 코드                  | 설명                                                                                                                                          |
+| :-------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------- |
+| `abort_error`         | 사용자가 상호작용을 취소함(예: 시트 닫기)                                                                                                     |
+| `security_error`      | host origin 검증 실패                                                                                                                         |
+| `not_supported_error` | 요청된 결제수단을 host가 지원하지 않음                                                                                                        |
+| `invalid_state_error` | 핸드셰이크 순서가 올바르지 않음                                                                                                               |
+| `not_allowed_error`   | 요청에 유효한 User Activation이 없음([비의도적 결제 요청 방지](#prevention-of-unsolicited-payment-requests) 참고)                           |
 
-### Security for Web-Based Hosts
+### 웹 기반 Host 보안
 
 #### Content Security Policy (CSP)
 
-To ensure security, both parties **MUST** implement appropriate
-**[Content Security Policy (CSP)](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP)**
-directives:
+보안을 위해 양측은 적절한
+**[Content Security Policy(CSP)](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP)**
+지시어를 구현해야 합니다(**MUST**).
 
-- **Business:** **MUST** set `frame-ancestors <host_origin>;` to ensure it's
-    only embedded by trusted hosts.
+- **Business:** 신뢰 host에서만 임베딩되도록 `frame-ancestors <host_origin>;`를 설정해야 합니다(**MUST**).
 
 - **Host:**
-    - **Direct Embedding:** If the host directly embeds the business's page,
-        specifying a `frame-src` directive listing every potential business
-        origin can be impractical, especially if there are many businesses. In
-        this scenario, while a strict `frame-src` is ideal, other security
-        measures like those in [Iframe Sandbox Attributes](#iframe-sandbox-attributes)
-        and [Credentialless Iframes](#credentialless-iframes) are critical.
-    - **Intermediate Iframe:** The host **MAY** use an intermediate iframe
-        (e.g., on a host-controlled subdomain) to embed the business's page.
-        This offers better control:
-        - The host's main page only needs to allow the origin of the
-            intermediate iframe in its `frame-src` (e.g.,
-            `frame-src <intermediate_iframe_origin>;`).
-        - The intermediate iframe **MUST** implement a strict `frame-src`
-            policy, dynamically set to allow _only_ the specific
-            `<merchant_origin>` for the current embedded session (e.g.,
-            `frame-src <merchant_origin>;`). This can be set via HTTP headers
-            when serving the intermediate iframe content.
+    - **직접 임베딩:** host가 business 페이지를 직접 임베딩하면,
+      잠재 business origin이 많을 때 `frame-src`를 모두 열거하기가 비현실적일 수 있습니다.
+      이 경우 엄격한 `frame-src`가 이상적이지만,
+      [Iframe Sandbox Attributes](#iframe-sandbox-attributes),
+      [Credentialless Iframes](#credentialless-iframes) 같은 보조 보안 수단이 중요합니다.
+    - **중간 Iframe:** host는 business 페이지 임베딩을 위해
+      중간 iframe(예: host 제어 서브도메인)을 사용할 수 있습니다(**MAY**).
+      이 방식은 제어성을 높입니다.
+        - host 메인 페이지는 `frame-src`에서 중간 iframe origin만 허용하면 됩니다.
+          (예: `frame-src <intermediate_iframe_origin>;`)
+        - 중간 iframe은 현재 세션의 특정 `<merchant_origin>`만 허용하도록
+          엄격한 `frame-src` 정책을 구현해야 합니다(**MUST**).
+          (예: `frame-src <merchant_origin>;`)
+          이는 중간 iframe 콘텐츠 제공 시 HTTP 헤더로 설정할 수 있습니다.
 
-#### Iframe Sandbox Attributes
+#### Iframe Sandbox 속성
 
-All business iframes **MUST** be sandboxed to restrict their capabilities. The
-following sandbox attributes **SHOULD** be applied, but a host and business
-**MAY** negotiate additional capabilities:
+모든 business iframe은 권한 제한을 위해 sandbox 처리되어야 합니다(**MUST**).
+다음 sandbox 속성 적용이 권장되며(**SHOULD**),
+host와 business는 추가 권한을 협상할 수 있습니다(**MAY**).
 
 ```html
 <iframe sandbox="allow-scripts allow-forms allow-same-origin"></iframe>
 ```
 
-#### Credentialless Iframes
+#### Credentialless Iframe
 
-Hosts **SHOULD** use the `credentialless` attribute on the iframe to load it in
-a new, ephemeral context. This prevents the business from correlating user
-activity across contexts or accessing existing sessions, protecting user
-privacy.
+host는 iframe에 `credentialless` 속성을 사용해 새 임시 컨텍스트로 로드하는 것이 권장됩니다(**SHOULD**).
+이를 통해 business가 컨텍스트 간 사용자 활동을 연계하거나 기존 세션에 접근하는 것을 방지해
+사용자 프라이버시를 보호할 수 있습니다.
 
 ```html
 <iframe credentialless src="https://business.example.com/checkout"></iframe>
 ```
 
-#### Strict Origin Validation
+#### 엄격한 Origin 검증
 
-Enforce strict validation of the `origin` for all `postMessage` communications
-between frames.
+프레임 간 모든 `postMessage` 통신에 대해 `origin`을 엄격히 검증해야 합니다.
 
-### Prevention of Unsolicited Payment Requests
+### 비의도적 결제 요청 방지
 
-**Vulnerability:** A malicious or compromised business could programmatically
-trigger `ec.payment.credential_request` without user interaction.
+**취약점:** 악의적이거나 침해된 business가 사용자 상호작용 없이
+`ec.payment.credential_request`를 프로그램적으로 트리거할 수 있습니다.
 
-**Mitigation (Host-Controlled Execution):** To eliminate this risk, the host is
-designated as the sole trusted initiator of the payment execution. The host
-SHOULD display a User Confirmation UI before releasing the token. Silent
-tokenization is strictly PROHIBITED when the trigger originates from the
-Embedded Checkout.
+**대응(Host 제어 실행):** 이 위험을 제거하기 위해 host를 결제 실행의 유일 신뢰 시작자로 지정합니다.
+host는 토큰 발급 전에 사용자 확인 UI를 표시하는 것이 권장됩니다(**SHOULD**).
+트리거가 Embedded Checkout에서 시작된 경우 무음 토큰화는 엄격히 금지됩니다.
 
-## Schema Definitions
+## 스키마 정의
 
-The following schemas define the data structures used within the Embedded
-Checkout protocol and its extensions.
+아래 스키마는 Embedded Checkout 프로토콜과 확장에서 사용하는 데이터 구조를 정의합니다.
 
 ### Checkout
 
-The core object representing the current state of the transaction, including
-line items, totals, and buyer information.
+line item, totals, buyer 정보를 포함한 거래의 현재 상태를 나타내는 핵심 객체입니다.
 
 {{ schema_fields('checkout_resp', 'checkout') }}
 
 ### Order
 
-The object returned upon successful completion of a checkout, containing
-confirmation details.
+checkout이 성공적으로 완료되었을 때 반환되는 확인 정보 객체입니다.
 
 {{ schema_fields('order', 'order') }}
 
@@ -1377,15 +1287,12 @@ confirmation details.
 
 ### Payment Instrument
 
-Represents a specific method of payment (e.g., a specific credit card, bank
-account, or wallet credential) available to the buyer.
+구매자가 사용할 수 있는 특정 결제 수단(예: 특정 카드, 계좌, 지갑 credential)을 나타냅니다.
 
 {{ schema_fields('payment_instrument', 'embedded-checkout') }}
 
 ### Payment Handler Response
 
-Represents the processor or wallet provider responsible for authenticating and
-processing a specific payment instrument (e.g., Google Pay, Stripe, or a Bank
-App).
+특정 결제 수단을 인증/처리하는 processor 또는 wallet provider(예: Google Pay, Stripe, 은행 앱)의 응답 구조를 나타냅니다.
 
 {{ schema_fields('payment_handler_resp', 'embedded-checkout') }}

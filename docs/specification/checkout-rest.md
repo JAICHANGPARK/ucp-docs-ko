@@ -14,46 +14,43 @@
    limitations under the License.
 -->
 
-# Checkout Capability - REST Binding
+# 체크아웃 기능 - REST 바인딩
 
-This document specifies the REST binding for the
-[Checkout Capability](checkout.md).
+이 문서는 [Checkout Capability](checkout.md)의 REST 바인딩을 정의합니다.
 
-## Protocol Fundamentals
+## 프로토콜 기본 사항
 
-### Base URL
+### 기본 URL
 
-All UCP REST endpoints are relative to the business's base URL, which is
-discovered through the UCP profile at `/.well-known/ucp`. The endpoint for the
-checkout capability is defined in the `rest.endpoint` field of the
-business profile.
+모든 UCP REST 엔드포인트는 business의 base URL을 기준으로 하며,
+이 URL은 `/.well-known/ucp` UCP 프로필에서 탐색됩니다.
+checkout capability 엔드포인트는 business 프로필의 `rest.endpoint` 필드에 정의됩니다.
 
-### Content Types
+### 콘텐츠 타입
 
-* **Request**: `application/json`
-* **Response**: `application/json`
+* **요청(Request)**: `application/json`
+* **응답(Response)**: `application/json`
 
-All request and response bodies **MUST** be valid JSON as specified in
-[RFC 8259](https://tools.ietf.org/html/rfc8259){ target="_blank" }.
+모든 요청/응답 바디는 [RFC 8259](https://tools.ietf.org/html/rfc8259){ target="_blank" }에 정의된
+유효한 JSON이어야 합니다(**MUST**).
 
-### Transport Security
+### 전송 보안
 
-All REST endpoints **MUST** be served over HTTPS with minimum TLS version
-1.3.
+모든 REST 엔드포인트는 최소 TLS 1.3 이상의 HTTPS로 제공되어야 합니다(**MUST**).
 
-## Operations
+## 연산(Operations)
 
-| Operation                                          | Method | Endpoint                           | Description                |
-| :------------------------------------------------- | :----- | :--------------------------------- | :------------------------- |
-| [Create Checkout](checkout.md#create-checkout)     | `POST` | `/checkout-sessions`               | Create a checkout session. |
-| [Get Checkout](checkout.md#get-checkout)           | `GET`  | `/checkout-sessions/{id}`          | Get a checkout session.    |
-| [Update Checkout](checkout.md#update-checkout)     | `PUT`  | `/checkout-sessions/{id}`          | Update a checkout session. |
-| [Complete Checkout](checkout.md#complete-checkout) | `POST` | `/checkout-sessions/{id}/complete` | Place the order.           |
-| [Cancel Checkout](checkout.md#cancel-checkout)     | `POST` | `/checkout-sessions/{id}/cancel`   | Cancel a checkout session. |
+| 연산 | 메서드 | 엔드포인트 | 설명 |
+| :--- | :----- | :--------- | :--- |
+| [Create Checkout](checkout.md#create-checkout) | `POST` | `/checkout-sessions` | checkout 세션 생성 |
+| [Get Checkout](checkout.md#get-checkout) | `GET` | `/checkout-sessions/{id}` | checkout 세션 조회 |
+| [Update Checkout](checkout.md#update-checkout) | `PUT` | `/checkout-sessions/{id}` | checkout 세션 갱신 |
+| [Complete Checkout](checkout.md#complete-checkout) | `POST` | `/checkout-sessions/{id}/complete` | 주문 확정 |
+| [Cancel Checkout](checkout.md#cancel-checkout) | `POST` | `/checkout-sessions/{id}/cancel` | checkout 세션 취소 |
 
-## Examples
+## 예시
 
-### Create Checkout
+### Checkout 생성 { #create-checkout }
 
 === "Request"
 
@@ -166,13 +163,13 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version
     }
     ```
 
-### Update Checkout
+### Checkout 업데이트 { #update-checkout }
 
-#### Update Buyer Info
+#### 구매자 정보 업데이트
 
-All fields in `buyer` are optional, allowing clients to progressively build
-the checkout state across multiple calls. Each PUT replaces the entire session,
-so clients must include all previously set fields they wish to retain.
+`buyer`의 모든 필드는 선택 사항이며, 클라이언트는 여러 호출에 걸쳐
+checkout 상태를 점진적으로 구성할 수 있습니다. 각 PUT은 세션 전체를 교체하므로
+유지하려는 기존 필드는 반드시 함께 포함해야 합니다.
 
 === "Request"
 
@@ -296,11 +293,10 @@ so clients must include all previously set fields they wish to retain.
     }
     ```
 
-#### Update Fulfillment
+#### Fulfillment 업데이트
 
-Fulfillment is an extension to the checkout capability. Most fields are provided
-by the business based on buyer inputs, which includes desired fulfillment
-type & addresses.
+Fulfillment는 checkout capability의 확장입니다. 대부분의 필드는
+구매자 입력(희망 fulfillment 타입 및 주소 등)을 바탕으로 business가 계산해 제공합니다.
 
 === "Request"
 
@@ -500,9 +496,9 @@ type & addresses.
     }
     ```
 
-#### Update Fulfillment Selection
+#### Fulfillment 선택 업데이트
 
-Follow-up calls after initial `fulfillment` data to update selection.
+초기 `fulfillment` 데이터 설정 이후, 선택값을 변경하기 위한 후속 호출입니다.
 
 === "Request"
 
@@ -694,11 +690,10 @@ Follow-up calls after initial `fulfillment` data to update selection.
     }
     ```
 
-### Complete Checkout
+### Checkout 완료 { #complete-checkout }
 
-If businesses have specific logic to enforce field existence in `buyer` and
-addresses (i.e. `fulfillment_address`, `billing_address`), this is the right
-place to set these expectations via `messages`.
+business가 `buyer` 및 주소(`fulfillment_address`, `billing_address`) 필수 여부를
+강제하는 로직을 가진 경우, `messages`를 통해 해당 요구사항을 명시하는 적절한 지점입니다.
 
 === "Request"
 
@@ -890,7 +885,7 @@ place to set these expectations via `messages`.
     }
     ```
 
-### Get Checkout
+### Checkout 조회 { #get-checkout }
 
 === "Request"
 
@@ -1042,7 +1037,7 @@ place to set these expectations via `messages`.
     }
     ```
 
-### Cancel Checkout
+### Checkout 취소 { #cancel-checkout }
 
 === "Request"
 
@@ -1199,59 +1194,58 @@ place to set these expectations via `messages`.
     }
     ```
 
-## HTTP Headers
+## HTTP 헤더
 
-The following headers are defined for the HTTP binding and apply to all
-operations unless otherwise noted.
+다음 헤더는 HTTP 바인딩에서 정의되며,
+별도 명시가 없는 한 모든 연산에 적용됩니다.
 
 {{ header_fields('create_checkout', 'rest.openapi.json') }}
 
-### Specific Header Requirements
+### 헤더별 요구사항
 
-* **UCP-Agent**: All requests **MUST** include the `UCP-Agent` header
-    containing the platform profile URI using Dictionary Structured Field syntax
-    ([RFC 8941](https://datatracker.ietf.org/doc/html/rfc8941){target="_blank"}).
-    Format: `profile="https://platform.example/profile"`.
-* **Idempotency-Key**: Operations that modify state **SHOULD** support
-    idempotency. When provided, the server **MUST**:
-    1. Store the key with the operation result for at least 24 hours.
-    2. Return the cached result for duplicate keys.
-    3. Return `409 Conflict` if the key is reused with different parameters.
+* **UCP-Agent**: 모든 요청은 Dictionary Structured Field 문법
+  ([RFC 8941](https://datatracker.ietf.org/doc/html/rfc8941){target="_blank"})으로
+  플랫폼 프로필 URI를 담은 `UCP-Agent` 헤더를 **반드시(MUST)** 포함해야 합니다.
+  형식: `profile="https://platform.example/profile"`.
+* **Idempotency-Key**: 상태를 변경하는 연산은 멱등성을 지원하는 것이 **권장(SHOULD)** 됩니다.
+  제공된 경우 서버는 다음을 **반드시(MUST)** 수행해야 합니다.
+  1. 키와 연산 결과를 최소 24시간 저장
+  2. 중복 키 요청 시 캐시된 결과 반환
+  3. 다른 파라미터로 키를 재사용하면 `409 Conflict` 반환
 
-## Protocol Mechanics
+## 프로토콜 메커니즘
 
-### Status Codes
+### 상태 코드
 
-UCP uses standard HTTP status codes to indicate the success or failure of an API
-request.
+UCP는 API 요청의 성공/실패를 표준 HTTP 상태 코드로 표현합니다.
 
-| Status Code                 | Description                                                                        |
-| :-------------------------- | :--------------------------------------------------------------------------------- |
-| `200 OK`                    | The request was successful.                                                        |
-| `201 Created`               | The resource was successfully created.                                             |
-| `400 Bad Request`           | The request was invalid or cannot be served.                                       |
-| `401 Unauthorized`          | Authentication is required and has failed or has not been provided.                |
-| `403 Forbidden`             | The request is authenticated but the user does not have the necessary permissions. |
-| `409 Conflict`              | The request could not be completed due to a conflict (e.g., idempotent key reuse). |
-| `422 Unprocessable Entity`  | The profile content is malformed (discovery failure).                              |
-| `424 Failed Dependency`     | The profile URL is valid but fetch failed (discovery failure).                     |
-| `429 Too Many Requests`     | Rate limit exceeded.                                                               |
-| `503 Service Unavailable`   | Temporary unavailability.                                                          |
-| `500 Internal Server Error` | An unexpected condition was encountered on the server.                             |
+| 상태 코드 | 설명 |
+| :-------- | :--- |
+| `200 OK` | 요청 성공 |
+| `201 Created` | 리소스 생성 성공 |
+| `400 Bad Request` | 요청이 잘못되었거나 처리 불가 |
+| `401 Unauthorized` | 인증 필요, 인증 실패 또는 미제공 |
+| `403 Forbidden` | 인증되었지만 권한 부족 |
+| `409 Conflict` | 충돌로 요청 완료 불가(예: idempotency 키 재사용) |
+| `422 Unprocessable Entity` | 프로필 콘텐츠 형식 오류(discovery 실패) |
+| `424 Failed Dependency` | 프로필 URL은 유효하지만 조회 실패(discovery 실패) |
+| `429 Too Many Requests` | 레이트 리밋 초과 |
+| `503 Service Unavailable` | 일시적 서비스 불가 |
+| `500 Internal Server Error` | 서버 내부의 예기치 못한 오류 |
 
-### Error Responses
+### 오류 응답
 
-See the [Core Specification](overview.md#error-handling) for the complete error
-code registry and transport binding examples.
+전체 오류 코드 레지스트리와 전송 바인딩 예시는
+[Core Specification](overview.md#error-handling)을 참고하세요.
 
-* **Protocol errors**: Return appropriate HTTP status code (401, 403, 409, 429,
-    503) with JSON body containing `code` and `content`.
-* **Business outcomes**: Return HTTP 200 with UCP envelope and `messages` array.
+* **프로토콜 오류**: 적절한 HTTP 상태 코드(401, 403, 409, 429, 503)와
+  `code`, `content`를 포함한 JSON 바디 반환
+* **비즈니스 결과**: UCP envelope과 `messages` 배열을 포함해 HTTP 200 반환
 
-#### Business Outcomes
+#### 비즈니스 결과
 
-Business outcomes (including errors like unavailable merchandise) are returned
-with HTTP 200 and the UCP envelope containing `messages`:
+비즈니스 결과(상품 불가 오류 포함)는 HTTP 200과 `messages`를 담은
+UCP envelope으로 반환됩니다:
 
 ```json
 {
@@ -1282,18 +1276,18 @@ with HTTP 200 and the UCP envelope containing `messages`:
 }
 ```
 
-## Security Considerations
+## 보안 고려사항
 
-### Authentication
+### 인증(Authentication)
 
-Authentication is optional and depends on business requirements. When
-authentication is required, the REST transport **MAY** use:
+인증은 선택 사항이며 business 요구사항에 따라 달라집니다.
+인증이 필요한 경우 REST 전송은 다음을 사용할 수 있습니다(**MAY**).
 
-1. **Open API**: No authentication required for public operations.
-2. **API Keys**: Via `X-API-Key` header.
-3. **OAuth 2.0**: Via `Authorization: Bearer {token}` header, following
-    [RFC 6749](https://tools.ietf.org/html/rfc6749){ target="_blank" }.
-4. **Mutual TLS**: For high-security environments.
+1. **Open API**: 공개 연산에 인증 불필요
+2. **API Keys**: `X-API-Key` 헤더 사용
+3. **OAuth 2.0**: `Authorization: Bearer {token}` 헤더 사용,
+   [RFC 6749](https://tools.ietf.org/html/rfc6749){ target="_blank" } 준수
+4. **Mutual TLS**: 고보안 환경
 
-Businesses **MAY** require authentication for some operations while leaving
-others open (e.g., public checkout without authentication).
+business는 일부 연산만 인증을 요구하고 나머지는 공개로 둘 수 있습니다(**MAY**).
+(예: 인증 없는 공개 checkout)
