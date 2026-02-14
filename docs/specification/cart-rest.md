@@ -14,16 +14,15 @@
    limitations under the License.
 -->
 
-# Cart Capability - REST Binding
+# Cart Capability - REST 바인딩
 
-This document specifies the REST binding for the [Cart Capability](cart.md).
+이 문서는 [Cart Capability](cart.md)의 REST 바인딩을 정의합니다.
 
-## Protocol Fundamentals
+## 프로토콜 기본 사항
 
 ### Discovery
 
-Businesses advertise REST transport availability through their UCP profile at
-`/.well-known/ucp`.
+business는 `/.well-known/ucp`의 UCP 프로필을 통해 REST 전송 사용 가능 여부를 광고합니다.
 
 ```json
 {
@@ -59,42 +58,43 @@ Businesses advertise REST transport availability through their UCP profile at
 
 ### Base URL
 
-All UCP REST endpoints are relative to the business's base URL, which is
-discovered through the UCP profile at `/.well-known/ucp`. The endpoint for the
-cart capability is defined in the `rest.endpoint` field of the business profile.
+모든 UCP REST 엔드포인트는 business의 base URL을 기준으로 하며,
+이 URL은 `/.well-known/ucp` UCP 프로필에서 탐색됩니다.
+cart capability 엔드포인트는 business 프로필의 `rest.endpoint` 필드에 정의됩니다.
 
 ### Content Types
 
-* **Request**: `application/json`
-* **Response**: `application/json`
+* **요청(Request)**: `application/json`
+* **응답(Response)**: `application/json`
 
-All request and response bodies **MUST** be valid JSON as specified in
-[RFC 8259](https://tools.ietf.org/html/rfc8259){ target="_blank" }.
+모든 요청/응답 바디는
+[RFC 8259](https://tools.ietf.org/html/rfc8259){ target="_blank" }에 정의된
+유효한 JSON이어야 합니다(**MUST**).
 
-### Transport Security
+### 전송 보안
 
-All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
+모든 REST 엔드포인트는 최소 TLS 1.3 이상의 HTTPS로 제공되어야 합니다(**MUST**).
 
-## Operations
+## 연산(Operations)
 
-| Operation | Method | Endpoint | Description |
-| :---- | :---- | :---- | :---- |
-| [Create Cart](#create-cart) | `POST` | `/carts` | Create a cart session. |
-| [Get Cart](#get-cart) | `GET` | `/carts/{id}` | Get a cart session. |
-| [Update Cart](#update-cart) | `PUT` | `/carts/{id}` | Update a cart session. |
-| [Cancel Cart](#cancel-cart) | `POST` | `/carts/{id}/cancel` | Cancel a cart session. |
+| 연산 | 메서드 | 엔드포인트 | 설명 |
+| :--- | :----- | :--------- | :--- |
+| [Create Cart](#create-cart) | `POST` | `/carts` | cart 세션 생성 |
+| [Get Cart](#get-cart) | `GET` | `/carts/{id}` | cart 세션 조회 |
+| [Update Cart](#update-cart) | `PUT` | `/carts/{id}` | cart 세션 갱신 |
+| [Cancel Cart](#cancel-cart) | `POST` | `/carts/{id}/cancel` | cart 세션 취소 |
 
 ### Create Cart
 
-#### Input Schema
+#### 입력 스키마
 
 {{ schema_fields('cart_create_req', 'cart') }}
 
-#### Output Schema
+#### 출력 스키마
 
 {{ schema_fields('cart_resp', 'cart') }}
 
-#### Example
+#### 예시
 
 === "Request"
 
@@ -175,15 +175,15 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 ### Get Cart
 
-#### Input Schema
+#### 입력 스키마
 
-* `id` (String, required): The cart session ID (path parameter).
+* `id` (String, required): cart 세션 ID (path parameter).
 
-#### Output Schema
+#### 출력 스키마
 
 {{ schema_fields('cart_resp', 'cart') }}
 
-#### Example
+#### 예시
 
 === "Request"
 
@@ -273,17 +273,17 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 ### Update Cart
 
-#### Input Schema
+#### 입력 스키마
 
-* `id` (String, required): The cart session ID (path parameter).
+* `id` (String, required): cart 세션 ID (path parameter).
 
 {{ schema_fields('cart_update_req', 'cart') }}
 
-#### Output Schema
+#### 출력 스키마
 
 {{ schema_fields('cart_resp', 'cart') }}
 
-#### Example
+#### 예시
 
 === "Request"
 
@@ -385,15 +385,15 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
 
 ### Cancel Cart
 
-#### Input Schema
+#### 입력 스키마
 
-* `id` (String, required): The cart session ID (path parameter).
+* `id` (String, required): cart 세션 ID (path parameter).
 
-#### Output Schema
+#### 출력 스키마
 
 {{ schema_fields('cart_resp', 'cart') }}
 
-#### Example
+#### 예시
 
 === "Request"
 
@@ -456,56 +456,56 @@ All REST endpoints **MUST** be served over HTTPS with minimum TLS version 1.3.
     }
     ```
 
-## HTTP Headers
+## HTTP 헤더
 
-The following headers are defined for the HTTP binding and apply to all
-operations unless otherwise noted.
+다음 헤더는 HTTP 바인딩에서 정의되며,
+별도 명시가 없는 한 모든 연산에 적용됩니다.
 
 {{ header_fields('create_cart', 'rest.openapi.json') }}
 
-### Specific Header Requirements
+### 헤더별 요구사항
 
-* **UCP-Agent**: All requests **MUST** include the `UCP-Agent` header
-    containing the platform profile URI using Dictionary Structured Field syntax
-    ([RFC 8941](https://datatracker.ietf.org/doc/html/rfc8941){target="_blank"}).
-    Format: `profile="https://platform.example/profile"`.
-* **Idempotency-Key**: Operations that modify state **SHOULD** support
-    idempotency. When provided, the server **MUST**:
-    1. Store the key with the operation result for at least 24 hours.
-    2. Return the cached result for duplicate keys.
-    3. Return `409 Conflict` if the key is reused with different parameters.
+* **UCP-Agent**: 모든 요청은 Dictionary Structured Field 문법
+  ([RFC 8941](https://datatracker.ietf.org/doc/html/rfc8941){target="_blank"})
+  으로 플랫폼 프로필 URI를 담은 `UCP-Agent` 헤더를 **반드시(MUST)** 포함해야 합니다.
+  형식: `profile="https://platform.example/profile"`.
+* **Idempotency-Key**: 상태를 변경하는 연산은 멱등성을 지원하는 것이 **권장(SHOULD)** 됩니다.
+  제공된 경우 서버는 다음을 **반드시(MUST)** 수행해야 합니다.
+  1. 키와 연산 결과를 최소 24시간 저장.
+  2. 중복 키 요청 시 캐시된 결과 반환.
+  3. 다른 파라미터로 키를 재사용하면 `409 Conflict` 반환.
 
-## Protocol Mechanics
+## 프로토콜 메커니즘
 
-### Status Codes
+### 상태 코드
 
-| Status Code | Description |
-| :--- | :--- |
-| `200 OK` | The request was successful. |
-| `201 Created` | The cart was successfully created. |
-| `400 Bad Request` | The request was invalid or cannot be served. |
-| `401 Unauthorized` | Authentication is required and has failed or has not been provided. |
-| `403 Forbidden` | The request is authenticated but the user does not have the necessary permissions. |
-| `409 Conflict` | The request could not be completed due to a conflict (e.g., idempotent key reuse). |
-| `422 Unprocessable Entity` | The profile content is malformed (discovery failure). |
-| `424 Failed Dependency` | The profile URL is valid but fetch failed (discovery failure). |
-| `429 Too Many Requests` | Rate limit exceeded. |
-| `500 Internal Server Error` | An unexpected condition was encountered on the server. |
-| `503 Service Unavailable` | Temporary unavailability. |
+| 상태 코드 | 설명 |
+| :-------- | :--- |
+| `200 OK` | 요청 성공 |
+| `201 Created` | cart 생성 성공 |
+| `400 Bad Request` | 요청이 잘못되었거나 처리 불가 |
+| `401 Unauthorized` | 인증 필요, 인증 실패 또는 미제공 |
+| `403 Forbidden` | 인증은 되었지만 필요한 권한 없음 |
+| `409 Conflict` | 충돌로 요청 완료 불가(예: idempotency 키 재사용) |
+| `422 Unprocessable Entity` | 프로필 콘텐츠가 잘못됨(discovery 실패) |
+| `424 Failed Dependency` | 프로필 URL은 유효하지만 조회 실패(discovery 실패) |
+| `429 Too Many Requests` | 레이트 리밋 초과 |
+| `500 Internal Server Error` | 서버 내부의 예기치 못한 오류 |
+| `503 Service Unavailable` | 일시적 서비스 불가 |
 
-### Error Responses
+### 오류 응답
 
-See the [Core Specification](overview.md#error-handling) for the complete error
-code registry and transport binding examples.
+전체 오류 코드 레지스트리와 전송 바인딩 예시는
+[Core Specification](overview.md#error-handling)을 참고하세요.
 
-* **Protocol errors**: Return appropriate HTTP status code (401, 403, 409, 429,
-    503) with JSON body containing `code` and `content`.
-* **Business outcomes**: Return HTTP 200 with UCP envelope and `messages` array.
+* **프로토콜 오류**: 적절한 HTTP 상태 코드(401, 403, 409, 429, 503)와
+  `code`, `content`를 포함한 JSON 바디 반환
+* **비즈니스 결과**: UCP envelope과 `messages` 배열을 포함해 HTTP 200 반환
 
-#### Business Outcomes
+#### 비즈니스 결과
 
-Business outcomes (including not found and validation errors) are returned with
-HTTP 200 and the UCP envelope containing `messages`:
+비즈니스 결과(미발견, 검증 오류 포함)는 HTTP 200과 함께 `messages`가 포함된
+UCP envelope으로 반환됩니다.
 
 ```json
 {
@@ -526,18 +526,18 @@ HTTP 200 and the UCP envelope containing `messages`:
 }
 ```
 
-## Security Considerations
+## 보안 고려사항
 
-### Authentication
+### 인증(Authentication)
 
-Authentication is optional and depends on business requirements. When
-authentication is required, the REST transport **MAY** use:
+인증은 선택 사항이며 business 요구사항에 따라 달라집니다.
+인증이 필요한 경우 REST 전송은 다음을 사용할 수 있습니다(**MAY**).
 
-1. **Open API**: No authentication required for public operations.
-2. **API Keys**: Via `X-API-Key` header.
-3. **OAuth 2.0**: Via `Authorization: Bearer {token}` header, following
-    [RFC 6749](https://tools.ietf.org/html/rfc6749){ target="_blank" }.
-4. **Mutual TLS**: For high-security environments.
+1. **Open API**: 공개 연산에 인증 불필요
+2. **API Keys**: `X-API-Key` 헤더 사용
+3. **OAuth 2.0**: `Authorization: Bearer {token}` 헤더 사용,
+   [RFC 6749](https://tools.ietf.org/html/rfc6749){ target="_blank" } 준수
+4. **Mutual TLS**: 고보안 환경
 
-Businesses **MAY** require authentication for some operations while leaving
-others open (e.g., public cart without authentication).
+business는 일부 연산만 인증을 요구하고 나머지는 공개로 둘 수 있습니다(**MAY**).
+(예: 인증 없는 공개 cart)
