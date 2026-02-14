@@ -1,0 +1,69 @@
+<!--
+   Copyright 2026 UCP Authors
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+
+# 로드맵
+
+이 로드맵은 우리의 전략적 우선순위를 투명하게 공유하고,
+완전한 에이전트 기반의 글로벌 커머스 표준으로 가는 핵심 경로에 대해
+파트너들과 정렬하기 위한 문서입니다. 우리의 목표는 고립된 거래를 넘어,
+국경과 산업 분야를 가로질러 동작하는 일관되고 지능적인 커머스 계층을
+구축하는 것입니다.
+
+**참고:** 이 로드맵은 현재 방향을 반영하며 계획 수립을 안내하기 위한 것이지만,
+특정 기능 제공에 대한 확약을 의미하지는 않습니다.
+이 과제들에 대한 접근 방식은 진화할 수 있으며,
+비즈니스 우선순위 변화와 커뮤니티 피드백에 따라
+이니셔티브는 변경, 제거 또는 추가될 수 있습니다.
+
+## 예정된 로드맵 우선순위
+
+### 전체 소비자 여정에 대한 더 깊은 지원
+
+고립된 거래를 넘어가기 위해, 우리는 프로토콜 범위를 확장하여
+멀티 아이템 체크아웃, 로열티, 라이프사이클 관리와 같은 핵심 사용자 여정을 다룹니다.
+동시에 모든 쇼핑 경험에서 비즈니스의 브랜드와 로직이 중심을 유지하도록 보장합니다.
+주요 예정 이니셔티브는 다음과 같습니다.
+
+* **상품 탐색 및 주문 후 관리:** 전체 여정을 지원함으로써,
+    단일 상품 체크아웃 처리에 그치지 않고 비즈니스가 고객 생애 가치(LTV)와
+    평균 주문 금액(AOV)을 극대화하도록 돕습니다.
+* **카트 및 바스켓 구성:** 하나의 비즈니스에서 멀티 아이템 체크아웃,
+    복잡한 바스켓 규칙(예: 프로모션, 세금, 배송),
+    실제 쇼핑 방식에 맞는 다양한 이행 로직을 지원합니다.
+* **로열티 및 멤버 혜택:** 사용자가 최적의 가치를 찾고,
+    비즈니스가 계정 연동을 통해 소비자와 더 깊은 연결을 만들 수 있도록
+    로열티 및 멤버 혜택 기능을 제공합니다.
+* **네이티브 교차판매(Cross-sell) 및 업셀(Upsell) 모듈:**
+    사용자 컨텍스트 기반의 개인화 추천과 업셀을
+    비즈니스가 제공할 수 있도록 하는 기능을 제공합니다.
+
+### 글로벌 시장 지원
+
+우리는 모든 규모와 지역의 비즈니스를 포괄하는 확장 가능한 생태계를 구축하고 있으며,
+"simple and open"이 모두에게 접근 가능함을 의미하도록 설계하고 있습니다.
+이를 위해 인도, 인도네시아, 라틴아메리카 등 다양한 시장에 대한
+단계적 롤아웃을 계획하고 있습니다.
+또한 폭넓은 지역별 사용 사례와 현지화된 결제 상호운용성을 지원하도록
+프로토콜을 확장하고 있습니다.
+
+## 함께 만들어 주세요
+
+커머스의 미래는 밀실에서 만들어질 수 없습니다.
+우리는 비즈니스, 개발자, 결제 제공자가 이 명세를 함께 다듬어 가길 바랍니다.
+초기 빌드에 대한 여러분의 피드백은,
+차세대 글로벌 커머스를 구동할 표준을 형성하는 데 직접적인 도움이 됩니다.
+
+[UCP 기여자로 참여하기](https://github.com/Universal-Commerce-Protocol/ucp?tab=contributing-ov-file){ target="_blank" }
