@@ -1,0 +1,77 @@
+name: Track Upstream Docs Changes
+
+on:
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch:
+    inputs:
+      base_sha:
+        description: "Optional base commit SHA (defaults to translation_state/state.json)"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  track:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout translation repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Configure upstream remote
+        run: |
+          if git remote get-url upstream >/dev/null 2>&1; then
+            git remote set-url upstream https://github.com/Universal-Commerce-Protocol/ucp.git
+          else
+            git remote add upstream https://github.com/Universal-Commerce-Protocol/ucp.git
+          fi
+          git fetch upstream main --no-tags
+
+      - name: Collect upstream documentation changes
+        id: collect
+        env:
+          BASE_SHA_INPUT: ${{ github.event.inputs.base_sha || '' }}
+        run: |
+          HEAD_SHA="$(git rev-parse upstream/main)"
+          ARGS=(python3 scripts/collect_upstream_changes.py --head-sha "$HEAD_SHA" --state-file translation_state/state.json)
+
+          if [ -n "$BASE_SHA_INPUT" ]; then
+            ARGS+=(--base-sha "$BASE_SHA_INPUT")
+          fi
+
+          "${ARGS[@]}"
+
+      - name: Create pull request with tracking report
+        if: steps.collect.outputs.has_changes == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "docs(track): upstream changes ${{ steps.collect.outputs.base_sha_short }}..${{ steps.collect.outputs.head_sha_short }}"
+          branch: ${{ steps.collect.outputs.branch_name }}
+          delete-branch: true
+          title: "docs(track): upstream docs changes ${{ steps.collect.outputs.head_sha_short }}"
+          body: |
+            This PR was generated automatically by `.github/workflows/track-upstream-docs.yml`.
+
+            - Compare: https://github.com/Universal-Commerce-Protocol/ucp/compare/${{ steps.collect.outputs.base_sha }}...${{ steps.collect.outputs.head_sha }}
+            - Report file: `${{ steps.collect.outputs.report_path }}`
+
+            Translation is manual. Please use the checkboxes in the report.
+          add-paths: |
+            docs/translation-updates
+            translation_state/state.json
+
+      - name: No documentation changes detected
+        if: steps.collect.outputs.has_changes != 'true'
+        run: echo "No documentation-impacting changes detected in upstream range."
