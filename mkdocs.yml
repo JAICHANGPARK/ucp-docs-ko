@@ -13,55 +13,55 @@
 #   limitations under the License.
 
 
-site_name: Universal Commerce Protocol (UCP) - Korean Docs
+site_name: Universal Commerce Protocol (UCP) 한국어 문서
 site_url: https://jaichangpark.github.io/ucp-docs-ko/  # Required for the llmstxt plugin to work.
 site_description: >
-  The Universal Commerce Protocol (UCP) is a solution for enabling gen AI agents to make payments on
-  behalf of users, safely, securely, and in a decentralized and privacy protecting manner.
-  This protocol is a part of the broader ecosystem, which includes agentic protocols like A2A and
-  MCP, and encompasses the global nature of payments.
+  Universal Commerce Protocol(UCP)은 생성형 AI 에이전트가 사용자를 대신해
+  안전하고 신뢰할 수 있으며 분산형·프라이버시 보호 방식으로 결제를 수행할 수 있게 하는
+  프로토콜입니다. UCP는 A2A, MCP 같은 에이전트 프로토콜 생태계와 함께 동작하며
+  글로벌 결제 시나리오를 포괄합니다.
 site_dir: site
 edit_uri: edit/main/docs/
 
 # Navigation
 nav:
-  - Home: index.md
-  - Core Concepts: documentation/core-concepts.md
-  - Playground: playground.md
-  - Specification:
-    - Overview: specification/overview.md
-    - Checkout Capability:
-      - Overview: specification/checkout.md
-      - HTTP/REST Binding: specification/checkout-rest.md
-      - MCP Binding: specification/checkout-mcp.md
-      - A2A Binding: specification/checkout-a2a.md
-      - EP Binding: specification/embedded-checkout.md
-      - AP2 Mandates Extension: specification/ap2-mandates.md
-      - Buyer Consent Extension: specification/buyer-consent.md
-      - Discounts Extension: specification/discount.md
-      - Fulfillment Extension: specification/fulfillment.md
-    - Cart Capability:
-      - Overview: specification/cart.md
-      - HTTP/REST Binding: specification/cart-rest.md
-      - MCP Binding: specification/cart-mcp.md
-    - Order Capability: specification/order.md
-    - Identity Linking Capability: specification/identity-linking.md
-    - Payment Handlers:
-      - Guide: specification/payment-handler-guide.md
-      - Template: specification/payment-handler-template.md
-      - Tokenization Guide: specification/tokenization-guide.md
-      - Examples:
-        - Processor Tokenizer: specification/examples/processor-tokenizer-payment-handler.md
-        - Platform Tokenizer: specification/examples/platform-tokenizer-payment-handler.md
-        - Encrypted Credential: specification/examples/encrypted-credential-handler.md
-    - Schema Authoring: documentation/schema-authoring.md
-    - Reference: specification/reference.md
-    - Versioning: specification/versioning.md
-  - UCP and AP2: documentation/ucp-and-ap2.md
-  - Roadmap: documentation/roadmap.md
-  - Translation Updates: translation-updates/index.md
+  - 홈: index.md
+  - 핵심 개념: documentation/core-concepts.md
+  - 플레이그라운드: playground.md
+  - 명세:
+    - 개요: specification/overview.md
+    - 체크아웃 기능:
+      - 개요: specification/checkout.md
+      - HTTP/REST 바인딩: specification/checkout-rest.md
+      - MCP 바인딩: specification/checkout-mcp.md
+      - A2A 바인딩: specification/checkout-a2a.md
+      - 임베디드 체크아웃 바인딩: specification/embedded-checkout.md
+      - AP2 위임 확장: specification/ap2-mandates.md
+      - 구매자 동의 확장: specification/buyer-consent.md
+      - 할인 확장: specification/discount.md
+      - 주문 이행 확장: specification/fulfillment.md
+    - 장바구니 기능:
+      - 개요: specification/cart.md
+      - HTTP/REST 바인딩: specification/cart-rest.md
+      - MCP 바인딩: specification/cart-mcp.md
+    - 주문 기능: specification/order.md
+    - 신원 연결 기능: specification/identity-linking.md
+    - 결제 핸들러:
+      - 가이드: specification/payment-handler-guide.md
+      - 템플릿: specification/payment-handler-template.md
+      - 토큰화 가이드: specification/tokenization-guide.md
+      - 예시:
+        - 프로세서 토크나이저: specification/examples/processor-tokenizer-payment-handler.md
+        - 플랫폼 토크나이저: specification/examples/platform-tokenizer-payment-handler.md
+        - 암호화 자격증명: specification/examples/encrypted-credential-handler.md
+    - 스키마 작성: documentation/schema-authoring.md
+    - 레퍼런스: specification/reference.md
+    - 버저닝: specification/versioning.md
+  - UCP와 AP2: documentation/ucp-and-ap2.md
+  - 로드맵: documentation/roadmap.md
+  - 번역 업데이트: translation-updates/index.md
 
-repo_name: UCP Docs KO on GitHub
+repo_name: UCP 한국어 문서 저장소
 repo_url: https://github.com/JAICHANGPARK/ucp-docs-ko
 
 # Copyright
@@ -81,12 +81,11 @@ extra:
     property: G-ZEGTBCTMJ9
     # cSpell:enable
   consent:
-    title: Cookie consent
+    title: 쿠키 동의
     description: >-
-      We use cookies to recognize your repeated visits and preferences, as well
-      as to measure the effectiveness of our documentation and whether users
-      find what they're searching for. With your consent, you're helping us to
-      make our documentation better.
+      반복 방문 및 선호를 기억하고, 문서의 유효성과 검색 성공률을 측정하기 위해
+      쿠키를 사용합니다. 동의해 주시면 한국어 문서를 더 정확하고 유용하게 개선하는 데
+      도움이 됩니다.
   version:
     provider: mike
 
@@ -95,6 +94,7 @@ theme:
   logo: assets/updated-icon.svg
   favicon: assets/favicon.png
   name: material
+  language: ko
   font:
     text: Google Sans
     code: Roboto Mono

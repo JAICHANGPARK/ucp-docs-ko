@@ -14,47 +14,46 @@
    limitations under the License.
 -->
 
-# Fulfillment Extension
+# Fulfillment 확장
 
-## Overview
+## 개요
 
-The fulfillment extension enables businesses to advertise support for physical
-goods fulfillment (shipping, pickup, etc).
+fulfillment 확장은 business가 실물 상품 이행(배송, 매장 수령 등) 지원 여부를
+광고할 수 있게 합니다.
 
-This extension adds a `fulfillment` field to Checkout containing:
+이 확장은 Checkout에 `fulfillment` 필드를 추가하며, 다음을 포함합니다.
 
-* `methods[]` — fulfillment methods applicable to cart items (shipping, pickup, etc.)
-    * `line_item_ids` — which items this method fulfills
-    * `destinations[]` — where to fulfill (address, store location)
-    * `groups[]` — business-generated packages, each with selectable `options[]`
-* `available_methods[]` — inventory availability per item (optional)
+* `methods[]` - 장바구니 아이템에 적용 가능한 fulfillment 방법(배송, 픽업 등)
+  * `line_item_ids` - 이 방법으로 처리되는 아이템
+  * `destinations[]` - 이행 대상 위치(주소, 매장 위치)
+  * `groups[]` - business가 생성한 패키지 단위, 각 그룹은 선택 가능한 `options[]` 포함
+* `available_methods[]` - 아이템별 재고 기반 이행 가능성(선택)
 
-**Mental model:**
+**멘탈 모델:**
 
 * `methods[0]` Shipping
-    * `line_item_ids` 👕👖
-    * `selected_destination_id` = `destinations[0].id` 🔘✅ 123 Fake St
-    * `groups[0]` 📦👕👖
-        * `selected_option_id` = `options[0].id` 🔘✅ Standard $5
-        * `options[1]` 🔘 Express $10
+  * `line_item_ids` 👕👖
+  * `selected_destination_id` = `destinations[0].id` 🔘✅ 123 Fake St
+  * `groups[0]` 📦👕👖
+    * `selected_option_id` = `options[0].id` 🔘✅ Standard $5
+    * `options[1]` 🔘 Express $10
 * `methods[1]` Pick Up in Store
-    * `line_item_ids` 👞
-    * `selected_destination_id` = `destinations[0].id` 🔘✅ Uptown Store
-    * `groups[0]` 📦👞
-        * `selected_option_id` = `options[0].id` 🔘✅ In-Store Pickup
-        * `options[1]` 🔘 Curbside Pickup
+  * `line_item_ids` 👞
+  * `selected_destination_id` = `destinations[0].id` 🔘✅ Uptown Store
+  * `groups[0]` 📦👞
+    * `selected_option_id` = `options[0].id` 🔘✅ In-Store Pickup
+    * `options[1]` 🔘 Curbside Pickup
 
-## Schema
+## 스키마
 
-Fulfillment applies only to items requiring physical delivery. Items not
-requiring fulfillment (e.g., digital goods) do not need to be assigned to a
-method.
+fulfillment는 실물 전달이 필요한 아이템에만 적용됩니다.
+이행이 필요하지 않은 아이템(예: 디지털 상품)은 method에 할당할 필요가 없습니다.
 
-### Properties
+### 속성
 
 {{ extension_fields('fulfillment', 'fulfillment') }}
 
-### Entities
+### 엔터티
 
 #### Fulfillment
 
@@ -96,7 +95,7 @@ method.
 
 {{ schema_fields('postal_address', 'fulfillment') }}
 
-### Example
+### 예시
 
 ```json
 {
@@ -154,74 +153,75 @@ method.
 }
 ```
 
-## Rendering
+## 렌더링
 
-Fulfillment options are designed for **method-agnostic rendering**. Platforms
-do not need to understand specific method types (shipping, pickup, etc.) to
-present options meaningfully. The business provides precomputed,
-human-readable fields that platforms render directly.
+fulfillment 옵션은 **method-agnostic 렌더링**을 목표로 설계되었습니다.
+platform은 method 타입(배송/픽업 등)을 구체적으로 이해하지 않아도
+옵션을 의미 있게 표시할 수 있습니다.
+business가 사전 계산된 사람이 읽기 쉬운 필드를 제공하고,
+platform은 이를 그대로 렌더링하면 됩니다.
 
-### Human-Readable Fields
+### 사람이 읽기 쉬운 필드
 
-| Location              | Field         | Required | Purpose                                                 |
+| 위치 | 필드 | 필수 | 목적 |
 | --------------------- | ------------- | -------- | ------------------------------------------------------- |
-| `groups[].options[]`  | `title`       | Yes      | Primary label that distinguishes from siblings          |
-| `groups[].options[]`  | `description` | No       | Supplementary context for the title                     |
-| `groups[].options[]`  | `total`       | Yes      | Price in minor units (may be null if not yet available) |
-| `available_methods[]` | `description` | No       | Standalone explanation of alternative availability      |
+| `groups[].options[]`  | `title`       | Yes      | 같은 그룹 내 옵션을 구분하는 기본 라벨 |
+| `groups[].options[]`  | `description` | No       | title을 보조하는 추가 설명 |
+| `groups[].options[]`  | `total`       | Yes      | 소수 단위 가격(아직 확정 전이면 null 가능) |
+| `available_methods[]` | `description` | No       | 대체 가능 방법에 대한 독립 설명 |
 
-### Business Responsibilities
+### Business 책임
 
-**For `options[].title`:**
+**`options[].title`에 대해:**
 
-* **MUST** distinguish this option from its siblings
-* **SHOULD** include method and speed (e.g., "Express Shipping", "Curbside Pickup")
-* **MUST** be sufficient for buyer decision if `description` is absent
+* 같은 그룹 내 형제 옵션과 구분되도록 **MUST** 작성
+* 방법/속도를 포함하는 것이 **SHOULD** (예: "Express Shipping", "Curbside Pickup")
+* `description`이 없어도 구매자 의사결정에 충분해야 **MUST** 함
 
-**For `options[].description`:**
+**`options[].description`에 대해:**
 
-* **MUST NOT** repeat `title` or `total`—provides supplementary context only
-* **SHOULD** include timing, carrier, or other decision-relevant details
-* **SHOULD** be a complete phrase (e.g., "Arrives Dec 12-15 via FedEx")
-* **MAY** be omitted if title is self-explanatory
+* `title` 또는 `total`을 반복하면 안 되며(**MUST NOT**), 보조 맥락만 제공
+* 도착 시점/택배사/의사결정 관련 정보를 포함하는 것이 **SHOULD**
+* 완전한 문장 또는 구로 작성하는 것이 **SHOULD** (예: "Arrives Dec 12-15 via FedEx")
+* title만으로 충분하면 생략 가능(**MAY**)
 
-**For `available_methods[].description`:**
+**`available_methods[].description`에 대해:**
 
-* **MUST** be a standalone sentence explaining what, when, and where
-* **SHOULD** be usable verbatim in platform dialogue (e.g., "Pants available
-    for pickup at Downtown Store today at 2pm")
+* 무엇을/언제/어디서 처리 가능한지 설명하는 독립 문장이어야 **MUST** 함
+* platform 대화 UI에 그대로 사용할 수 있어야 **SHOULD** 함
+  (예: "Pants available for pickup at Downtown Store today at 2pm")
 
-**For ordering:**
+**정렬 순서에 대해:**
 
-* Businesses **SHOULD** return `options[]` in a meaningful order (e.g., cheapest
-    first, fastest first)
-* Platforms **SHOULD** render options in the provided order
+* business는 `options[]`를 의미 있는 순서(예: 최저가 우선, 최단시간 우선)로
+  반환하는 것이 **SHOULD**
+* platform은 제공된 순서 그대로 렌더링하는 것이 **SHOULD**
 
-### Platform Responsibilities
+### Platform 책임
 
-Platforms **SHOULD** treat fulfillment as a generic, renderable structure:
+platform은 fulfillment를 범용 렌더링 가능한 구조로 취급하는 것이 **SHOULD** 합니다.
 
-* Render each option as a card using `title`, `description`, and `total`
-* Present options in the order provided by the business
-* Present all methods returned—method selection is a buyer decision
-* Use `available_methods[].description` to surface alternatives to the buyer
+* 각 옵션을 `title`, `description`, `total` 기반 카드 형태로 렌더링
+* business가 제공한 순서대로 옵션 제시
+* 반환된 모든 method를 제시 (method 선택은 구매자 결정)
+* `available_methods[].description`을 사용해 대체 옵션 노출
 
-Platforms **MAY** provide enhanced UX for recognized method types (store
-selectors
-for pickup, carrier logos for shipping), but this is optional. The baseline
-contract is: **`title` + `description` + `total` is sufficient to render any
-option.**
+platform은 인식 가능한 method 타입에 대해 향상 UX를 제공할 수 있습니다(**MAY**).
+(예: pickup 매장 선택기, shipping 운송사 로고)
+단, 이는 선택 사항입니다. 기본 계약은
+**`title` + `description` + `total`만으로 모든 옵션을 렌더링 가능해야 한다**는 점입니다.
 
-When a buyer selects an option the platform cannot fully process, the
-platform **SHOULD** use `continue_url` to hand off to the business's checkout.
+구매자가 플랫폼이 완전 처리할 수 없는 옵션을 선택한 경우,
+platform은 business checkout으로 핸드오프하기 위해 `continue_url`을 사용하는 것이
+**SHOULD** 됩니다.
 
 ## Available Methods
 
-Available methods indicate whether an item can be fulfilled with a given
-method, and when. Use cases:
+available methods는 특정 아이템이 특정 method로 이행 가능한지,
+그리고 언제 가능한지를 나타냅니다. 사용 사례 예시:
 
-* **Alternative methods**: "These pants are also available for pickup at Downtown Store"
-* **Fulfill later**: Preorders, items shipping from a distant warehouse, pickup when store gets inventory
+* **대체 방법 안내**: "이 바지는 Downtown Store 매장 수령도 가능합니다"
+* **나중 이행**: 예약 주문, 원거리 창고 출고, 매장 재고 입고 후 픽업
 
 ```json
 {
@@ -255,30 +255,29 @@ method, and when. Use cases:
 }
 ```
 
-The `description` field enables platforms to surface alternatives to buyers:
+`description` 필드는 platform이 구매자에게 대체 옵션을 안내할 수 있게 합니다.
 
 > 🤖 The shirt and pants ship for $5, arriving in 5-8 days. Or the pants can
 > be picked up at Downtown Store in 4 hours.
 
-If the buyer chooses pickup but the platform doesn't support split
-fulfillment, the platform **SHOULD** use `continue_url` to hand off to the
-business's checkout.
+구매자가 pickup을 선택했지만 platform이 분할 fulfillment를 지원하지 않으면,
+platform은 business checkout으로 핸드오프하기 위해 `continue_url`을 사용하는 것이
+**SHOULD** 됩니다.
 
-## Configuration
+## 구성(Configuration)
 
-Businesses and platforms declare fulfillment constraints in their profiles.
-Businesses fetch platform profiles to adapt responses accordingly.
+business와 platform은 각자의 프로필에서 fulfillment 제약을 선언합니다.
+business는 platform 프로필을 조회해 이에 맞는 응답을 생성합니다.
 
-### Platform Profile
+### Platform 프로필
 
-Platforms declare their rendering capabilities using `platform_schema`:
+platform은 `platform_schema`를 사용해 렌더링 capability를 선언합니다.
 
 {{ schema_fields('types/platform_fulfillment_config', 'fulfillment') }}
 
-Platforms that omit config or set `supports_multi_group: false` receive
-single-group responses. The response shape is always
-`methods[].groups[]`—the difference is whether `groups.length` can exceed 1
-within each method.
+config를 생략하거나 `supports_multi_group: false`로 설정한 platform은
+단일 그룹 응답을 받습니다. 응답 구조는 항상 `methods[].groups[]`이며,
+차이는 각 method 내 `groups.length`가 1을 초과할 수 있는지 여부입니다.
 
 ```json
 // Default: single group per method
@@ -288,10 +287,9 @@ within each method.
 { "dev.ucp.shopping.fulfillment": [{"version": "2026-01-11", "config": { "supports_multi_group": true }}] }
 ```
 
-### Business Profile
+### Business 프로필
 
-Businesses declare what fulfillment configurations they support using
-`merchant_config`:
+business는 `merchant_config`를 사용해 자신이 지원하는 fulfillment 구성을 선언합니다.
 
 {{ schema_fields('types/merchant_fulfillment_config', 'fulfillment') }}
 
@@ -313,43 +311,41 @@ Businesses declare what fulfillment configurations they support using
 }
 ```
 
-This example says: shipping can go to multiple addresses, and carts can mix
-shipping+pickup.
+위 예시는 shipping이 다중 주소를 지원하고,
+장바구니에서 shipping+pickup 혼합이 가능함을 의미합니다.
 
-### Business Response Behavior
+### Business 응답 동작
 
-**When `supports_multi_group: false` (default):**
+**`supports_multi_group: false`(기본값)일 때:**
 
-* Business **MUST** consolidate all items into a **single group per method**
-* Response still uses array structure: `methods[].groups[]` with `groups.length === 1`
-* Business **MAY** still return multiple methods (e.g., shipping + pickup) if
-    cart items require it
+* business는 모든 아이템을 **method당 단일 그룹**으로 통합해야 합니다(**MUST**).
+* 응답은 배열 구조를 유지합니다: `methods[].groups[]`에서 `groups.length === 1`
+* 장바구니 요구에 따라 business는 여러 method(예: shipping + pickup)를
+  여전히 반환할 수 있습니다(**MAY**).
 
-**When `supports_multi_group: true`:**
+**`supports_multi_group: true`일 때:**
 
-* Business **MAY** return multiple groups per method based on inventory,
-    packaging, or warehouse logic
-* Platform is responsible for rendering group selection UI (e.g., choose
-    shipping speed per package)
+* business는 재고/패키징/창고 로직에 따라 method당 다중 그룹을 반환할 수 있습니다(**MAY**).
+* platform은 그룹 선택 UI(예: 패키지별 배송 속도 선택)를 렌더링해야 합니다.
 
-### Adding New Methods
+### 신규 Method 추가
 
-Extensions that extend fulfillment with new method types (e.g.,
-`local_delivery`) **MUST** add an extension schema that:
+fulfillment를 신규 method 타입(예: `local_delivery`)으로 확장하는 확장은,
+아래를 포함하는 extension schema를 **반드시(MUST)** 추가해야 합니다.
 
-1. Adds the method to the `type` enum in `fulfillment_method`
-2. Adds corresponding business config options:
-    * `allows_multi_destination.local_delivery: boolean`
-    * `allows_method_combinations` items enum (includes `"local_delivery"`)
+1. `fulfillment_method`의 `type` enum에 신규 method 추가
+2. 대응 business config 옵션 추가:
+   * `allows_multi_destination.local_delivery: boolean`
+   * `allows_method_combinations` 항목 enum (예: `"local_delivery"` 포함)
 
-Note: Platform's `supports_multi_group` is method-agnostic (single boolean),
-so no extension needed.
+참고: platform의 `supports_multi_group`는 method-agnostic(단일 boolean)이므로
+추가 확장이 필요하지 않습니다.
 
-## Examples
+## 예시
 
-### Basic
+### 기본
 
-**Config:** None required (default behavior)
+**Config:** 별도 요구 없음(기본 동작)
 
 ```json
 {
@@ -407,12 +403,11 @@ so no extension needed.
 }
 ```
 
-### Split Groups
+### 그룹 분할(Split Groups)
 
-**Config:** Platform profile requires `config.supports_multi_group: true`
+**Config:** platform 프로필에 `config.supports_multi_group: true` 필요
 
-Business splits items into multiple packages; buyer selects shipping rate per
-package.
+business가 아이템을 여러 패키지로 나누고, 구매자가 패키지별 배송 옵션을 선택합니다.
 
 ```json
 {
@@ -475,13 +470,13 @@ package.
 }
 ```
 
-### Split Destinations
+### 목적지 분할(Split Destinations)
 
-**Config:** Business profile requires
-`config.allows_multi_destination.shipping: true`
+**Config:** business 프로필에
+`config.allows_multi_destination.shipping: true` 필요
 
-Shirt ships to mom (US), pants ship to grandma (Hong Kong). Two methods of the
-same type, each with its own destination.
+셔츠는 엄마(미국), 바지는 할머니(홍콩)에게 배송되는 예시입니다.
+동일 타입(shipping)의 method를 2개 두고 각각 독립 목적지를 가집니다.
 
 ```json
 {

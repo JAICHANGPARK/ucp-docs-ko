@@ -14,121 +14,115 @@
    limitations under the License.
 -->
 
-# Universal Commerce Protocol (UCP) Official Specification
+# Universal Commerce Protocol (UCP) 공식 명세
 
-## Overarching guidelines
+## 상위 가이드라인
 
-The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**,
-**SHOULD**, **SHOULD NOT**, **RECOMMENDED**, **MAY**, and **OPTIONAL** in this
-document are to be interpreted as described in
-[RFC 2119](https://www.rfc-editor.org/rfc/rfc2119.html){ target="_blank" } and
-[RFC 8174](https://www.rfc-editor.org/rfc/rfc8174.html){ target="_blank" }.
+이 문서의 **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**,
+**SHOULD**, **SHOULD NOT**, **RECOMMENDED**, **MAY**, **OPTIONAL** 키워드는
+[RFC 2119](https://www.rfc-editor.org/rfc/rfc2119.html){ target="_blank" } 및
+[RFC 8174](https://www.rfc-editor.org/rfc/rfc8174.html){ target="_blank" } 정의를 따릅니다.
 
-Schema notes:
+스키마 참고:
 
-- Date format: Always specified as
-    [RFC 3339](https://www.rfc-editor.org/rfc/rfc3339.html){ target="_blank" }
-    unless otherwise specified
-- Amounts format: Minor units (cents)
+- 날짜 형식: 별도 명시가 없으면
+  [RFC 3339](https://www.rfc-editor.org/rfc/rfc3339.html){ target="_blank" } 사용
+- 금액 형식: 소수 단위(minor units, cents)
 
-## Discovery, Governance, and Negotiation
+## Discovery, 거버넌스, 협상
 
-UCP employs a server-selects architecture where the business (server) chooses
-the protocol version and capabilities from the intersection of both parties'
-capabilities. Both business and platform profiles can be cached by both parties,
-allowing efficient capability negotiation within the normal request/response
-flow between platform and business.
+UCP는 server-selects 아키텍처를 채택합니다. business(서버)가 양측 capability 교집합에서
+프로토콜 버전과 capability를 선택합니다. business/platform 프로필은 양측에서 캐시될 수 있어
+표준 요청/응답 흐름 안에서 효율적인 capability 협상이 가능합니다.
 
-### Namespace Governance
+### 네임스페이스 거버넌스
 
-UCP uses reverse-domain naming to encode governance authority directly into
-capability identifiers. This eliminates the need for a central registry.
+UCP는 reverse-domain 네이밍으로 capability 식별자에 거버넌스 권한을 직접 인코딩합니다.
+이를 통해 중앙 레지스트리 의존성을 줄입니다.
 
-#### Naming Convention
+#### 네이밍 규칙
 
-All capability and service names **MUST** use the format:
+모든 capability 및 service 이름은 다음 형식을 **반드시(MUST)** 따라야 합니다.
 
 ```text
 {reverse-domain}.{service}.{capability}
 ```
 
-**Components:**
+**구성요소:**
 
-- `{reverse-domain}` - Authority identifier derived from domain ownership
-- `{service}` - Service/vertical category (e.g., `shopping`, `common`)
-- `{capability}` - The specific capability name
+- `{reverse-domain}` - 도메인 소유권 기반 권한 식별자
+- `{service}` - 서비스/버티컬 분류(예: `shopping`, `common`)
+- `{capability}` - 구체 capability 이름
 
-**Examples:**
+**예시:**
 
-| Name                                | Authority   | Service  | Capability       |
+| 이름                                | 권한 주체   | 서비스   | Capability       |
 | ----------------------------------- | ----------- | -------- | ---------------- |
 | `dev.ucp.shopping.checkout`         | ucp.dev     | shopping | checkout         |
 | `dev.ucp.shopping.fulfillment`      | ucp.dev     | shopping | fulfillment      |
 | `dev.ucp.common.identity_linking`   | ucp.dev     | common   | identity_linking |
 | `com.example.payments.installments` | example.com | payments | installments     |
 
-#### Spec URL Binding
+#### Spec URL 바인딩
 
-The `spec` and `schema` fields are **REQUIRED** for all capabilities. The origin
-of these URLs **MUST** match the namespace authority:
+모든 capability에는 `spec` 및 `schema` 필드가 **필수(REQUIRED)** 입니다.
+이 URL들의 origin은 네임스페이스 권한과 **일치해야 합니다(MUST)**.
 
-| Namespace       | Required Origin           |
+| 네임스페이스    | 필수 Origin               |
 | --------------- | ------------------------- |
 | `dev.ucp.*`     | `https://ucp.dev/...`     |
 | `com.example.*` | `https://example.com/...` |
 
-Platform **MUST** validate this binding and **SHOULD** reject capabilities where
-the spec origin does not match the namespace authority.
+Platform은 이 바인딩을 **검증해야 하며(MUST)**,
+spec origin이 네임스페이스 권한과 맞지 않는 capability는 **거부하는 것이 권장됩니다(SHOULD)**.
 
-#### Governance Model
+#### 거버넌스 모델
 
-| Namespace Pattern | Authority    | Governance          |
+| 네임스페이스 패턴 | 권한 주체    | 거버넌스 주체       |
 | ----------------- | ------------ | ------------------- |
-| `dev.ucp.*`       | ucp.dev      | UCP governing body  |
-| `com.{vendor}.*`  | {vendor}.com | Vendor organization |
-| `org.{org}.*`     | {org}.org    | Organization        |
+| `dev.ucp.*`       | ucp.dev      | UCP 거버넌스 기구   |
+| `com.{vendor}.*`  | {vendor}.com | 벤더 조직           |
+| `org.{org}.*`     | {org}.org    | 일반 조직           |
 
-The `dev.ucp.*` namespace is reserved for capabilities sanctioned by the UCP
-governing body. Vendors **MUST** use their own reverse-domain namespace for
-custom capabilities.
+`dev.ucp.*` 네임스페이스는 UCP 거버넌스 기구가 승인한 capability 전용입니다.
+벤더는 커스텀 capability에 대해 자신의 reverse-domain 네임스페이스를 **반드시(MUST)** 사용해야 합니다.
 
-### Services
+### 서비스
 
-A **service** defines the API surface for a vertical (shopping, common, etc.).
-Services include operations, events, and transport bindings defined via
-standard formats:
+**service**는 버티컬(shopping, common 등)의 API 표면을 정의합니다.
+service에는 표준 형식으로 정의된 연산, 이벤트, 전송 바인딩이 포함됩니다.
 
-- **REST**: OpenAPI 3.x (JSON format)
-- **MCP**: OpenRPC (JSON format)
-- **A2A**: Agent Card Specification
-- **EP(embedded)**: OpenRPC (JSON format)
+- **REST**: OpenAPI 3.x (JSON 형식)
+- **MCP**: OpenRPC (JSON 형식)
+- **A2A**: Agent Card 명세
+- **EP(embedded)**: OpenRPC (JSON 형식)
 
-#### Service Definition
+#### 서비스 정의
 
-| Field             | Type   | Required | Description                         |
-| ----------------- | ------ | -------- | ----------------------------------- |
-| `version`         | string | Yes      | Service version (YYYY-MM-DD format) |
-| `spec`            | string | Yes      | URL to service documentation        |
-| `rest`            | object | No       | REST transport binding              |
-| `rest.schema`     | string | Yes      | URL to OpenAPI spec (JSON)          |
-| `rest.endpoint`   | string | Yes      | Business's REST endpoint            |
-| `mcp`             | object | No       | MCP transport binding               |
-| `mcp.schema`      | string | Yes      | URL to OpenRPC spec (JSON)          |
-| `mcp.endpoint`    | string | Yes      | Business's MCP endpoint             |
-| `a2a`             | object | No       | A2A transport binding               |
-| `a2a.endpoint`    | string | Yes      | Business's A2A Agent Card URL       |
-| `embedded`        | string | No       | Embedded transport binding          |
-| `embedded.schema` | string | Yes      | URL to OpenRPC spec (JSON)          |
+| 필드              | 타입   | 필수 여부 | 설명                                |
+| ----------------- | ------ | --------- | ----------------------------------- |
+| `version`         | string | Yes       | 서비스 버전(YYYY-MM-DD)            |
+| `spec`            | string | Yes       | 서비스 문서 URL                     |
+| `rest`            | object | No        | REST 전송 바인딩                    |
+| `rest.schema`     | string | Yes       | OpenAPI 명세 URL(JSON)              |
+| `rest.endpoint`   | string | Yes       | Business REST 엔드포인트            |
+| `mcp`             | object | No        | MCP 전송 바인딩                     |
+| `mcp.schema`      | string | Yes       | OpenRPC 명세 URL(JSON)              |
+| `mcp.endpoint`    | string | Yes       | Business MCP 엔드포인트             |
+| `a2a`             | object | No        | A2A 전송 바인딩                     |
+| `a2a.endpoint`    | string | Yes       | Business A2A Agent Card URL         |
+| `embedded`        | string | No        | Embedded 전송 바인딩                |
+| `embedded.schema` | string | Yes       | OpenRPC 명세 URL(JSON)              |
 
-Transport definitions **MUST** be thin: they declare method names and reference
-base schemas only. See [Requirements](#requirements) for details.
+전송 정의는 **얇게(thin)** 유지되어야 하며(**MUST**), 메서드명 선언과 기본 스키마 참조만 포함해야 합니다.
+자세한 내용은 [요구사항](#requirements)을 참고하세요.
 
-#### Endpoint Resolution
+#### 엔드포인트 해석
 
-The `endpoint` field provides the base URL for API calls. OpenAPI paths are
-appended to this endpoint to form the complete URL.
+`endpoint` 필드는 API 호출의 base URL을 제공합니다.
+OpenAPI 경로는 이 endpoint에 덧붙여 최종 URL을 구성합니다.
 
-**Example:**
+**예시:**
 
 ```json
 {
@@ -139,33 +133,32 @@ appended to this endpoint to form the complete URL.
 }
 ```
 
-With OpenAPI path `/checkout-sessions`, the resolved URL is:
+OpenAPI 경로가 `/checkout-sessions`일 때 해석된 URL은 다음과 같습니다.
 
 ```text
 POST https://business.example.com/api/v2/checkout-sessions
 ```
 
-**Rules:**
+**규칙:**
 
-- `endpoint` **MUST** be a valid URL with scheme (https)
-- `endpoint` **SHOULD NOT** have a trailing slash
-- OpenAPI paths are relative and appended directly to endpoint
-- Same resolution applies to MCP endpoints for JSON-RPC calls
-- `endpoint` for A2A transport refers to the Agent Card URL for the agent
+- `endpoint`는 스킴(https)을 포함한 유효 URL이어야 합니다(**MUST**).
+- `endpoint`는 trailing slash를 포함하지 않아야 합니다(**SHOULD NOT**).
+- OpenAPI 경로는 상대 경로이며 endpoint 뒤에 직접 붙습니다.
+- 동일한 해석 규칙이 MCP JSON-RPC endpoint에도 적용됩니다.
+- A2A 전송의 `endpoint`는 해당 agent의 Agent Card URL을 가리킵니다.
 
-### Capabilities
+### 기능(Capability)
 
-A **capability** is a feature within a service. It declares what
-functionality is supported and where to find documentation and schemas.
+**capability**는 서비스 내부 기능 단위이며, 지원 기능과 문서/스키마 위치를 선언합니다.
 
-#### Capability Definition
+#### 기능(Capability) 정의
 
 {{ extension_schema_fields('capability.json#/$defs/platform_schema', 'capability-schema') }}
 
-#### Extensions
+#### 확장(Extensions)
 
-An **extension** is an optional module that augments another capability.
-Extensions use the `extends` field to declare their parent(s):
+**extension**은 다른 capability를 확장하는 선택 모듈입니다.
+`extends` 필드로 상위 capability를 선언합니다.
 
 ```json
 {
@@ -180,9 +173,9 @@ Extensions use the `extends` field to declare their parent(s):
 }
 ```
 
-##### Multi-Parent Extensions
+##### 다중 부모 확장
 
-Extensions **MAY** extend multiple parent capabilities by using an array:
+확장은 배열 형식으로 여러 상위 capability를 확장할 수 있습니다(**MAY**).
 
 ```json
 {
@@ -197,37 +190,34 @@ Extensions **MAY** extend multiple parent capabilities by using an array:
 }
 ```
 
-When an extension declares multiple parents:
+확장이 여러 상위를 선언한 경우:
 
-- The extension **MAY** define different fields for each capability it extends
-    (e.g., `loyalty_earned` for checkout, `loyalty_preview` for cart)
-- See [Intersection Algorithm](#intersection-algorithm) for negotiation rules
+- 확장은 각 상위 capability별로 서로 다른 필드를 정의할 수 있습니다(**MAY**).
+  (예: checkout용 `loyalty_earned`, cart용 `loyalty_preview`)
+- 협상 규칙은 [교집합 알고리즘](#intersection-algorithm)을 참고하세요.
 
-Extensions can be:
+확장 유형 예:
 
-- **Official**: `dev.ucp.shopping.fulfillment` extends `dev.ucp.shopping.checkout`
-- **Vendor**: `com.example.installments` extends `dev.ucp.shopping.checkout`
+- **공식 확장**: `dev.ucp.shopping.fulfillment` → `dev.ucp.shopping.checkout` 확장
+- **벤더 확장**: `com.example.installments` → `dev.ucp.shopping.checkout` 확장
 
-### Schema Composition
+### 스키마 조합
 
-Extensions can add new fields and modify shared structures (e.g., discounts
-modify `totals`, fulfillment adds fulfillment to `totals.type`).
+확장은 새 필드를 추가하고 공유 구조를 수정할 수 있습니다.
+(예: discount는 `totals`를 수정하고 fulfillment는 `totals.type`에 fulfillment를 추가)
 
-#### Requirements
+#### 요구사항 { #requirements }
 
-- Transport definitions (OpenAPI/OpenRPC) **MUST** reference base schemas
-    only. They **MUST NOT** enumerate fields or define payload shapes inline.
-- Extensions **MUST** be self-describing. Each extension schema **MUST**
-    declare the types it introduces and how it modifies base types using `allOf`
-    composition.
-- Platforms **MUST** resolve schemas client-side by fetching and composing
-    base schemas with active extension schemas.
+- 전송 정의(OpenAPI/OpenRPC)는 기본 스키마만 참조해야 합니다(**MUST**).
+  인라인으로 필드 나열이나 payload shape 정의를 해서는 안 됩니다(**MUST NOT**).
+- 확장은 자기 기술적(self-describing)이어야 합니다(**MUST**).
+  각 확장 스키마는 `allOf` 조합을 통해 도입 타입과 기본 타입 수정 방식을 명시해야 합니다(**MUST**).
+- Platform은 기본 스키마와 활성 확장 스키마를 조회·조합해 클라이언트 측에서 스키마를 해석해야 합니다(**MUST**).
 
-#### Extension Schema Pattern
+#### 확장 스키마 패턴
 
-Extension schemas define composed types using `allOf`. The `$defs` key **MUST**
-use the full parent capability name (reverse-domain format) to enable
-deterministic schema resolution:
+확장 스키마는 `allOf`를 이용해 조합 타입을 정의합니다.
+`$defs` 키는 결정적 스키마 해석을 위해 상위 capability의 전체 이름(reverse-domain)을 사용해야 합니다(**MUST**).
 
 ```json
 {
@@ -251,49 +241,47 @@ deterministic schema resolution:
 }
 ```
 
-**Requirements:**
+**요구사항:**
 
-- Extension schemas **MUST** have a `$defs` entry for each parent declared in
-    `extends`
-- The `$defs` key **MUST** match the parent's full capability name exactly
+- 확장 스키마는 `extends`에 선언한 각 상위마다 `$defs` 항목을 가져야 합니다(**MUST**).
+- `$defs` 키는 상위의 전체 capability 이름과 정확히 일치해야 합니다(**MUST**).
 
-This convention ensures:
+이 규약의 효과:
 
-- **Self-documenting**: The schema declares exactly which parents it extends
-- **Deterministic resolution**: The `extends` value maps directly to the `$defs` key
-- **Verifiable**: Build-time checks can confirm each `extends` entry has a
-    matching `$defs` key
+- **자기 기술성**: 어떤 상위를 확장하는지 스키마가 직접 선언
+- **결정적 해석**: `extends` 값이 `$defs` 키에 직접 매핑
+- **검증 가능성**: 빌드 시 각 `extends` 항목의 `$defs` 대응 여부를 확인 가능
 
-#### Schema Resolution Convention
+#### 스키마 해석 규약 { #schema-resolution-convention }
 
-To validate payloads, implementations resolve extension schemas as follows:
+payload 검증을 위해 구현체는 다음 순서로 확장 스키마를 해석합니다.
 
-1. Determine the root capability from the operation (e.g., checkout operations
-    use `dev.ucp.shopping.checkout`)
-2. For each active extension, resolve and apply its `$defs[{root_capability}]`
+1. 연산에서 루트 capability를 결정합니다.
+   (예: checkout 연산은 `dev.ucp.shopping.checkout`)
+2. 각 활성 확장에 대해 `$defs[{root_capability}]`를 해석·적용합니다.
 
-**Example:** A checkout response includes the discount extension.
+**예시:** checkout 응답에 discount 확장이 포함된 경우
 
-- Root capability: `dev.ucp.shopping.checkout`
-- Extension schema: `discount.json`
-- Resolve: `discount.json#/$defs/dev.ucp.shopping.checkout`
+- 루트 capability: `dev.ucp.shopping.checkout`
+- 확장 스키마: `discount.json`
+- 해석 대상: `discount.json#/$defs/dev.ucp.shopping.checkout`
 
-#### Resolution Flow
+#### 해석 흐름 { #resolution-flow }
 
-Platforms **MUST** resolve schemas following this sequence:
+Platform은 다음 순서로 스키마를 해석해야 합니다(**MUST**).
 
-1. **Discovery**: Fetch business profile from `/.well-known/ucp`
-2. **Negotiation**: Compute capability intersection (see
-    [Intersection Algorithm](#intersection-algorithm))
-3. **Schema Fetch**: Fetch base schema and all active extension schemas
-4. **Compose**: Merge schemas via `allOf` chains based on active extensions
-5. **Validate**: Validate requests and responses against the composed schema
+1. **Discovery**: `/.well-known/ucp`에서 business profile 조회
+2. **Negotiation**: capability 교집합 계산
+   ([교집합 알고리즘](#intersection-algorithm) 참고)
+3. **Schema Fetch**: 기본 스키마 및 활성 확장 스키마 조회
+4. **Compose**: 활성 확장 기준으로 `allOf` 체인 병합
+5. **Validate**: 조합된 스키마로 요청/응답 검증
 
-### Profile Structure
+### 프로필 구조
 
-#### Business Profile
+#### Business 프로필
 
-Businesses publish their profile at `/.well-known/ucp`. An example:
+Business는 `/.well-known/ucp`에 profile을 게시합니다. 예시는 다음과 같습니다.
 
 ```json
 {
@@ -388,17 +376,14 @@ Businesses publish their profile at `/.well-known/ucp`. An example:
 }
 ```
 
-The `ucp` object contains protocol metadata: version, services, capabilities,
-and payment handlers. The `signing_keys` array contains public keys (JWK format)
-used to verify signatures on webhooks and other authenticated messages from the
-business.
+`ucp` 객체는 버전, services, capabilities, payment handlers 등 프로토콜 메타데이터를 담습니다.
+`signing_keys` 배열은 webhook 및 기타 인증 메시지의 서명 검증에 쓰이는 공개키(JWK 형식)를 포함합니다.
 
-#### Platform Profile
+#### Platform 프로필
 
-Platform profiles are similar and include signing keys for capabilities
-requiring cryptographic verification. Capabilities **MAY** include a `config`
-object for capability-specific settings (e.g., callback URLs, feature flags). An
-example:
+Platform profile도 유사한 구조이며, 암호학적 검증이 필요한 capability를 위해 서명 키를 포함합니다.
+capability는 capability별 설정(예: callback URL, feature flag)을 위한 `config` 객체를 포함할 수 있습니다(**MAY**).
+예시는 다음과 같습니다.
 
 ```json
 {
@@ -482,14 +467,13 @@ example:
 }
 ```
 
-### Platform Advertisement on Request
+### 요청 기반 플랫폼 광고
 
-Platforms **MUST** communicate their profile URI with each request to enable
-capability negotiation.
+Platform은 capability 협상을 위해 각 요청에 profile URI를 전달해야 합니다(**MUST**).
 
-**HTTP Transport:** Platforms **MUST** use Dictionary Structured Field syntax
-([RFC 8941](https://datatracker.ietf.org/doc/html/rfc8941){ target="_blank" })
-in the UCP-Agent header:
+**HTTP 전송:** Platform은 `UCP-Agent` 헤더에
+Dictionary Structured Field 문법([RFC 8941](https://datatracker.ietf.org/doc/html/rfc8941){ target="_blank" })
+을 사용해야 합니다(**MUST**).
 
 ```text
 POST /checkout HTTP/1.1
@@ -499,8 +483,7 @@ Content-Type: application/json
 {"line_items": [...]}
 ```
 
-**MCP Transport:** Platforms **MUST** include a `meta` object containing request
-metadata:
+**MCP 전송:** Platform은 요청 메타데이터를 담은 `meta` 객체를 포함해야 합니다(**MUST**).
 
 ```json
 {
@@ -523,114 +506,91 @@ metadata:
 }
 ```
 
-### Negotiation Protocol
+### 협상 프로토콜 { #negotiation-protocol }
 
-#### Platform Requirements
+#### Platform 요구사항
 
-1. **Profile Advertisement**: Platforms **MUST** include their profile URI in
-    every request using the transport-appropriate mechanism.
-2. **Discovery**: Platforms **MAY** fetch the business profile from
-    `/.well-known/ucp` before initiating requests. If fetched, platforms
-    **SHOULD** cache the profile according to HTTP cache-control directives.
-3. **Namespace Validation**: Platforms **MUST** validate that capability `spec`
-    URI origins match namespace authorities.
-4. **Schema Resolution**: Platforms **MUST** fetch and compose schemas for
-    negotiated capabilities before making requests.
+1. **프로필 광고**: Platform은 전송 방식에 맞는 메커니즘으로 모든 요청에 profile URI를 포함해야 합니다(**MUST**).
+2. **Discovery**: Platform은 요청 시작 전 `/.well-known/ucp`에서 business profile을 조회할 수 있습니다(**MAY**).
+   조회했다면 HTTP cache-control 지시에 따라 캐시하는 것이 권장됩니다(**SHOULD**).
+3. **네임스페이스 검증**: Platform은 capability `spec` URI origin이 네임스페이스 권한과 일치하는지 검증해야 합니다(**MUST**).
+4. **스키마 해석**: Platform은 요청 전에 협상된 capability의 스키마를 조회·조합해야 합니다(**MUST**).
 
-#### Business Requirements
+#### Business 요구사항
 
-1. **Profile Resolution**: Upon receiving a request with a platform profile
-    URI, businesses **MUST** fetch and validate the platform profile unless
-    already cached.
-2. **Capability Intersection**: Businesses **MUST** compute the intersection of
-    platform and business capabilities.
-3. **Extension Validation**: Extensions without their parent capability in the
-    intersection **MUST** be excluded.
-4. **Response Requirements**: Businesses **MUST** include the `ucp` field in
-    every response containing:
-    - `version`: The UCP version used to process the request
-    - `capabilities`: Array of active capabilities for this response
+1. **프로필 해석**: Business는 platform profile URI가 포함된 요청을 받으면 캐시가 없는 경우 profile을 조회·검증해야 합니다(**MUST**).
+2. **Capability 교집합 계산**: Business는 platform과 business capability의 교집합을 계산해야 합니다(**MUST**).
+3. **확장 검증**: 교집합에 상위 capability가 없는 확장은 제외해야 합니다(**MUST**).
+4. **응답 요구사항**: Business는 모든 응답에 `ucp` 필드를 포함해야 하며 다음을 담아야 합니다(**MUST**).
+   - `version`: 요청 처리에 사용한 UCP 버전
+   - `capabilities`: 해당 응답에서 활성화된 capability 배열
 
-#### Intersection Algorithm
+#### 교집합 알고리즘 { #intersection-algorithm }
 
-The capability intersection algorithm determines which capabilities are active
-for a session:
+세션에서 어떤 capability가 활성화되는지는 다음 알고리즘으로 결정됩니다.
 
-1. **Compute intersection**: For each business capability, include it in the
-    result if a platform capability with the same `name` exists.
+1. **교집합 계산**: 각 business capability에 대해, 동일 `name`의 platform capability가 있으면 결과에 포함합니다.
+2. **고아 확장 제거**: `extends`가 설정되어 있지만 상위 capability가 교집합에 없는 capability를 제거합니다.
+   - 단일 상위(`extends: "string"`): 해당 상위가 반드시 존재해야 함
+   - 다중 상위(`extends: ["a", "b"]`): 상위 중 하나 이상 존재해야 함
+3. **반복 제거**: 더 이상 제거할 항목이 없을 때까지 2단계를 반복합니다(전이적 확장 체인 처리).
 
-2. **Prune orphaned extensions**: Remove any capability where `extends` is
-    set but **none** of its parent capabilities are in the intersection.
-    - For single-parent extensions (`extends: "string"`): parent must be present
-    - For multi-parent extensions (`extends: ["a", "b"]`): at least one parent
-        must be present
+최종 결과는 양측이 공통 지원하며 확장 의존성이 충족된 capability 집합입니다.
 
-3. **Repeat pruning**: Continue step 2 until no more capabilities are removed
-    (handles transitive extension chains).
+#### 오류 처리 { #error-handling }
 
-The result is the set of capabilities both parties support, with extension
-dependencies satisfied.
+UCP 협상 실패는 두 가지로 구분됩니다.
 
-#### Error Handling
+1. **Discovery 실패**: Business가 platform profile을 조회하거나 파싱하지 못함
+2. **협상 실패**: profile은 유효하지만 capability 교집합이 비었거나 버전이 호환되지 않음
 
-UCP negotiation can fail in two ways:
+이 두 실패 유형은 처리 방식이 다릅니다.
 
-1. **Discovery failure**: The business cannot fetch or parse the platform's
-   profile.
+- **Discovery 실패** → 선택적 `continue_url`을 포함한 전송 오류
+- **협상 실패** → 선택적 `continue_url`을 포함한 UCP 응답
 
-2. **Negotiation failure**: The provided profile is valid but capability
-   intersection is empty or versions are incompatible.
+##### 오류 코드
 
-These failure types require different handling:
+**협상 오류:**
 
-- **Discovery failure** → transport error with optional `continue_url`
-- **Negotiation failure** → UCP response with optional `continue_url`
+| 코드                        | 설명                                       | REST | MCP    |
+| --------------------------- | ------------------------------------------ | ---- | ------ |
+| `invalid_profile_url`       | profile URL 형식 오류/누락/해석 불가       | 400  | -32001 |
+| `profile_unreachable`       | URL 해석은 되었으나 조회 실패(타임아웃/비2xx) | 424  | -32001 |
+| `profile_malformed`         | 조회 콘텐츠가 유효 JSON이 아니거나 스키마 위반 | 422  | -32001 |
+| `capabilities_incompatible` | 교집합에 호환 capability 없음              | 200  | result |
+| `version_unsupported`       | platform UCP 버전 미지원                   | 200  | result |
 
-##### Error Codes
+**프로토콜 오류:**
 
-**Negotiation Errors:**
+| HTTP | 설명                                  | MCP    |
+| ---- | ------------------------------------- | ------ |
+| 401  | 인증 필요 또는 인증 정보 무효         | -32000 |
+| 403  | 인증됨, 그러나 권한 부족              | -32000 |
+| 409  | Idempotency 키가 다른 payload로 재사용됨 | -32000 |
+| 429  | 요청 과다                             | -32000 |
+| 500  | 예기치 않은 서버 오류                 | -32603 |
+| 503  | 서버 일시적 처리 불가                 | -32000 |
 
-| Code                        | Description                                          | REST | MCP    |
-| --------------------------- | ---------------------------------------------------- | ---- | ------ |
-| `invalid_profile_url`       | Profile URL is malformed, missing, or unresolvable   | 400  | -32001 |
-| `profile_unreachable`       | Resolved URL but fetch failed (timeout, non-2xx)     | 424  | -32001 |
-| `profile_malformed`         | Fetched content is not valid JSON or violates schema | 422  | -32001 |
-| `capabilities_incompatible` | No compatible capabilities in intersection           | 200  | result |
-| `version_unsupported`       | Platform's UCP version is not supported              | 200  | result |
+MCP over HTTP에서는 HTTP 상태 코드가 1차 신호이고 JSON-RPC `error.code`는 2차 신호입니다.
+두 전송 모두 429/503에 대해 `Retry-After`(REST) 또는 `error.data.retry_after`(MCP) 제공이 권장됩니다(**SHOULD**).
 
-**Protocol Errors:**
+##### `continue_url` 필드
 
-| HTTP | Description                                     | MCP        |
-| ---- | ----------------------------------------------- | ---------- |
-| 401  | Authentication required or credentials invalid  | -32000     |
-| 403  | Authenticated but insufficient permissions      | -32000     |
-| 409  | Idempotency key reused with different payload   | -32000     |
-| 429  | Too many requests                               | -32000     |
-| 500  | Unexpected server error                         | -32603     |
-| 503  | Server temporarily unable to handle requests    | -32000     |
+UCP 협상이 실패했을 때 `continue_url`은 웹 fallback 경로를 제공합니다.
+Business는 상황에 가장 적합한 URL을 제공하는 것이 좋습니다(**SHOULD**).
 
-For MCP over HTTP, the HTTP status code is the primary signal; the JSON-RPC
-`error.code` provides a secondary signal. Both transports **SHOULD** include
-`Retry-After` header (REST) or `error.data.retry_after` (MCP) for 429 and 503
-responses.
+- checkout 연산: cart 또는 checkout 페이지 링크
+- catalog 연산: 상품 상세 또는 검색 결과 링크
+- 최후 fallback: 스토어프런트 홈 링크
 
-##### The `continue_url` Field
+이를 통해 에이전트는 표준 웹 인터페이스로 유연하게 전환해 작업을 이어갈 수 있습니다.
 
-When UCP negotiation fails, `continue_url` provides a fallback web experience.
-Businesses **SHOULD** provide the most contextually relevant URL:
-
-- For checkout operations: link to the cart or checkout page
-- For catalog operations: link to the product or search results
-- As a fallback: link to the storefront homepage
-
-This enables graceful degradation—agents can redirect buyers to complete their
-task through the standard web interface.
-
-##### Transport Bindings
+##### 전송 바인딩
 
 === "REST"
 
-    **Discovery Failure (424):**
+    **Discovery 실패 (424):**
 
     ```http
     HTTP/1.1 424 Failed Dependency
@@ -643,7 +603,7 @@ task through the standard web interface.
     }
     ```
 
-    **Negotiation Failure (200):**
+    **협상 실패 (200):**
 
     ```http
     HTTP/1.1 200 OK
@@ -666,26 +626,26 @@ task through the standard web interface.
     }
     ```
 
-    **Protocol Error — Rate Limit (429):**
+    **프로토콜 오류 - Rate Limit (429):**
 
     ```http
     HTTP/1.1 429 Too Many Requests
     Retry-After: 60
     ```
 
-    **Protocol Error — Unauthorized (401):**
+    **프로토콜 오류 - Unauthorized (401):**
 
     ```http
     HTTP/1.1 401 Unauthorized
     WWW-Authenticate: Bearer realm="ucp"
     ```
 
-    Protocol errors use standard HTTP status codes and headers. Response bodies
-    are optional.
+    프로토콜 오류는 표준 HTTP 상태 코드와 헤더를 사용합니다.
+    응답 바디는 선택 사항입니다.
 
 === "MCP"
 
-    **Discovery Failure (JSON-RPC error):**
+    **Discovery 실패 (JSON-RPC error):**
 
     ```json
     {
@@ -703,7 +663,7 @@ task through the standard web interface.
     }
     ```
 
-    **Negotiation Failure (JSON-RPC result):**
+    **협상 실패 (JSON-RPC result):**
 
     ```json
     {
@@ -732,7 +692,7 @@ task through the standard web interface.
     }
     ```
 
-    **Protocol Error — Rate Limit (JSON-RPC error):**
+    **프로토콜 오류 - Rate Limit (JSON-RPC error):**
 
     ```json
     {
@@ -748,7 +708,7 @@ task through the standard web interface.
     }
     ```
 
-    **Protocol Error — Unauthorized (JSON-RPC error):**
+    **프로토콜 오류 - Unauthorized (JSON-RPC error):**
 
     ```json
     {
@@ -761,14 +721,13 @@ task through the standard web interface.
     }
     ```
 
-    When using Streamable HTTP transport, servers **MUST** return the
-    corresponding HTTP status code (e.g., `429` for rate limit) alongside
-    the JSON-RPC error. The HTTP status code is the primary signal for
-    error type.
+    Streamable HTTP 전송을 사용할 때 서버는 JSON-RPC 오류와 함께
+    대응 HTTP 상태 코드(예: rate limit의 `429`)를 반환해야 합니다(**MUST**).
+    오류 유형의 1차 신호는 HTTP 상태 코드입니다.
 
-#### Capability Declaration in Responses
+#### 응답의 Capability 선언 { #capability-declaration-in-responses }
 
-The `capabilities` registry in responses indicates active capabilities:
+응답의 `capabilities` 레지스트리는 현재 활성 capability를 나타냅니다.
 
 ```json
 {
@@ -794,127 +753,119 @@ The `capabilities` registry in responses indicates active capabilities:
 }
 ```
 
-#### Response Capability Selection
+#### 응답 Capability 선택 { #response-capability-selection }
 
-Businesses **MUST** include in `ucp.capabilities` only the capabilities that are:
+Business는 `ucp.capabilities`에 아래 조건을 모두 만족하는 capability만 포함해야 합니다(**MUST**).
 
-1. In the negotiated intersection for this session, AND
-2. Relevant to this response's operation type
+1. 해당 세션의 협상 교집합에 포함됨
+2. 해당 응답의 연산 유형에 관련됨
 
-**Root Capability Relevance:**
+**루트 Capability 관련성:**
 
-A root capability is relevant if it matches the operation type:
+루트 capability는 연산 유형과 일치할 때 관련성이 있습니다.
 
 - `create_checkout` / `update_checkout` / `complete_checkout` →
     `dev.ucp.shopping.checkout`
 - `create_cart` / `update_cart` → `dev.ucp.shopping.cart`
 - Order webhooks → `dev.ucp.shopping.order`
 
-**Extension Relevance:**
+**확장 관련성:**
 
-An extension is relevant if **any** of its `extends` values matches a relevant
-root capability.
+확장은 `extends` 값 중 **하나 이상**이 관련 루트 capability와 일치할 때 관련성이 있습니다.
 
-**Selection Examples:**
+**선택 예시:**
 
-| Response Type | Includes                        | Does NOT Include             |
-| ------------- | ------------------------------- | ---------------------------- |
-| Checkout      | checkout, discount, fulfillment | cart, order                  |
-| Cart          | cart, discount                  | checkout, fulfillment, order |
-| Order         | order                           | checkout, cart, discount     |
+| 응답 유형 | 포함                             | 미포함                       |
+| --------- | -------------------------------- | ---------------------------- |
+| Checkout  | checkout, discount, fulfillment  | cart, order                  |
+| Cart      | cart, discount                   | checkout, fulfillment, order |
+| Order     | order                            | checkout, cart, discount     |
 
-## Payment Architecture
+## 결제 아키텍처
 
-UCP adopts a decoupled architecture for payments to solve the "N-to-N"
-complexity problem between **platforms**, **businesses**, and **payment
-credential providers**. This design separates **Payment
-Instruments** (what is accepted) from **Payment Handlers** (the specifications
-for how instruments are processed), ensuring security and scalability.
+UCP는 **platform**, **business**, **결제 자격증명 제공자(payment credential provider)** 간의
+"N 대 N" 통합 복잡성을 줄이기 위해 결제를 분리형 아키텍처로 설계했습니다.
+이 설계는 **Payment Instruments**(무엇을 받는가)와
+**Payment Handlers**(어떻게 처리하는가의 명세)를 분리해
+보안성과 확장성을 확보합니다.
 
-### Security and Trust Model
+### 보안 및 신뢰 모델
 
-The payment architecture is built on a "Trust-by-Design" philosophy. It assumes
-that while the business and payment credential provider have a trusted legal
-relationship, the platform (Client) acts as an intermediary that **SHOULD NOT**
-touch raw financial credentials.
+결제 아키텍처는 "Trust-by-Design" 철학을 따릅니다.
+business와 결제 자격증명 제공자 사이에는 신뢰 가능한 법적·기술적 관계가 있다고 가정하며,
+platform(Client)은 원시 금융 자격증명에 직접 접근하지 않는 중개 계층(**SHOULD NOT**)으로 동작합니다.
 
-#### The Trust Triangle
+#### 신뢰 삼각형
 
-1. **Business ↔ Payment Credential Provider:** A pre-existing legal and technical relationship. The business holds API keys and a contract with the payment credential provider.
-2. **Platform ↔ Payment Credential Provider:** The platform interacts with the payment credential provider's interface (e.g., an iframe or API) to tokenize data but is not the "owner" of the funds.
-3. **Platform ↔ Business:** The platform passes the result (a token or mandate) to the business to finalize the order.
+1. **Business ↔ 결제 자격증명 제공자:** 기존의 법적·기술적 관계가 존재하며, business는 API 키와 계약을 보유합니다.
+2. **Platform ↔ 결제 자격증명 제공자:** Platform은 iframe/API 등으로 토큰화를 수행하지만 자금의 소유 주체는 아닙니다.
+3. **Platform ↔ Business:** Platform은 결과물(토큰/mandate)을 business에 전달해 주문 확정을 돕습니다.
 
-#### Enhanced Security for Autonomous Commerce
+#### 자율 커머스를 위한 강화 보안
 
-For scenarios requiring cryptographic proof of user authorization (e.g.,
-autonomous AI agents), UCP supports the **AP2 Mandates Extension**
-(`dev.ucp.shopping.ap2_mandate`). This optional extension provides
-non-repudiable authorization through verifiable digital credentials.
+사용자 승인에 대한 암호학적 증명이 필요한 시나리오(예: 자율 AI 에이전트)를 위해,
+UCP는 **AP2 Mandates Extension**(`dev.ucp.shopping.ap2_mandate`)을 지원합니다.
+이 선택 확장은 검증 가능한 디지털 자격증명을 통해 부인 방지(non-repudiation) 수준의 승인을 제공합니다.
 
-See [Transaction Integrity](#transaction-integrity-and-non-repudiation)
-and [AP2 Mandates Extension](ap2-mandates.md) for details on when and how to
-use this extension.
+이 확장의 적용 시점과 방법은
+[거래 무결성 및 부인 방지](#transaction-integrity-and-non-repudiation)와
+[AP2 Mandates Extension](ap2-mandates.md)를 참고하세요.
 
-#### Credential Flow & PCI Scope
+#### 자격증명 흐름과 PCI 범위
 
-To minimize compliance overhead (PCI-DSS):
+규정 준수 비용(PCI-DSS)을 줄이기 위한 원칙:
 
-1. **Unidirectional Flow:** Credentials flow **Platform → Business** only. Businesses **MUST NOT** echo credentials back in responses.
-2. **Opaque Credentials:** Platforms handle tokens (such as network tokens), encrypted payloads, or mandates, not raw PANs.
-3. **Handler ID Routing:** The `handler_id` in the payload ensures the business knows exactly which payment credential provider key to use for decryption/charging, preventing key confusion attacks.
+1. **단방향 흐름:** 자격증명은 **Platform → Business** 방향으로만 이동합니다.
+   Business는 응답에서 자격증명을 되돌려 보내면 안 됩니다(**MUST NOT**).
+2. **불투명 자격증명:** Platform은 원시 PAN 대신 토큰(예: network token), 암호화 payload, mandate를 다룹니다.
+3. **Handler ID 라우팅:** payload의 `handler_id`는 business가 어떤 제공자 키로 복호화/승인할지 정확히 식별하도록 하여 키 혼동 공격을 줄입니다.
 
-### Roles & Responsibilities: Who Implements What?
+### 역할과 책임: 누가 무엇을 구현하는가?
 
-A common source of confusion is the division of labor. The UCP payment model
-splits responsibilities as follows:
+UCP 결제 모델에서 자주 헷갈리는 지점은 책임 분리입니다.
+역할별 책임은 다음과 같습니다.
 
-| Role                            | Responsibility             | Action                                                                                                                                                                                                                                                              |
-| :------------------------------ | :------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Payment Credential Provider** | **Defines the Spec**       | Creates the **Handler Definition**. They publish the "Blueprint" (JSON Schemas) that dictates how to tokenize a card and what config inputs are needed.<br>*Example: "Here is the schema for the 'com.psp-x.tokenization' handler."*                                |
-| **Business**                    | **Configures the Handler** | Selects the Handler they want to use and provides their specific **Configuration** (Public Keys, Merchant IDs) in the UCP Checkout Response. *Example: "I accept Visa using 'com.psp-x.tokenization' with this Publishable Key."*                                   |
-| **Platform**                    | **Executes the Protocol**  | Reads the business's config and executes the logic defined by the payment credential provider's Spec to acquire a token. *Example: "I see the Business uses a payment credential provider. I will call the provider's SDK with the Business's Key to get a token."* |
+| 역할                             | 책임                          | 수행 내용                                                                                                                                                                                                                                                         |
+| :------------------------------- | :---------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **결제 자격증명 제공자**         | **명세 정의**                 | **Handler Definition**을 작성합니다. 카드 토큰화 방식과 필요한 config 입력을 규정하는 "청사진"(JSON Schema)을 게시합니다.<br>*예: `'com.psp-x.tokenization' 핸들러 스키마를 제공`*                                                                              |
+| **Business**                     | **핸들러 구성**               | 사용할 핸들러를 선택하고 UCP Checkout 응답에 **구체 구성값**(공개키, Merchant ID 등)을 제공합니다.<br>*예: `이 공개키로 'com.psp-x.tokenization' 기반 Visa 결제를 허용`*                                                                                         |
+| **Platform**                     | **프로토콜 실행**             | Business config를 읽고, 결제 자격증명 제공자 명세의 로직을 실행해 토큰을 획득합니다.<br>*예: `Business가 지정한 SDK를 호출해 토큰 획득`*                                                                                                                        |
 
-### Payment in the Checkout Lifecycle
+### Checkout 라이프사이클의 결제
 
-When payment is required, the payment process follows a standard 3-step lifecycle
-within UCP: **Negotiation**, **Acquisition**, and **Completion**.
+결제가 필요한 경우 UCP 내 결제 흐름은
+**Negotiation**, **Acquisition**, **Completion**의 3단계 라이프사이클을 따릅니다.
 
-![High-level payment flow sequence diagram](site:specification/images/ucp-payment-flow.png)
+![상위 수준 결제 흐름 시퀀스 다이어그램](site:specification/images/ucp-payment-flow.png)
 
-1. **Negotiation (Business → Platform):** The business advertises available payment handlers in their UCP profile. This tells the platform *how* to pay (e.g., "Use this specific payment credential provider endpoint with this public key").
-2. **Acquisition (Platform ↔ Payment Credential Provider):** The platform executes the handler's logic. This happens client-side or agent-side, directly with the payment credential provider (e.g., exchanging credentials for a network token). The business is not involved, ensuring raw data never touches the business's frontend API.
-3. **Completion (Platform → Business):** The platform submits the opaque credential (token) to the business. The business uses it to capture funds via their backend integration with the payment credential provider.
+1. **Negotiation (Business → Platform):** Business는 UCP profile에 사용 가능한 payment handler를 광고합니다. Platform은 이를 통해 *어떻게 결제할지*를 파악합니다.
+2. **Acquisition (Platform ↔ 결제 자격증명 제공자):** Platform이 핸들러 로직을 실행합니다. 보통 클라이언트/에이전트 측에서 직접 제공자와 통신해 자격증명을 토큰으로 교환합니다.
+3. **Completion (Platform → Business):** Platform은 불투명 자격증명(토큰)을 business에 전달하고, business는 백엔드 결제 연동으로 자금 처리를 완료합니다.
 
-### Payment Handlers
+### 결제 핸들러
 
-Payment Handlers are **specifications** (not entities) that define how payment
-instruments are processed. They are the contract that binds the three
-participants together.
+Payment Handler는 **엔터티가 아니라 명세(specification)** 이며,
+결제 수단을 어떻게 처리할지 정의하는 계약입니다.
 
-**Important distinction:**
+**핵심 구분:**
 
-- **Payment Credential Provider** = The participant (entity like Google Pay, Shop Pay)
-- **Payment Handler** = The specification the provider authors (e.g., `com.google.pay`, `dev.shopify.shop_pay`)
+- **Payment Credential Provider** = 참여 주체(예: Google Pay, Shop Pay)
+- **Payment Handler** = 해당 주체가 작성한 명세(예: `com.google.pay`, `dev.shopify.shop_pay`)
 
-Payment handlers allow for a variety of different payment instruments and
-token-types to be supported, including network tokens. They are standardized
-definitions typically authored by payment credential providers or the UCP
-governing body.
+Payment handler를 통해 network token을 포함한 다양한 결제 수단과 토큰 타입을 지원할 수 있습니다.
+일반적으로 결제 자격증명 제공자 또는 UCP 거버넌스가 이 표준 정의를 작성합니다.
 
-**Dynamic Filtering:** Businesses **MUST** filter the `handlers` list based on
-the context of the cart (e.g., removing "Buy Now Pay Later" for subscription
-items, or filtering regional methods based on shipping address).
+**동적 필터링:** Business는 cart 문맥에 따라 `handlers` 목록을 필터링해야 합니다(**MUST**).
+(예: 구독 상품에서 BNPL 제거, 배송지 기반 지역 결제수단 필터링)
 
-### Risk Signals
+### 위험 신호(Risk Signals)
 
-To aid in fraud assessment, the Platform **MAY** include additional risk signals
-in the `complete` call, providing the Business with more context about the
-transaction's legitimacy. The structure and content of these risk signals are
-not strictly defined by this specification, allowing flexibility based on the
-agreement between the Platform and Business or specific payment handler
-requirements.
+사기 평가를 돕기 위해 Platform은 `complete` 호출에 추가 risk signal을 포함할 수 있습니다(**MAY**).
+이를 통해 business는 거래 정당성에 대한 더 많은 문맥을 확보합니다.
+risk signal 구조/내용은 본 명세에서 엄격히 고정하지 않아,
+Platform-Business 간 합의나 핸들러 요구사항에 따라 유연하게 구성할 수 있습니다.
 
-**Example (Flexible Structure):**
+**예시(유연한 구조):**
 
 ```json
 {
@@ -925,18 +876,17 @@ requirements.
 }
 ```
 
-### Implementation Scenarios
+### 구현 시나리오
 
-The following scenarios illustrate how different payment handlers and
-instruments are negotiated and executed using concrete data examples.
+다음 시나리오는 서로 다른 payment handler와 결제 수단이
+실제 데이터 예시에서 어떻게 협상되고 실행되는지 보여줍니다.
 
-#### Scenario A: Digital Wallet
+#### 시나리오 A: 디지털 월렛
 
-In this scenario, the platform identifies a payment credential provider (e.g.,
-`com.google.pay`, `dev.shopify.shop_pay`) and uses their API to acquire
-an encrypted payment token.
+이 시나리오에서 platform은 결제 자격증명 제공자(예: `com.google.pay`, `dev.shopify.shop_pay`)를 식별하고,
+해당 API를 호출해 암호화 결제 토큰을 획득합니다.
 
-##### 1. Business Advertisement (Response from Create Checkout)
+##### 1. Business 광고(Create Checkout 응답)
 
 ```json
 {
@@ -990,14 +940,14 @@ an encrypted payment token.
 }
 ```
 
-##### 2. Token Execution (Platform Side)
+##### 2. 토큰 실행(Platform 측)
 
-The platform recognizes `com.google.pay` or `dev.shopify.shop_pay`. It passes the `config` into the
-respective handler API. The handler returns the encrypted token data.
+Platform은 `com.google.pay` 또는 `dev.shopify.shop_pay`를 인식하고,
+해당 handler API에 `config`를 전달합니다. Handler는 암호화 토큰 데이터를 반환합니다.
 
-##### 3. Complete Checkout (Request to Business)
+##### 3. Complete Checkout(Business 요청)
 
-The Platform wraps the payment handler response into a payment instrument.
+Platform은 payment handler 응답을 payment instrument로 감싸 전달합니다.
 
 ```json
 POST /checkout-sessions/{id}/complete
@@ -1037,14 +987,13 @@ POST /checkout-sessions/{id}/complete
 }
 ```
 
-#### Scenario B: Direct Tokenization with Challenge (SCA)
+#### 시나리오 B: 챌린지(SCA) 기반 직접 토큰화
 
-In this scenario, the platform uses a generic tokenizer to request a session
-token or network tokens. The bank requires Strong Customer
-Authentication (SCA/3DS), forcing the business to pause completion and
-request a challenge.
+이 시나리오에서 platform은 범용 tokenizer로 세션 토큰 또는 network token을 요청합니다.
+은행이 Strong Customer Authentication(SCA/3DS)을 요구하면,
+business는 completion을 일시 중단하고 챌린지를 요구합니다.
 
-##### 1. Business Advertisement
+##### 1. Business 광고
 
 ```json
 {
@@ -1067,13 +1016,13 @@ request a challenge.
 }
 ```
 
-##### 2. Token Execution (Platform Side)
+##### 2. 토큰 실행(Platform 측)
 
-The platform calls `https://api.psp.com/tokens` which identity **SHOULD** have
-previous legal binding connection with them and receives `tok_visa_123`
-(which could represent a vaulted card or network token).
+Platform은 `https://api.psp.com/tokens`를 호출하고 `tok_visa_123`을 수신합니다.
+해당 제공자와의 신원·법적 연계는 사전에 정립되어 있어야 합니다(**SHOULD**).
+`tok_visa_123`은 vault 카드 또는 network token을 표현할 수 있습니다.
 
-##### 3. Complete Checkout (Request to Business)
+##### 3. Complete Checkout(Business 요청)
 
 ```json
 POST /checkout-sessions/{id}/complete
@@ -1094,10 +1043,9 @@ POST /checkout-sessions/{id}/complete
 }
 ```
 
-##### 4. Challenge Required (Response from Business)
+##### 4. 챌린지 필요(Business 응답)
 
-The business attempts the charge, but the PSP returns a "Soft Decline"
-requiring 3DS.
+Business가 승인 시도를 수행하지만 PSP가 3DS가 필요한 "Soft Decline"을 반환합니다.
 
 ```json
 HTTP/1.1 200 OK
@@ -1113,15 +1061,15 @@ HTTP/1.1 200 OK
 }
 ```
 
-*The platform **MUST** now open `continue_url` in a WebView/Window for the user
-to complete the bank check, then retry the completion.*
+*Platform은 이제 `continue_url`을 WebView/Window로 열어
+사용자가 은행 인증을 완료하도록 한 뒤 completion을 재시도해야 합니다(**MUST**).*
 
-#### Scenario C: Autonomous Agent (AP2)
+#### 시나리오 C: 자율 에이전트(AP2)
 
-This scenario demonstrates the **Recommended Flow for Agents**. Instead of a
-session token, the agent generates cryptographic mandates.
+이 시나리오는 **에이전트 권장 흐름**을 보여줍니다.
+세션 토큰 대신 에이전트가 암호학적 mandate를 생성합니다.
 
-##### 1. Business Advertisement
+##### 1. Business 광고
 
 ```json
 {
@@ -1140,10 +1088,9 @@ session token, the agent generates cryptographic mandates.
 }
 ```
 
-##### 2. Agent Execution
+##### 2. 에이전트 실행
 
-The agent cryptographically signs objects using the user's private key on a
-non-agentic surface.
+에이전트는 비에이전트 표면(non-agentic surface)에서 사용자 개인키로 객체를 서명합니다.
 
 ##### 3. Complete Checkout
 
@@ -1173,135 +1120,119 @@ POST /checkout-sessions/{id}/complete
 }
 ```
 
-*This provides the business with non-repudiable proof that the user authorized
-this specific transaction, enabling safe autonomous processing.*
+*이를 통해 business는 해당 거래에 대한 사용자 승인 사실을 부인 방지 형태로 확보할 수 있으며,
+안전한 자율 처리 기반을 갖게 됩니다.*
 
-### PCI-DSS Scope Management
+### PCI-DSS 범위 관리
 
-#### Platform Scope
+#### Platform 범위
 
-Most platform implementations can **avoid PCI-DSS scope** by:
+대부분의 platform 구현은 다음 방식으로 **PCI-DSS 범위를 회피**할 수 있습니다.
 
-- Using handlers that provide opaque credentials (encrypted data, token
-    references, etc.)
-- Never accessing or storing raw payment data (card numbers, CVV, etc.)
-- Forwarding credentials without the ability to use them directly
-- Using PSP tokenization payment handlers where raw credentials never pass
-    through the platform
+- 불투명 자격증명(암호화 데이터, 토큰 참조 등)을 제공하는 handler 사용
+- 원시 결제 데이터(카드번호, CVV 등)를 조회/저장하지 않음
+- 자격증명을 직접 사용 가능한 형태로 보유하지 않고 전달만 수행
+- 원시 자격증명이 platform을 통과하지 않는 PSP 토큰화 handler 사용
 
-#### Business Scope
+#### Business 범위
 
-Businesses can minimize PCI scope by:
+Business는 다음 방식으로 PCI 범위를 최소화할 수 있습니다.
 
-- Using payment credential provider-hosted tokenization (provider stores
-    credentials, business receives token reference)
-- Using wallet providers that provide encrypted credentials (Google Pay, Shop
-    Pay)
-- Never logging raw credentials
-- Delegating credential processing to PCI-certified payment credential providers
+- 제공자 호스팅 토큰화 사용(자격증명은 제공자가 저장, business는 토큰 참조만 수신)
+- 암호화 자격증명을 제공하는 wallet provider 활용(Google Pay, Shop Pay)
+- 원시 자격증명 로그 금지
+- PCI 인증 제공자에게 자격증명 처리를 위임
 
-#### Payment Credential Provider Scope
+#### 결제 자격증명 제공자 범위
 
-Payment credential providers (PSPs, wallets) are typically PCI-DSS Level 1
-certified and handle:
+결제 자격증명 제공자(PSP, wallet)는 보통 PCI-DSS Level 1 인증을 보유하며 다음을 처리합니다.
 
-- Raw credential collection
-- Credential protection (tokenization, encryption, secure storage)
-- Credential validation and processing
-- PCI-compliant infrastructure
+- 원시 자격증명 수집
+- 자격증명 보호(토큰화, 암호화, 안전 저장)
+- 자격증명 검증 및 처리
+- PCI 준수 인프라 운영
 
-### Security Best Practices
+### 보안 모범 사례
 
-**For Businesses:**
+**Business 권장사항:**
 
-1. Validate handler_id before processing (ensure handler is in advertised set)
-2. Use separate PSP credentials for TEST vs PRODUCTION environments
-3. Implement idempotency for payment processing (prevent double-charges)
-4. Log payment events without logging credentials
-5. Set appropriate credential timeouts
-6. For autonomous commerce scenarios requiring cryptographic proof, consider
-    supporting the `dev.ucp.shopping.ap2_mandate` extension (see
-    [AP2 Mandates Extension](ap2-mandates.md))
+1. 처리 전 `handler_id` 검증(광고된 집합 내 핸들러인지 확인)
+2. TEST/PRODUCTION 환경별 PSP 자격증명 분리
+3. 결제 처리 멱등성 구현(중복 과금 방지)
+4. 자격증명 제외 결제 이벤트 로깅
+5. 적절한 자격증명 타임아웃 설정
+6. 암호학적 증명이 필요한 자율 커머스 시나리오에서는
+   `dev.ucp.shopping.ap2_mandate` 확장 지원 고려
+   ([AP2 Mandates Extension](ap2-mandates.md) 참고)
 
-**For Platforms:**
+**Platform 권장사항:**
 
-1. Always use HTTPS for checkout API calls
-2. Validate handler configurations before executing protocols
-3. Implement timeout handling for credential acquisition
-4. Clear credentials from memory after submission
-5. Handle credential expiration gracefully (re-acquire if needed)
-6. For autonomous agents, consider using the `dev.ucp.shopping.ap2_mandate`
-    extension for cryptographic proof of authorization (see
-    [AP2 Mandates Extension](ap2-mandates.md))
+1. checkout API 호출에 항상 HTTPS 사용
+2. 프로토콜 실행 전 handler config 검증
+3. 자격증명 획득 타임아웃 처리 구현
+4. 제출 후 메모리에서 자격증명 제거
+5. 자격증명 만료를 우아하게 처리(필요 시 재획득)
+6. 자율 에이전트 시나리오에서는 승인 증명을 위해
+   `dev.ucp.shopping.ap2_mandate` 확장 사용 고려
+   ([AP2 Mandates Extension](ap2-mandates.md) 참고)
 
-**For Payment Credential Providers:**
+**결제 자격증명 제공자 권장사항:**
 
-1. Secure credentials for the specific business (encryption, tokenization, or
-    other handler-specific methods)
-2. Implement rate limiting on credential acquisition
-3. Validate platform authorization before providing credentials
-4. Set reasonable credential expiration (e.g., 15 minutes for tokens, time-
-    limited encrypted payloads)
-5. Ensure credentials cannot be used by platforms directly (only by the
-    intended business)
+1. 특정 business용 자격증명 보안 확보(암호화, 토큰화, 기타 handler별 방식)
+2. 자격증명 획득 API 레이트리밋 적용
+3. 자격증명 제공 전 platform 권한 검증
+4. 합리적인 자격증명 만료 시간 설정(예: 토큰 15분, 시간 제한 암호화 payload)
+5. 자격증명이 platform에서 직접 사용되지 않도록 보장(의도된 business만 사용)
 
-### Fraud Prevention Integration
+### 사기 방지 통합
 
-While UCP does not define fraud prevention APIs, the payment architecture
-supports fraud signal integration:
+UCP 자체가 사기 방지 API를 정의하지는 않지만,
+결제 아키텍처는 fraud signal 통합을 지원합니다.
 
-- Businesses can require additional fields in handler configurations (e.g.,
-    3DS requirements)
-- Platforms can submit device fingerprints and session data alongside credentials
-- Payment credential providers can perform risk assessment during credential
-    acquisition
-- Businesses can reject high-risk transactions and request additional
-    verification
+- Business는 handler config에 추가 필드(예: 3DS 요구사항)를 요구할 수 있습니다.
+- Platform은 자격증명과 함께 디바이스 지문/세션 데이터를 제출할 수 있습니다.
+- 결제 자격증명 제공자는 자격증명 획득 단계에서 위험 평가를 수행할 수 있습니다.
+- Business는 고위험 거래를 거절하고 추가 검증을 요청할 수 있습니다.
 
-Future extensions **MAY** standardize fraud signal schemas, but the current
-architecture allows flexible integration with existing fraud prevention systems.
+향후 확장에서 fraud signal 스키마를 표준화할 수 있지만(**MAY**),
+현재 아키텍처만으로도 기존 사기 방지 시스템과 유연하게 통합할 수 있습니다.
 
-### Payment Architecture Extensions
+### 결제 아키텍처 확장
 
-The core payment architecture described above can be extended for specialized
-use cases:
+위 핵심 결제 아키텍처는 특수 사용 사례를 위해 확장할 수 있습니다.
 
-- **AP2 Mandates Extension** (`dev.ucp.shopping.ap2_mandate`): Adds
-    cryptographic proof of user authorization for autonomous commerce scenarios
-    where non-repudiable evidence is required. See
-    [AP2 Mandates Extension](ap2-mandates.md).
+- **AP2 Mandates Extension** (`dev.ucp.shopping.ap2_mandate`):
+  자율 커머스처럼 부인 방지 증거가 필요한 시나리오에 사용자 승인 암호학적 증명을 추가합니다.
+  [AP2 Mandates Extension](ap2-mandates.md) 참고.
 
-- **Custom Handler Types**: Payment credential providers can define custom
-    handlers to support new payment instruments. See
-    [Payment Handler Guide](payment-handler-guide.md) for details.
+- **커스텀 Handler 타입**: 결제 자격증명 제공자는 새로운 결제 수단 지원을 위해
+  커스텀 handler를 정의할 수 있습니다.
+  자세한 내용은 [Payment Handler Guide](payment-handler-guide.md) 참고.
 
-The extension model ensures the core architecture remains simple while
-supporting advanced security and compliance requirements when needed.
+확장 모델은 핵심 아키텍처를 단순하게 유지하면서도,
+필요 시 고급 보안/컴플라이언스 요구사항을 수용할 수 있게 합니다.
 
-## Transport Layer
+## 전송 계층
 
-UCP supports multiple transport protocols. Platforms and businesses effectively
-negotiate the transport via `services` on their profiles.
+UCP는 복수 전송 프로토콜을 지원합니다.
+Platform과 business는 profile의 `services` 정보를 기반으로 전송 방식을 협상합니다.
 
-### REST Transport (Core)
+### REST 전송 (코어)
 
-UCP supports **HTTP/1.1** (or higher) using RESTful patterns.
+UCP는 REST 패턴 기반으로 **HTTP/1.1** 이상을 지원합니다.
 
-- **Content-Type:** Requests and responses **MUST** use `application/json`.
-- **Methods:** Implementations **MUST** use standard HTTP verbs (e.g., `POST`
-    for creation, `GET` for retrieval).
-- **Status Codes:** Implementations **MUST** use standard HTTP status codes
-    (e.g., 200, 201, 400, 401, 500).
+- **Content-Type:** 요청/응답은 `application/json`을 사용해야 합니다(**MUST**).
+- **Methods:** 구현체는 표준 HTTP 메서드(예: 생성 `POST`, 조회 `GET`)를 사용해야 합니다(**MUST**).
+- **Status Codes:** 구현체는 표준 HTTP 상태 코드(예: 200, 201, 400, 401, 500)를 사용해야 합니다(**MUST**).
 
-### Model Context Protocol (MCP)
+### Model Context Protocol(MCP)
 
-UCP supports **[MCP protocol](https://modelcontextprotocol.io/specification/)**,
-which operates over JSON-RPC.
+UCP는 JSON-RPC 기반의 **[MCP 프로토콜](https://modelcontextprotocol.io/specification/)** 을 지원합니다.
 
-#### Request Format
+#### 요청 포맷
 
-MCP requests use the `tools/call` method with the operation name in
-`params.name` and UCP payload in `params.arguments`:
+MCP 요청은 `tools/call` 메서드를 사용하며,
+연산명은 `params.name`, UCP payload는 `params.arguments`에 담습니다.
 
 ```json
 {
@@ -1318,16 +1249,16 @@ MCP requests use the `tools/call` method with the operation name in
 }
 ```
 
-#### Response Format
+#### 응답 포맷
 
-MCP tool responses use a dual-output pattern for backward compatibility. UCP
-MCP servers:
+MCP 도구 응답은 하위 호환을 위해 dual-output 패턴을 사용합니다.
+UCP MCP 서버는 다음을 따릅니다.
 
-- **MUST** return the UCP response payload in `structuredContent`
-- **SHOULD** declare `outputSchema` in tool definitions, referencing the
-    appropriate UCP JSON Schema for the capability
-- **SHOULD** also return serialized JSON in `content[]` for backward
-    compatibility with clients not supporting `structuredContent`
+- `structuredContent`에 UCP 응답 payload를 반환해야 합니다(**MUST**).
+- tool 정의에서 capability별 적절한 UCP JSON Schema를 가리키는
+  `outputSchema`를 선언하는 것이 권장됩니다(**SHOULD**).
+- `structuredContent`를 지원하지 않는 클라이언트 호환을 위해
+  직렬화 JSON을 `content[]`에도 함께 반환하는 것이 권장됩니다(**SHOULD**).
 
 ```json
 {
@@ -1351,83 +1282,78 @@ MCP servers:
 
 ### Agent-to-Agent Protocol (A2A)
 
-A business **MAY** expose an A2A agent that supports UCP as an A2A Extension,
-allowing integration with platforms over structured UCP data types.
+Business는 UCP를 A2A 확장으로 지원하는 A2A 에이전트를 노출할 수 있습니다(**MAY**).
+이를 통해 구조화된 UCP 데이터 타입으로 platform과 통합할 수 있습니다.
 
 ### Embedded Protocol (EP)
 
-A business **MAY** embed an interface onto an eligible host that would
-receive events as the user interacts with the interface and delegate key user
-actions.
+Business는 적격 host에 임베디드 인터페이스를 제공할 수 있습니다(**MAY**).
+사용자 상호작용 이벤트를 수신하고 주요 사용자 동작을 위임할 수 있습니다.
 
-Initiation comes through a `continue_url` that is returned by the business.
+시작점은 business가 반환하는 `continue_url`입니다.
 
-## Standard Capabilities
+## 표준 Capability
 
-UCP defines a set of standard capabilities:
+UCP는 다음과 같은 표준 capability 집합을 정의합니다.
 
-| Capability Name      | ID (URI)                                       | Description                                                                                                  |
+| Capability 이름      | ID (URI)                                       | 설명                                                                                                         |
 | :------------------- | :--------------------------------------------- | :----------------------------------------------------------------------------------------------------------- |
-| **Checkout**         | `{{ ucp_url }}/schemas/shopping/checkout.json` | Facilitates the creation and management of checkout sessions, including cart management and tax calculation. |
-| **Identity Linking** | -                                              | Enables platforms to obtain authorization via OAuth 2.0 to perform actions on a user's behalf.               |
-| **Order**            | `{{ ucp_url }}/schemas/shopping/order.json`    | Allows businesses to push asynchronous updates about an order's lifecycle (shipping, delivery, returns).     |
+| **Checkout**         | `{{ ucp_url }}/schemas/shopping/checkout.json` | cart 관리와 세금 계산을 포함한 checkout 세션 생성/관리 기능 제공                                              |
+| **Identity Linking** | -                                              | OAuth 2.0 기반 권한 위임으로 platform이 사용자 대신 작업을 수행할 수 있게 함                                 |
+| **Order**            | `{{ ucp_url }}/schemas/shopping/order.json`    | 주문 라이프사이클(배송, 전달, 반품)에 대한 비동기 업데이트를 business가 전달할 수 있게 함                    |
 
-### Definition & Extensions
+### 정의 및 확장
 
-Detailed definitions for endpoints, schemas, and valid extensions for each
-capability are provided in their respective specification files. Extensions are
-typically versioned and defined alongside their parent capability.
+각 capability의 endpoint, schema, 유효 확장에 대한 상세 정의는
+해당 명세 파일에서 제공합니다.
+확장은 보통 상위 capability와 함께 버저닝되고 정의됩니다.
 
-## Security & Authentication
+## 보안 및 인증
 
-### Transport Security
+### 전송 보안
 
-All UCP communication **MUST** occur over **HTTPS**.
+모든 UCP 통신은 **HTTPS**로 이루어져야 합니다(**MUST**).
 
-### Request Authentication
+### 요청 인증
 
-- **Platform to Business:** Requests **SHOULD** be authenticated using
-    standard headers (e.g., `Authorization: Bearer <token>`).
-- **Business to Platform (Webhooks):** Webhooks **MUST** be signed using a
-    shared secret or asymmetric key to verify integrity and origin.
+- **Platform → Business:** 요청은 표준 헤더(예: `Authorization: Bearer <token>`)로 인증하는 것이 권장됩니다(**SHOULD**).
+- **Business → Platform(Webhook):** webhook은 무결성과 출처 검증을 위해
+  shared secret 또는 비대칭 키로 서명되어야 합니다(**MUST**).
 
-### Data Privacy
+### 데이터 프라이버시
 
-Sensitive data (such as Payment Credentials or PII) **MUST** be handled
-according to PCI-DSS and GDPR guidelines. UCP encourages the use of tokenized
-payment data to minimize business and platform liability.
+민감 데이터(결제 자격증명, PII 등)는 PCI-DSS 및 GDPR 가이드라인에 따라 처리되어야 합니다(**MUST**).
+UCP는 business/platform 책임 범위를 줄이기 위해 토큰화 결제 데이터 사용을 권장합니다.
 
-### Transaction Integrity and Non-Repudiation
+### 거래 무결성 및 부인 방지 { #transaction-integrity-and-non-repudiation }
 
-For scenarios requiring cryptographic proof of authorization (e.g., autonomous
-agents, high-value transactions), UCP supports the **AP2 Mandates Extension**
-(`dev.ucp.shopping.ap2_mandate`). When this optional extension is negotiated:
+승인에 대한 암호학적 증명이 필요한 시나리오(예: 자율 에이전트, 고액 거래)에서
+UCP는 **AP2 Mandates Extension**(`dev.ucp.shopping.ap2_mandate`)을 지원합니다.
+이 선택 확장이 협상되면 다음이 적용됩니다.
 
-- Businesses provide a cryptographic signature on checkout terms
-- Platforms provide cryptographic mandates proving user authorization
+- Business는 checkout 조건에 대한 암호학적 서명을 제공합니다.
+- Platform은 사용자 승인을 증명하는 암호학적 mandate를 제공합니다.
 
-This mechanism provides strong, end-to-end cryptographic assurances about
-transaction details and participant consent, significantly reducing risks of
-tampering and disputes.
+이 메커니즘은 거래 상세와 참여자 동의에 대해 종단 간 강한 암호학적 보장을 제공하여
+변조와 분쟁 위험을 크게 줄입니다.
 
-See [AP2 Mandates Extension](ap2-mandates.md) for complete specification,
-implementation guide, and examples.
+[AP2 Mandates Extension](ap2-mandates.md)에서 전체 명세, 구현 가이드, 예시를 확인할 수 있습니다.
 
-## Versioning
+## 버저닝
 
-### Version Format
+### 버전 형식
 
-UCP uses date-based versioning in the format `YYYY-MM-DD`. This provides
-clear chronological ordering and unambiguous version comparison.
+UCP는 `YYYY-MM-DD` 형식의 날짜 기반 버저닝을 사용합니다.
+이를 통해 시간순 정렬과 버전 비교를 명확하게 수행할 수 있습니다.
 
-### Version Discovery and Negotiation
+### 버전 Discovery 및 협상
 
-UCP prioritizes strong backwards compatibility. Businesses implementing a
-version **SHOULD** handle requests from platforms using that version or older.
+UCP는 강한 하위 호환성을 우선합니다.
+특정 버전을 구현한 business는 해당 버전 또는 그 이전 버전을 사용하는 platform 요청을 처리하는 것이 권장됩니다(**SHOULD**).
 
-Both businesses and platforms declare a single version in their profiles:
+Business와 platform은 각각 profile에 단일 버전을 선언합니다.
 
-#### Example
+#### 예시
 
 === "Business Profile"
 
@@ -1455,22 +1381,19 @@ Both businesses and platforms declare a single version in their profiles:
     }
     ```
 
-### Version Negotiation
+### 버전 협상
 
-![High-level resolution flow sequence diagram](site:specification/images/ucp-discovery-negotiation.png)
+![상위 수준 해석 흐름 시퀀스 다이어그램](site:specification/images/ucp-discovery-negotiation.png)
 
-Businesses **MUST** validate the platform's version and determine compatibility:
+Business는 platform 버전을 검증하고 호환 여부를 판단해야 합니다(**MUST**).
 
-1. Platform declares version via profile referenced in request
+1. Platform은 요청에서 참조한 profile로 버전을 선언합니다.
 2. Business validates:
-    - If platform version ≤ business version: Business **MUST**
-        process the request
-    - If platform version > business version: Business **MUST** return
-        `version_unsupported` error
-3. Businesses **MUST** include the version used for processing in every
-    response.
+    - platform 버전 ≤ business 버전: 요청을 처리해야 합니다(**MUST**).
+    - platform 버전 > business 버전: `version_unsupported` 오류를 반환해야 합니다(**MUST**).
+3. Business는 처리에 사용한 버전을 모든 응답에 포함해야 합니다(**MUST**).
 
-Response with version confirmation:
+버전 확인 응답 예:
 
 ```json
 {
@@ -1485,7 +1408,7 @@ Response with version confirmation:
 }
 ```
 
-Version unsupported error:
+버전 미지원 오류 예:
 
 ```json
 {
@@ -1499,66 +1422,64 @@ Version unsupported error:
 }
 ```
 
-### Backwards Compatibility
+### 하위 호환성
 
-#### Backwards-Compatible Changes
+#### 하위 호환 변경
 
-The following changes **MAY** be introduced without a new version:
+다음 변경은 새 버전 없이 도입할 수 있습니다(**MAY**).
 
-- Adding new non-required fields to responses
-- Adding new non-required parameters to requests
-- Adding new endpoints, methods, or operations to a transport
-- Adding new error codes with existing error structures
-- Adding new values to enums (unless explicitly documented as exhaustive)
-- Changing the order of fields in responses
-- Changing the length or format of opaque strings (IDs, tokens)
+- 응답에 비필수 필드 추가
+- 요청에 비필수 파라미터 추가
+- 전송에 새 endpoint/method/operation 추가
+- 기존 오류 구조를 유지한 새 오류 코드 추가
+- enum에 새 값 추가(단, 완전 목록으로 명시된 경우 제외)
+- 응답 필드 순서 변경
+- 불투명 문자열(ID, token) 길이/형식 변경
 
-#### Breaking Changes
+#### 비호환 변경
 
-The following changes **MUST NOT** be introduced without a new version:
+다음 변경은 새 버전 없이 도입하면 안 됩니다(**MUST NOT**).
 
-- Removing or renaming existing fields
-- Changing field types or semantics
-- Making non-required fields required
-- Removing operations, methods, or endpoints
-- Changing authentication or authorization requirements
-- Modifying existing protocol flow or state machine
-- Changing the meaning of existing error codes
+- 기존 필드 삭제/개명
+- 필드 타입/의미 변경
+- 비필수 필드를 필수화
+- operation/method/endpoint 제거
+- 인증/인가 요구사항 변경
+- 기존 프로토콜 흐름 또는 상태 머신 수정
+- 기존 오류 코드 의미 변경
 
-### Independent Component Versioning
+### 컴포넌트 독립 버저닝
 
-- UCP protocol versions independently from capabilities.
-- Each capability versions independently from other capabilities.
-- Capabilities **MUST** follow the same backwards compatibility rules as the
-    protocol.
-- Businesses **MUST** validate capability version compatibility using the same
-    logic as what's described above.
-- Transports **MAY** define their own version handling mechanisms.
+- UCP 프로토콜 버전은 capability 버전과 독립적으로 관리됩니다.
+- 각 capability도 다른 capability와 독립적으로 버저닝됩니다.
+- capability는 프로토콜과 동일한 하위 호환 규칙을 따라야 합니다(**MUST**).
+- Business는 위와 동일한 로직으로 capability 버전 호환성을 검증해야 합니다(**MUST**).
+- 전송 계층은 자체 버전 처리 메커니즘을 정의할 수 있습니다(**MAY**).
 
-#### UCP Capabilities (`dev.ucp.*`)
+#### UCP Capability (`dev.ucp.*`)
 
-UCP-authored capabilities version with protocol releases by default. Individual
-capabilities **MAY** version independently when breaking changes are required
-outside the protocol release cycle.
+UCP 작성 capability는 기본적으로 프로토콜 릴리스와 함께 버저닝됩니다.
+단, 프로토콜 릴리스 주기 외에서 비호환 변경이 필요하면
+개별 capability를 독립 버저닝할 수 있습니다(**MAY**).
 
-#### Vendor Capabilities (`com.{vendor}.*`)
+#### Vendor Capability (`com.{vendor}.*`)
 
-Capabilities outside the `dev.ucp.*` namespace version fully independently.
-Vendors control their own release schedules and versioning strategy.
+`dev.ucp.*` 외 네임스페이스의 capability는 완전히 독립적으로 버저닝됩니다.
+벤더는 자체 릴리스 주기와 버전 전략을 통제합니다.
 
-## Glossary
+## 용어집
 
-| Term                              | Acronym | Definition                                                                                                                                                |
-| :-------------------------------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Agent Payments Protocol**       | AP2     | An open protocol designed to enable AI agents to securely interoperate and complete payments autonomously. UCP leverages AP2 for secure payment mandates. |
-| **Agent2Agent Protocol**          | A2A     | An open standard for secure, collaborative communication between diverse AI agents. UCP can use A2A as a transport layer.                                 |
-| **Capability**                    | -       | A standalone core feature that a business supports (e.g., Checkout, Identity Linking). Capabilities are the fundamental "verbs" of UCP.                   |
-| **Credential Provider**           | CP      | A trusted entity (like a digital wallet) responsible for securely managing and executing the user's payment and identity credentials.                     |
-| **Extension**                     | -       | An optional capability that augments another capability via the `extends` field. Extensions appear in `ucp.capabilities[]` alongside core capabilities.   |
-| **Profile**                       | -       | A JSON document hosted by businesses and platforms at a well-known URI, declaring their identity, supported capabilities, and endpoints.                  |
-| **Business**                      | -       | The entity selling goods or services. In UCP, they act as the **Merchant of Record (MoR)**, retaining financial liability and ownership of the order.     |
-| **Model Context Protocol**        | MCP     | A protocol standardizing how AI models connect to external data and tools. UCP capabilities map 1:1 to MCP tools.                                         |
-| **Universal Commerce Protocol**   | UCP     | The standard defined in this document, enabling interoperability between commerce entities via standardized capabilities and discovery.                   |
-| **Payment Service Provider**      | PSP     | The financial infrastructure provider that processes payments, authorizations, and settlements on behalf of the business.                                 |
-| **Platform**                      | -       | The consumer-facing surface (AI agent, app, website) acting on behalf of the user to discover businesses and facilitate commerce.                         |
-| **Verifiable Digital Credential** | VDC     | An Issuer-signed credential (set of claims) whose authenticity can be verified cryptographically. Used in UCP for secure payment authorizations.          |
+| 용어                              | 약어    | 정의                                                                                                                                                    |
+| :-------------------------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Agent Payments Protocol**       | AP2     | AI 에이전트가 안전하게 상호운용하며 자율 결제를 수행하도록 설계된 오픈 프로토콜. UCP는 안전한 결제 mandate를 위해 AP2를 활용합니다.                    |
+| **Agent2Agent Protocol**          | A2A     | 다양한 AI 에이전트 간 안전하고 협력적인 통신을 위한 오픈 표준. UCP는 A2A를 전송 계층으로 사용할 수 있습니다.                                          |
+| **Capability**                    | -       | business가 지원하는 독립 핵심 기능(예: Checkout, Identity Linking). capability는 UCP의 기본 동작 단위입니다.                                           |
+| **Credential Provider**           | CP      | 사용자 결제/신원 자격증명을 안전하게 관리·실행하는 신뢰 주체(예: 디지털 월렛).                                                                          |
+| **Extension**                     | -       | `extends` 필드를 통해 다른 capability를 보강하는 선택 capability. 확장은 `ucp.capabilities[]`에 core capability와 함께 나타납니다.                      |
+| **Profile**                       | -       | business/platform이 well-known URI에 게시하는 JSON 문서로, 정체성·지원 capability·endpoint를 선언합니다.                                               |
+| **Business**                      | -       | 상품/서비스를 판매하는 주체. UCP에서 **Merchant of Record(MoR)** 로서 재무 책임과 주문 소유권을 가집니다.                                               |
+| **Model Context Protocol**        | MCP     | AI 모델이 외부 데이터/도구와 연결되는 방식을 표준화한 프로토콜. UCP capability는 MCP tool과 1:1 매핑될 수 있습니다.                                   |
+| **Universal Commerce Protocol**   | UCP     | 본 문서에서 정의한 표준으로, 표준화된 capability와 discovery를 통해 커머스 주체 간 상호운용성을 제공합니다.                                             |
+| **Payment Service Provider**      | PSP     | business를 대신해 결제 승인/처리/정산을 수행하는 금융 인프라 제공자입니다.                                                                              |
+| **Platform**                      | -       | 사용자 대면 표면(AI 에이전트, 앱, 웹사이트 등)으로서 사용자를 대신해 business를 탐색하고 커머스를 수행하는 주체입니다.                                 |
+| **Verifiable Digital Credential** | VDC     | Issuer가 서명한 자격증명(클레임 집합)으로, 암호학적으로 진위 검증이 가능합니다. UCP에서 안전한 결제 승인에 활용됩니다.                                  |
