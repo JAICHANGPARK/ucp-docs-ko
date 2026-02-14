@@ -14,48 +14,44 @@
    limitations under the License.
 -->
 
-# Checkout Capability
+# 체크아웃(Checkout) Capability
 
-* **Capability Name:** `dev.ucp.shopping.checkout`
+* **Capability 이름:** `dev.ucp.shopping.checkout`
 
-## Overview
+## 개요
 
-Allows platforms to facilitate checkout sessions. The checkout has to be
-finalized manually by the user through a trusted UI unless the AP2 Mandates
-extension is supported.
+플랫폼이 체크아웃 세션을 중개할 수 있도록 합니다. AP2 Mandates 확장을 지원하지 않는 경우,
+체크아웃은 신뢰 가능한 UI에서 사용자가 수동으로 최종 확정해야 합니다.
 
-The business remains the Merchant of Record (MoR), and they don't need to become
-PCI DSS compliant to accept card payments through this Capability.
+business는 Merchant of Record(MoR) 지위를 유지하며,
+이 Capability를 통해 카드 결제를 수락하기 위해 별도로 PCI DSS 준수를 획득할 필요는 없습니다.
 
-### Flow overview
+### 흐름 개요
 
 ![High-level checkout flow sequence diagram](site:specification/images/ucp-checkout-flow.png)
 
-### Payments
+### 결제(Payments)
 
-Payment handlers are discovered from the business's UCP profile at
-`/.well-known/ucp` and checkout.ucp.payment_handlers. The handlers define
-the processing specifications for collecting payment instruments
-(e.g., Google Pay, Shop Pay). When the buyer submits payment, the platform
-populates the `payment.instruments` array with the collected instrument data.
+결제 핸들러는 business의 UCP 프로필 `/.well-known/ucp` 및
+`checkout.ucp.payment_handlers`에서 탐색합니다. 핸들러는 결제 수단 수집을 위한
+처리 명세(예: Google Pay, Shop Pay)를 정의합니다. 구매자가 결제를 제출하면,
+platform은 수집된 수단 데이터를 `payment.instruments` 배열에 채웁니다.
 
-The `payment` object is optional on checkout creation and may be omitted for
-use cases that don't require payment processing (e.g., quote generation, cart
-management).
+`payment` 객체는 체크아웃 생성 시 선택 사항이며,
+결제 처리가 필요 없는 사용 사례(예: 견적 생성, 장바구니 관리)에서는 생략할 수 있습니다.
 
-### Fulfillment
+### 이행(Fulfillment)
 
-Fulfillment is modelled as an extension in UCP to account for diverse use cases.
+이행은 다양한 사용 사례를 수용하기 위해 UCP에서 확장(extension)으로 모델링됩니다.
 
-Fulfillment is optional in the checkout object. This is done to enable a
-platform to perform checkout for digital goods without needing to furnish
-fulfillment details more relevant for physical goods.
+체크아웃 객체에서 이행은 선택 사항입니다. 이를 통해 플랫폼은
+실물 상품에 주로 필요한 이행 세부정보 없이도 디지털 상품 체크아웃을 처리할 수 있습니다.
 
-### Checkout Status Lifecycle
+### 체크아웃 상태 라이프사이클
 
-The checkout `status` field indicates the current phase of the session and
-determines what action is required next. The business sets the status; the
-platform receives messages indicating what's needed to progress.
+체크아웃 `status` 필드는 세션의 현재 단계를 나타내고,
+다음에 필요한 동작을 결정합니다. 상태는 business가 설정하며,
+platform은 진행에 필요한 정보를 메시지 형태로 받습니다.
 
 ```text
        +------------+                         +---------------------+
@@ -66,8 +62,8 @@ platform receives messages indicating what's needed to progress.
              v                                           |
     +------------------+                                 |
     |ready_for_complete|                                 |
-    |                  |                                 |
-    | (platform can    |                                 | continue_url
+    |                  |                                 | continue_url
+    | (platform can    |                                 |
     | call Complete    |                                 |
     |   Checkout)      |                                 |
     +--------+---------+                                 |
@@ -90,60 +86,56 @@ platform receives messages indicating what's needed to progress.
           (session invalid/expired - can occur from any state)
 ```
 
-### Status Values
+### 상태 값
 
-* **`incomplete`**: Checkout session is missing required information or has
-    issues that need resolution. Platform should inspect `messages` array for
-    context and should attempt to resolve via Update Checkout.
+* **`incomplete`**: 체크아웃 세션에 필수 정보가 누락되었거나 해결해야 할 문제가 있음.
+  platform은 `messages` 배열을 확인해 맥락을 파악하고,
+  Update Checkout으로 해결을 시도해야 합니다.
 
-* **`requires_escalation`**: Checkout session requires information that
-    cannot be provided via API, or buyer input is required. Platform should
-    inspect `messages` to understand what's needed (see Error Handling below).
-    If any `recoverable` errors exist, resolve those first.
-    Then hand off to buyer via `continue_url`.
+* **`requires_escalation`**: API로 제공할 수 없는 정보가 필요하거나,
+  구매자 입력이 필요한 상태. platform은 `messages`로 필요한 사항을 파악해야 하며
+  (아래 오류 처리 참고), `recoverable` 오류가 있다면 먼저 해결한 뒤
+  `continue_url`로 구매자에게 핸드오프해야 합니다.
 
-* **`ready_for_complete`**: Checkout session has all necessary information
-    and platform can finalize programmatically. Platform can call
-    Complete Checkout.
+* **`ready_for_complete`**: 체크아웃에 필요한 정보가 모두 준비되어 platform이
+  프로그래밍 방식으로 최종화할 수 있는 상태. Complete Checkout 호출 가능.
 
-* **`complete_in_progress`**: Business is processing the Complete Checkout
-    request.
+* **`complete_in_progress`**: business가 Complete Checkout 요청을 처리 중인 상태.
 
-* **`completed`**: Order placed successfully.
+* **`completed`**: 주문이 성공적으로 접수된 상태.
 
-* **`canceled`**: Checkout session is invalid or expired. Platform should
-    start a new checkout session if needed.
+* **`canceled`**: 체크아웃 세션이 무효 또는 만료된 상태.
+  필요한 경우 platform은 새 체크아웃 세션을 시작해야 합니다.
 
-### Error Handling
+### 오류 처리
 
-The `messages` array contains errors, warnings, and informational messages
-about the checkout state. Error messages include a `severity` field that
-declares **who resolves the error**:
+`messages` 배열은 체크아웃 상태에 대한 오류/경고/정보 메시지를 담습니다.
+오류 메시지에는 **누가 해결해야 하는지**를 나타내는 `severity` 필드가 포함됩니다.
 
-| Severity                | Meaning                                       | Platform Action               |
-| :---------------------- | :-------------------------------------------- | :---------------------------- |
-| `recoverable`           | Platform can fix via API                      | Resolve using Update Checkout |
-| `requires_buyer_input`  | Business requires input not available via API | Hand off via `continue_url`   |
-| `requires_buyer_review` | Buyer review and authorization is required    | Hand off via `continue_url`   |
+| Severity | 의미 | 플랫폼 동작 |
+| :------- | :--- | :---------- |
+| `recoverable` | 플랫폼이 API로 수정 가능 | Update Checkout으로 해결 |
+| `requires_buyer_input` | business가 API로 받을 수 없는 입력이 필요 | `continue_url`로 핸드오프 |
+| `requires_buyer_review` | 구매자 검토/승인이 필요 | `continue_url`로 핸드오프 |
 
-Errors with `requires_*` severity contribute to `status: requires_escalation`.
-Both result in buyer handoff, but represent different checkout states.
+`requires_*` severity 오류는 `status: requires_escalation`에 기여합니다.
+둘 다 구매자 핸드오프가 필요하지만 의미하는 체크아웃 상태가 다릅니다.
 
-* `requires_buyer_input` means the checkout is **incomplete** — the business
-requires information their API doesn't support collecting programmatically.
-* `requires_buyer_review` means the checkout is **complete** — but policy,
-regulatory, or entitlement rules require buyer authorization before order
-placement (e.g., high-value order approval, first-purchase policy).
+* `requires_buyer_input`은 체크아웃이 **불완전(incomplete)** 함을 의미합니다.
+  business API가 프로그래밍 방식으로 수집할 수 없는 정보가 필요합니다.
+* `requires_buyer_review`는 체크아웃이 **완전(complete)** 하지만,
+  정책/규제/권한 규칙상 주문 전 구매자 승인이 필요함을 의미합니다.
+  (예: 고액 주문 승인, 첫 구매 정책)
 
-#### Error Processing Algorithm
+#### 오류 처리 알고리즘
 
-When status is `incomplete` or `requires_escalation`, platforms should process
-errors as a prioritized stack. The example below illustrates a checkout with
-three error types: a recoverable error (invalid phone), a buyer input
-requirement (delivery scheduling), and a review requirement (high-value order).
-The latter two require handoff and serve as explicit signals to the platform.
-Businesses **SHOULD** surface such messages as early as possible, and platforms
-**SHOULD** prioritize resolving recoverable errors before initiating handoff.
+상태가 `incomplete` 또는 `requires_escalation`일 때 플랫폼은 오류를 우선순위 스택으로 처리해야 합니다.
+아래 예시는 세 가지 오류 유형(복구 가능 오류: 잘못된 전화번호,
+구매자 입력 필요: 배송 일정,
+구매자 검토 필요: 고액 주문)을 보여줍니다.
+후자 둘은 핸드오프가 필요하며 플랫폼에 대한 명시적 신호로 동작합니다.
+business는 이런 메시지를 가능한 한 빨리 노출하는 것이 **권장(SHOULD)** 되며,
+platform은 핸드오프 전에 복구 가능한 오류를 우선 해결하는 것이 **권장(SHOULD)** 됩니다.
 
 ```json
 {
@@ -171,7 +163,7 @@ Businesses **SHOULD** surface such messages as early as possible, and platforms
 }
 ```
 
-Example error processing algorithm:
+오류 처리 알고리즘 예시:
 
 ```text
 GIVEN checkout with messages array
@@ -194,188 +186,178 @@ ELSE IF requires_buyer_review is not empty
   handoff_context = "ready for final review by the buyer"
 ```
 
-#### Standard Errors
+#### 표준 오류
 
-Standard errors are standardized error codes that platforms are expected to
-handle with specific, appropriate UX rather than generic error treatment.
+표준 오류는 플랫폼이 일반 오류 처리 대신 적절한 전용 UX로 다루어야 하는
+표준화된 오류 코드입니다.
 
-| Code                     | Description                                                                |
-| :----------------------- | :------------------------------------------------------------------------- |
-| `out_of_stock`           | Specific item or variant is unavailable                                    |
-| `item_unavailable`       | Item cannot be purchased (e.g. delisted)                                   |
-| `address_undeliverable`  | Cannot deliver to the provided address                                     |
-| `payment_failed`         | Payment processing failed                                                  |
+| 코드 | 설명 |
+| :--- | :--- |
+| `out_of_stock` | 특정 상품 또는 변형(variant)을 사용할 수 없음 |
+| `item_unavailable` | 상품을 구매할 수 없음(예: 판매 중단) |
+| `address_undeliverable` | 제공된 주소로 배송 불가 |
+| `payment_failed` | 결제 처리 실패 |
 
-Businesses **SHOULD** mark standard errors with `severity: recoverable` to
-signal that platforms should provide appropriate UX (out-of-stock messaging,
-address validation prompts, payment method changes) rather than generic error
-messages or deferring to checkout completion.
+business는 표준 오류를 `severity: recoverable`로 표시하는 것이 **권장(SHOULD)** 됩니다.
+이렇게 하면 플랫폼이 일반적인 오류 메시지 처리나 완료 단계 지연 대신,
+재고 부족 안내/주소 검증 유도/결제수단 변경 같은 적절한 UX를 제공해야 함을 명확히 전달할 수 있습니다.
 
-Example: `out_of_stock` requires specific upfront UX, whereas
-`payment_required` can be handled generically at submission.
+예: `out_of_stock`는 사전에 구체 UX가 필요하고,
+`payment_required`는 제출 시점에 일반적으로 처리할 수 있습니다.
 
 ## Continue URL
 
-The `continue_url` field enables checkout handoff from platform to business UI,
-allowing the buyer to continue and finalize the checkout session.
+`continue_url` 필드는 플랫폼 UI에서 business UI로 체크아웃을 핸드오프하여,
+구매자가 체크아웃 세션을 이어서 완료할 수 있게 합니다.
 
-### Availability
+### 제공 여부
 
-Businesses **MUST** provide `continue_url` when returning `status` =
-`requires_escalation`. For all other non-terminal statuses (`incomplete`,
-`ready_for_complete`, `complete_in_progress`), businesses **SHOULD** provide
-`continue_url`. For terminal states (`completed`, `canceled`), `continue_url`
-**SHOULD** be omitted.
+business는 `status`가 `requires_escalation`일 때 `continue_url`을 **반드시(MUST)** 제공해야 합니다.
+그 외 비종료 상태(`incomplete`, `ready_for_complete`, `complete_in_progress`)에서는
+`continue_url` 제공이 **권장(SHOULD)** 됩니다.
+종료 상태(`completed`, `canceled`)에서는 `continue_url`을 생략하는 것이 **권장(SHOULD)** 됩니다.
 
-### Format
+### 형식
 
-The `continue_url` **MUST** be an absolute HTTPS URL and **SHOULD** preserve
-checkout state for seamless handoff. Businesses **MAY** implement state
-preservation using either approach:
+`continue_url`은 절대 HTTPS URL이어야 하며(**MUST**),
+매끄러운 핸드오프를 위해 체크아웃 상태를 보존하는 것이 **권장(SHOULD)** 됩니다.
+business는 아래 두 방식 중 하나로 상태 보존을 구현할 수 있습니다(**MAY**).
 
-#### Server-Side State (Recommended)
+#### 서버 측 상태 (권장)
 
-An opaque URL backed by server-side checkout state:
+서버 측 체크아웃 상태에 연결된 opaque URL:
 
 ```text
 https://business.example.com/checkout-sessions/{checkout_id}
 ```
 
-* Server maintains checkout state tied to `checkout_id`
-* Simple, secure, recommended for most implementations
-* URL lifetime typically tied to `expires_at`
+* 서버가 `checkout_id`에 연결된 체크아웃 상태를 유지
+* 단순하고 안전하며 대부분 구현에 권장
+* URL 수명은 보통 `expires_at`에 연동
 
 #### Checkout Permalink
 
-A stateless URL that encodes checkout state directly, allowing reconstruction
-without server-side persistence. Businesses **SHOULD** implement support for
-this format to facilitate checkout handoff and accelerated entry—for example, a
-platform can prefill checkout state when initiating a buy-now flow.
+체크아웃 상태를 URL에 직접 인코딩해 서버 측 영속성 없이 재구성할 수 있는 stateless URL.
+business는 체크아웃 핸드오프 및 빠른 진입을 지원하기 위해 이 형식 구현을
+**권장(SHOULD)** 합니다. 예를 들어 platform은 buy-now 흐름 시작 시 체크아웃 상태를
+미리 채울 수 있습니다.
 
-> **Note:** Checkout permalinks are a REST-specific construct that extends the
-> [REST transport binding](checkout-rest.md). Accessing a permalink returns a
-> redirect to the checkout UI or renders the checkout page directly.
+> **참고:** Checkout permalink는
+> [REST transport binding](checkout-rest.md)을 확장하는 REST 전용 구성입니다.
+> permalink 접근 시 checkout UI로 리다이렉트되거나 checkout 페이지를 직접 렌더링합니다.
 
-## Guidelines
+## 가이드라인
 
-(In addition to the overarching guidelines)
+(상위 가이드라인에 더해)
 
 ### Platform
 
-* **MAY** engage an agent to facilitate the checkout session (e.g. add items
-    to the checkout session, select fulfillment address). However, the
-    agent must hand over the checkout session to a trusted and
-    deterministic UI for the user to review the checkout details and place the
-    order.
-* **MAY** send the user from the trusted, deterministic UI back to the agent
-    at any time. For example, when the user decides to exit the checkout screen
-    to keep adding items to the cart.
-* **MAY** provide agent context when the platform indicates that the request
-    was done by an agent.
-* **MUST** use `continue_url` when checkout status is `requires_escalation`.
-* **MAY** use `continue_url` to hand off to business UI in other situations.
-* When performing handoff, **SHOULD** prefer business-provided
-    `continue_url` over platform-constructed checkout permalinks.
+* **MAY** 에이전트를 활용해 체크아웃 세션을 보조할 수 있습니다.
+  (예: 아이템 추가, 이행 주소 선택)
+  단, 에이전트는 사용자가 체크아웃 상세를 검토하고 주문을 확정할 수 있도록
+  신뢰 가능하고 결정적인 UI에 세션을 넘겨야 합니다.
+* **MAY** 신뢰 가능한 결정적 UI에서 사용자를 언제든 다시 에이전트로 보낼 수 있습니다.
+  예: 사용자가 체크아웃 화면을 나가 장바구니에 아이템을 더 추가하려는 경우.
+* 플랫폼이 요청이 에이전트에 의해 수행되었음을 표시한 경우,
+  **MAY** 에이전트 컨텍스트를 제공할 수 있습니다.
+* 체크아웃 상태가 `requires_escalation`일 때 **MUST** `continue_url`을 사용해야 합니다.
+* 다른 상황에서도 **MAY** `continue_url`을 사용해 business UI로 핸드오프할 수 있습니다.
+* 핸드오프 수행 시,
+  platform이 구성한 checkout permalink보다 business 제공 `continue_url`을 우선하는 것이
+  **권장(SHOULD)** 됩니다.
 
 ### Business
 
-* **MUST** send a confirmation email after the checkout has been completed.
-* **SHOULD** provide accurate error messages.
-* Logic handling the checkout sessions **MUST** be deterministic.
-* **MUST** provide `continue_url` when returning `status` =
-    `requires_escalation`.
-* **MUST** include at least one message with `severity: escalation` when
-    returning `status` = `requires_escalation`.
-* **SHOULD** provide `continue_url` in all non-terminal checkout responses.
-* After a checkout session reaches the state "completed", it is considered
-    immutable.
+* 체크아웃 완료 후 확인 이메일을 **반드시(MUST)** 발송해야 합니다.
+* 정확한 오류 메시지를 제공하는 것이 **권장(SHOULD)** 됩니다.
+* 체크아웃 세션 처리 로직은 **반드시(MUST)** 결정적이어야 합니다.
+* `status` = `requires_escalation` 반환 시 `continue_url`을 **반드시(MUST)** 제공해야 합니다.
+* `status` = `requires_escalation` 반환 시 `severity: escalation` 메시지를
+  최소 1개 이상 **반드시(MUST)** 포함해야 합니다.
+* 모든 비종료 체크아웃 응답에서 `continue_url` 제공이 **권장(SHOULD)** 됩니다.
+* 체크아웃 세션이 "completed" 상태에 도달하면 불변(immutable)으로 간주됩니다.
 
-## Capability Schema Definition
+## Capability 스키마 정의
 
 {{ schema_fields('checkout_resp', 'checkout') }}
 
-## Operations
+## 연산(Operations)
 
-The Checkout capability defines the following logical operations.
+Checkout capability는 다음 논리 연산을 정의합니다.
 
-| Operation             | Description                                                                        |
-| :-------------------- | :--------------------------------------------------------------------------------- |
-| **Create Checkout**   | Initiates a new checkout session. Called as soon as a user adds an item to a cart. |
-| **Get Checkout**      | Retrieves the current state of a checkout session.                                 |
-| **Update Checkout**   | Updates a checkout session.                                                        |
-| **Complete Checkout** | Finalizes the checkout and places the order.                                       |
-| **Cancel Checkout**   | Cancels a checkout session.                                                        |
+| 연산 | 설명 |
+| :--- | :--- |
+| **Create Checkout** | 새 체크아웃 세션 시작. 사용자가 장바구니에 아이템을 담는 즉시 호출됨 |
+| **Get Checkout** | 체크아웃 세션의 현재 상태 조회 |
+| **Update Checkout** | 체크아웃 세션 갱신 |
+| **Complete Checkout** | 체크아웃을 최종 확정하고 주문 접수 |
+| **Cancel Checkout** | 체크아웃 세션 취소 |
 
 ### Create Checkout
 
-To be invoked by the platform when the user has expressed purchase intent
-(e.g., click on Buy) to initiate the checkout session with the item details.
+사용자가 구매 의사를 표현했을 때(예: Buy 클릭),
+아이템 상세를 포함해 체크아웃 세션을 시작하기 위해 platform이 호출합니다.
 
-**Recommendation**: To minimize discrepancies and a streamlined user experience,
-product data (price/title etc.) provided by the business through the feeds
-**SHOULD** match the actual attributes returned in the response.
+**권장 사항:** 불일치를 줄이고 더 매끄러운 사용자 경험을 위해,
+business가 피드로 제공한 상품 데이터(가격/제목 등)는 응답에서 반환되는 실제 속성과
+일치하는 것이 **권장(SHOULD)** 됩니다.
 
 {{ method_fields('create_checkout', 'rest.openapi.json', 'checkout') }}
 
 ### Get Checkout
 
-It provides the latest state of the checkout resource. After cancellation or
-completion it is up to the business on what to return (i.e this can be a long
-lived state or expire after a particular TTL - resulting in a 'not found'
-error). From the platform there is no specific enforcement for a TTL of the
-checkout.
+체크아웃 리소스의 최신 상태를 제공합니다. 취소/완료 이후 무엇을 반환할지는
+business 정책에 달려 있습니다(예: 장기간 상태 유지 또는 특정 TTL 후 만료되어
+`not found` 오류 반환). platform 측에서는 checkout TTL에 대한 별도 강제 규칙이 없습니다.
 
-The platform will honor the TTL provided by the business via `expires_at` at the
-time of checkout session creation.
+platform은 체크아웃 세션 생성 시 business가 `expires_at`로 제공한 TTL을 따릅니다.
 
 {{ method_fields('get_checkout', 'rest.openapi.json', 'checkout') }}
 
 ### Update Checkout
 
-Performs a full replacement of the checkout resource.
-The platform is **REQUIRED** to send the entire checkout resource containing any
-data updates to write-only data fields. The resource provided in the request
-will replace the existing checkout session state on the business side.
+체크아웃 리소스를 전체 교체(full replacement)합니다.
+platform은 write-only 필드 업데이트를 포함한 전체 checkout 리소스를
+**반드시(REQUIRED)** 전송해야 합니다. 요청에 담긴 리소스는
+business 측 기존 체크아웃 세션 상태를 대체합니다.
 
 {{ method_fields('update_checkout', 'rest.openapi.json', 'checkout') }}
 
 ### Complete Checkout
 
-This is the final checkout placement call. To be invoked when the user has
-committed to pay and place an order for the chosen items. The response of this
-call is the checkout object with the `order` field populated in it. The returned
-`order` provides necessary identifiers, such as `id` and `permalink_url`,
-that can be used to reference the full state of the placed order.
-At the time of order persistence, fields from `Checkout` **MAY** be used
-to construct the order representation (i.e. information like `line_items`,
-`fulfillment` will be used to create the initial order representation).
+최종 주문 확정 호출입니다.
+사용자가 선택한 아이템에 대해 결제 및 주문 확정을 의사결정했을 때 호출합니다.
+응답은 `order` 필드가 채워진 checkout 객체이며,
+반환된 `order`에는 배치된 주문의 전체 상태를 참조할 수 있는 `id`, `permalink_url` 등
+필수 식별자가 포함됩니다.
+주문 영속화 시점에는 `Checkout`의 필드를 사용해(`line_items`, `fulfillment` 등)
+초기 주문 표현을 구성할 수 있습니다(**MAY**).
 
-After this call, other details will be updated through subsequent events
-as the order, and its associated items, moves through the supply chain.
+이 호출 이후 상세 상태는 주문과 연관 아이템이 공급망을 따라 이동함에 따라,
+후속 이벤트를 통해 갱신됩니다.
 
 {{ method_fields('complete_checkout', 'rest.openapi.json', 'checkout') }}
 
 ### Cancel Checkout
 
-This operation will be used to cancel a checkout session, if it can be canceled.
-If the checkout session cannot be canceled (e.g. checkout session is
-already canceled or completed), then businesses **SHOULD** send back an error
-indicating the operation is not allowed. Any checkout session with a status
-that is not equal to `completed` or `canceled` **SHOULD** be cancelable.
+취소 가능한 경우 체크아웃 세션 취소에 사용합니다.
+체크아웃 세션을 취소할 수 없는 경우(예: 이미 canceled 또는 completed),
+business는 작업이 허용되지 않음을 나타내는 오류를 반환하는 것이 **권장(SHOULD)** 됩니다.
+`completed`/`canceled`가 아닌 상태의 체크아웃 세션은 취소 가능해야 하며(**SHOULD**),
+가능하도록 설계하는 것이 바람직합니다.
 
 {{ method_fields('cancel_checkout', 'rest.openapi.json', 'checkout') }}
 
-## Transport Bindings
+## 전송 바인딩(Transport Bindings)
 
-The abstract operations above are bound to specific transport protocols as
-defined below:
+위 추상 연산은 아래와 같이 특정 전송 프로토콜에 바인딩됩니다.
 
-* [REST Binding](checkout-rest.md): RESTful API mapping using standard HTTP verbs and JSON payloads.
-* [MCP Binding](checkout-mcp.md): Model Context Protocol mapping for agentic interaction.
-* [A2A Binding](checkout-a2a.md): Agent-to-Agent Protocol mapping for agentic interactions.
-* [Embedded Checkout Binding](embedded-checkout.md): JSON-RPC for powering embedded checkout.
+* [REST Binding](checkout-rest.md): 표준 HTTP 메서드와 JSON payload를 사용하는 REST API 매핑
+* [MCP Binding](checkout-mcp.md): 에이전트 상호작용을 위한 Model Context Protocol 매핑
+* [A2A Binding](checkout-a2a.md): 에이전트 상호작용을 위한 Agent-to-Agent Protocol 매핑
+* [Embedded Checkout Binding](embedded-checkout.md): 임베디드 체크아웃 구현을 위한 JSON-RPC
 
-## Entities
+## 엔터티
 
 ### Buyer
 
@@ -383,10 +365,10 @@ defined below:
 
 ### Context
 
-Context signals are provisional hints. Businesses SHOULD use these values when
-authoritative data (e.g. address) is absent, and MAY ignore unsupported values
-without returning errors. This differs from authoritative selections which
-require explicit validation and error feedback.
+Context 신호는 잠정적 힌트입니다.
+business는 권위 있는 데이터(예: 주소)가 없을 때 이 값을 활용하는 것이 **권장(SHOULD)** 되며,
+지원하지 않는 값은 오류 없이 무시할 수 있습니다(**MAY**).
+이는 명시적 검증과 오류 피드백이 필요한 authoritative selection과 다릅니다.
 
 {{ schema_fields('context', 'checkout') }}
 
@@ -428,20 +410,20 @@ require explicit validation and error feedback.
 
 #### Well-Known Link Types
 
-Businesses **SHOULD** provide all relevant links for the transaction. The
-following are the recommended well-known types:
+business는 거래와 관련된 링크를 가능한 한 모두 제공하는 것이 **권장(SHOULD)** 됩니다.
+아래는 권장 well-known 타입입니다.
 
-| Type               | Description                                       |
-| :----------------- | :------------------------------------------------ |
-| `privacy_policy`   | Link to the business's privacy policy             |
-| `terms_of_service` | Link to the business's terms of service           |
-| `refund_policy`    | Link to the business's refund policy              |
-| `shipping_policy`  | Link to the business's shipping policy            |
-| `faq`              | Link to the business's frequently asked questions |
+| 타입 | 설명 |
+| :--- | :--- |
+| `privacy_policy` | business 개인정보 처리방침 링크 |
+| `terms_of_service` | business 이용약관 링크 |
+| `refund_policy` | business 환불 정책 링크 |
+| `shipping_policy` | business 배송 정책 링크 |
+| `faq` | business 자주 묻는 질문 링크 |
 
-Businesses **MAY** define custom types for domain-specific needs. Platforms
-**SHOULD** handle unknown types gracefully by displaying them using the `title`
-field or omitting them.
+business는 도메인별 요구를 위해 사용자 정의 타입을 정의할 수 있습니다(**MAY**).
+platform은 알 수 없는 타입을 `title` 필드로 표시하거나 생략하는 방식으로
+유연하게 처리하는 것이 **권장(SHOULD)** 됩니다.
 
 ### Message
 

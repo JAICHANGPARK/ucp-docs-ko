@@ -19,43 +19,45 @@
 * **Capability Name:** `dev.ucp.shopping.cart`
 * **Version:** `DRAFT`
 
-## Overview
+## 개요
 
-The Cart capability enables basket building without the complexity of checkout.
-While [Checkout](checkout.md) manages payment handlers, status lifecycle, and
-order finalization, cart provides a lightweight CRUD interface for item
-collection before purchase intent is established.
+Cart capability는 checkout의 복잡성을 도입하지 않고 바스켓 빌딩을 가능하게 합니다.
+[Checkout](checkout.md)이 payment handler, 상태 라이프사이클, 주문 확정을 관리하는 반면,
+cart는 구매 의도가 확정되기 전 단계에서 아이템을 모으기 위한
+경량 CRUD 인터페이스를 제공합니다.
 
-**When to use Cart vs Checkout:**
+**Cart와 Checkout의 사용 기준:**
 
-* **Cart**: User is exploring, comparing, saving items for later. No payment
-  configuration needed. Platform/agent can freely add, remove, update items.
-* **Checkout**: User has expressed purchase intent. Payment handlers are
-  configured, status lifecycle begins, session moves toward completion.
+* **Cart**: 사용자가 탐색·비교·나중 저장 단계에 있음.
+  결제 구성 불필요. 플랫폼/에이전트는 항목 추가·제거·수정을 자유롭게 수행 가능.
+* **Checkout**: 사용자가 구매 의도를 명확히 표현한 상태.
+  payment handler가 구성되고 상태 라이프사이클이 시작되며,
+  세션이 완료 단계로 진행됨.
 
-The typical flow: `cart session` &#8594; `checkout session` &#8594; `order`
+일반적인 흐름: `cart session` &#8594; `checkout session` &#8594; `order`
 
-Carts support:
+Cart는 다음을 지원합니다.
 
-* **Incremental building**: Add/remove items across sessions
-* **Localized estimates**: Context-aware pricing without full checkout overhead
-* **Sharing**: `continue_url` enables cart sharing and recovery
+* **점진적 구성(Incremental building)**: 세션을 넘나들며 항목 추가/제거
+* **로컬라이즈드 추정치(Localized estimates)**: 전체 checkout 오버헤드 없이
+  컨텍스트 기반 가격 추정 제공
+* **공유(Sharing)**: `continue_url`을 통한 cart 공유 및 복구
 
 ## Cart vs Checkout
 
 | Aspect | Cart | Checkout |
 | ------ | ---- | -------- |
-| **Purpose** | Pre-purchase exploration | Purchase finalization |
-| **Payment** | None | Required (handlers, instruments) |
-| **Status** | Binary (exists/not found) | Lifecycle (`incomplete` → `completed`) |
-| **Complete Operation** | No | Yes |
-| **Totals** | Estimates (may be partial) | Final pricing |
+| **Purpose** | 구매 전 탐색 | 구매 확정 |
+| **Payment** | 없음 | 필수(handler, instrument) |
+| **Status** | 이진 상태(존재/미존재) | 라이프사이클(`incomplete` → `completed`) |
+| **Complete Operation** | 없음 | 있음 |
+| **Totals** | 추정치(부분적일 수 있음) | 최종 가격 |
 
-## Cart-to-Checkout Conversion
+## Cart-to-Checkout 변환
 
-When the cart capability is negotiated, platforms can convert a cart to checkout
-by providing `cart_id` in the Create Checkout request. The cart contents
-(`line_items`, `context`, `buyer`) initialize the checkout session.
+Cart capability가 협상되면,
+플랫폼은 Create Checkout 요청에 `cart_id`를 제공하여 cart를 checkout으로 변환할 수 있습니다.
+이때 cart 내용(`line_items`, `context`, `buyer`)이 checkout 세션 초기값으로 사용됩니다.
 
 ```json
 {
@@ -64,103 +66,108 @@ by providing `cart_id` in the Create Checkout request. The cart contents
 }
 ```
 
-Business MUST use cart contents and MUST ignore overlapping fields in checkout payload.
-The `cart_id` parameter is only available when the cart capability is advertised
-in the business profile.
+비즈니스는 cart 내용을 **MUST** 사용해야 하며,
+checkout payload의 중복 필드는 **MUST** 무시해야 합니다.
+`cart_id` 파라미터는 비즈니스 프로필에서 cart capability가 광고된 경우에만 사용할 수 있습니다.
 
-**Idempotent conversion:**
+**멱등 변환(Idempotent conversion):**
 
-If an incomplete checkout already exists for the given `cart_id`, the business
-MUST return the existing checkout session rather than creating a new one. This
-ensures a single active checkout per cart and prevents conflicting sessions.
+해당 `cart_id`에 대해 아직 완료되지 않은 checkout이 이미 존재하면,
+비즈니스는 새 checkout을 생성하는 대신 기존 checkout 세션을 **MUST** 반환해야 합니다.
+이를 통해 cart당 단일 활성 checkout이 보장되며,
+충돌하는 세션 생성을 방지합니다.
 
-**Cart lifecycle after conversion:**
+**변환 이후 cart 라이프사이클:**
 
-When checkout is initialized via `cart_id`, the cart and checkout sessions
-SHOULD be linked for the duration of the checkout.
+`cart_id`로 checkout을 초기화한 경우,
+비즈니스는 checkout 기간 동안 cart와 checkout 세션을 연결 상태로 유지하는 것을
+**SHOULD** 권장합니다.
 
-* **During active checkout** — Business SHOULD maintain the cart and reflect
-    relevant checkout modifications (quantity changes, item removals) back to
-    the cart. This supports back-to-storefront flows when buyers transition
-    between checkout and storefront.
+* **활성 checkout 중** — 비즈니스는 cart를 유지하고,
+    checkout에서 발생한 관련 변경(수량 변경, 항목 제거)을
+    cart에 반영하는 것을 **SHOULD** 권장합니다.
+    이는 구매자가 checkout과 storefront 사이를 이동할 때
+    back-to-storefront 흐름을 지원합니다.
 
-* **After checkout completion** — Business MAY clear the cart based on TTL,
-    completion of the checkout, or other business logic. Subsequent operations
-    on a cleared cart ID return `NOT_FOUND`; the platform can start a new
-    session with `create_cart`.
+* **checkout 완료 후** — 비즈니스는 TTL, checkout 완료, 기타 비즈니스 로직에 따라
+    cart를 정리(clear)할 수 있습니다.
+    정리된 cart ID에 대한 후속 요청은 `NOT_FOUND`를 반환하며,
+    플랫폼은 `create_cart`로 새 세션을 시작할 수 있습니다.
 
-## Guidelines
+## 가이드라인
 
-### Platform
+### 플랫폼
 
-* **MAY** use carts for pre-purchase exploration and session persistence.
-* **SHOULD** convert cart to checkout when user expresses purchase intent.
-* **MAY** display `continue_url` for handoff to business UI.
-* **SHOULD** handle `NOT_FOUND` gracefully when cart expires or is canceled.
+* 구매 전 탐색과 세션 지속성을 위해 cart를 **MAY** 사용할 수 있습니다.
+* 사용자가 구매 의도를 표현하면 cart를 checkout으로 변환하는 것을 **SHOULD** 권장합니다.
+* 비즈니스 UI로 핸드오프하기 위해 `continue_url`을 **MAY** 표시할 수 있습니다.
+* cart 만료/취소 시 `NOT_FOUND`를 정상적으로 처리하는 것을 **SHOULD** 권장합니다.
 
-### Business
+### 비즈니스
 
-* **SHOULD** provide `continue_url` for cart handoff and session recovery.
-* TODO: discuss `continue_url` destination - cart vs checkout.
-* **SHOULD** provide estimated totals when calculable.
-* **MAY** omit fulfillment totals until checkout when address is unknown.
-* **SHOULD** return informational messages for validation warnings.
-* **MAY** set cart expiry via `expires_at`.
-* **SHOULD** follow [cart lifecycle requirements](#cart-to-checkout-conversion)
-    when checkout is initialized via `cart_id`.
+* cart 핸드오프 및 세션 복구를 위해 `continue_url` 제공을 **SHOULD** 권장합니다.
+* TODO: `continue_url` 목적지(cart vs checkout) 논의 필요.
+* 계산 가능한 경우 추정 totals 제공을 **SHOULD** 권장합니다.
+* 주소 미확정 상태에서는 checkout 단계까지 fulfillment totals 생략을 **MAY** 할 수 있습니다.
+* 검증 경고에 대해 informational message 반환을 **SHOULD** 권장합니다.
+* `expires_at`으로 cart 만료 시간 설정을 **MAY** 할 수 있습니다.
+* `cart_id` 기반 checkout 초기화 시
+    [cart lifecycle requirements](#cart-to-checkout-conversion)을 준수하는 것을
+    **SHOULD** 권장합니다.
 
-## Cart Schema Definition
+## Cart 스키마 정의
 
 {{ schema_fields('cart_resp', 'cart') }}
 
-## Operations
+## 작업(Operation)
 
-The Cart capability defines the following logical operations.
+Cart capability는 다음 논리 작업을 정의합니다.
 
 | Operation | Description |
 | :--- | :--- |
-| **Create Cart** | Creates a new cart session. |
-| **Get Cart** | Retrieves the current state of a cart session. |
-| **Update Cart** | Updates a cart session. |
-| **Cancel Cart** | Cancels a cart session. |
+| **Create Cart** | 새 cart 세션을 생성합니다. |
+| **Get Cart** | cart 세션의 현재 상태를 조회합니다. |
+| **Update Cart** | cart 세션을 업데이트합니다. |
+| **Cancel Cart** | cart 세션을 취소합니다. |
 
 ### Create Cart
 
-Creates a new cart session with line items and optional buyer/context
-information for localized pricing estimates.
+라인 아이템과 선택적 buyer/context 정보를 포함해 새 cart 세션을 생성합니다.
+(로컬라이즈드 가격 추정 용도)
 
 * [REST Binding](cart-rest.md#create-cart)
 * [MCP Binding](cart-mcp.md#create_cart)
 
 ### Get Cart
 
-Retrieves the latest state of a cart session. Returns `NOT_FOUND` if the cart
-does not exist, has expired, or was canceled.
+cart 세션의 최신 상태를 조회합니다.
+cart가 존재하지 않거나 만료/취소된 경우 `NOT_FOUND`를 반환합니다.
 
 * [REST Binding](cart-rest.md#get-cart)
 * [MCP Binding](cart-mcp.md#get_cart)
 
 ### Update Cart
 
-Performs a full replacement of the cart session. The platform **MUST** send
-the entire cart resource. The provided resource replaces the existing cart
-state on the business side.
+cart 세션 전체를 교체합니다.
+플랫폼은 전체 cart 리소스를 **MUST** 전송해야 하며,
+전송된 리소스가 비즈니스 측 기존 상태를 대체합니다.
 
 * [REST Binding](cart-rest.md#update-cart)
 * [MCP Binding](cart-mcp.md#update_cart)
 
 ### Cancel Cart
 
-Cancels a cart session. Business MUST return the cart state before deletion.
-Subsequent operations for this cart ID SHOULD return `NOT_FOUND`.
+cart 세션을 취소합니다.
+비즈니스는 삭제 전 cart 상태를 **MUST** 반환해야 합니다.
+해당 cart ID에 대한 후속 작업은 `NOT_FOUND`를 반환하는 것을 **SHOULD** 권장합니다.
 
 * [REST Binding](cart-rest.md#cancel-cart)
 * [MCP Binding](cart-mcp.md#cancel_cart)
 
-## Entities
+## 엔터티
 
-Cart reuses the same entity schemas as [Checkout](checkout.md). This ensures
-consistent data structures when converting a cart to a checkout session.
+Cart는 [Checkout](checkout.md)과 동일한 엔터티 스키마를 재사용합니다.
+이를 통해 cart를 checkout 세션으로 변환할 때 데이터 구조 일관성이 유지됩니다.
 
 ### Line Item
 
@@ -188,8 +195,9 @@ consistent data structures when converting a cart to a checkout session.
 
 {{ schema_fields('types/total_resp', 'checkout') }}
 
-Taxes MAY be included where calculable. Platforms SHOULD assume cart totals
-are estimates; accurate taxes are computed at checkout.
+세금은 계산 가능한 경우 포함될 수 있습니다.
+플랫폼은 cart totals를 추정치로 간주해야 하며,
+정확한 세금은 checkout 단계에서 계산됩니다.
 
 ### Message
 

@@ -19,26 +19,26 @@
 * **Handler Name:** `com.example.encrypted_credential`
 * **Type:** Payment Handler Example
 
-## Introduction
+## 소개
 
-This example demonstrates a payment handler where the **platform encrypts
-credentials directly for the business**. Unlike tokenization patterns, there is
-no `/tokenize` or `/detokenize` endpoint—the platform's compliant credential
-vault encrypts credentials using the business's public key, and the business
-decrypts them locally.
+이 예시는 **플랫폼이 자격증명을 비즈니스용으로 직접 암호화하는**
+결제 핸들러를 보여줍니다.
+토큰화 패턴과 달리 `/tokenize`, `/detokenize` endpoint가 없으며,
+플랫폼의 규정 준수 credential vault가 비즈니스 공개키로 자격증명을 암호화하고,
+비즈니스는 이를 로컬에서 복호화합니다.
 
-This pattern is ideal when businesses want to avoid round-trip latency to a
-tokenizer at payment time.
+이 패턴은 결제 시점 tokenizer 왕복 지연(round-trip latency)을
+피하고 싶은 비즈니스에 적합합니다.
 
-**Note:** While this example uses card credentials (requiring PCI DSS
-compliance), the encryption pattern applies to **any credential type**.
-Compliance requirements vary by credential type.
+**참고:** 이 예시는 카드 자격증명(PCI DSS 필요)을 사용하지만,
+암호화 패턴 자체는 **모든 자격증명 타입**에 적용 가능합니다.
+규제 준수 요건은 자격증명 타입별로 달라집니다.
 
-### Key Benefits
+### 핵심 이점
 
-* **No runtime round-trips:** Business decrypts locally, no `/detokenize` call needed
-* **Simpler architecture:** No token storage or token-to-credential mapping
-* **Business-controlled keys:** Business manages their own decryption keys
+* **런타임 왕복 없음:** 비즈니스가 로컬 복호화하므로 `/detokenize` 호출 불필요
+* **단순한 아키텍처:** 토큰 저장/토큰-자격증명 매핑 불필요
+* **비즈니스 키 주도:** 비즈니스가 자체 복호화 키를 관리
 
 ### Quick Start
 
@@ -49,14 +49,14 @@ Compliance requirements vary by credential type.
 
 ---
 
-## Participants
+## 참여자
 
 | Participant  | Role                                                                              | Prerequisites                 |
 | :----------- | :-------------------------------------------------------------------------------- | :---------------------------- |
-| **Business** | Registers public key, receives encrypted credentials, decrypts locally            | Yes — registers with platform |
-| **Platform** | Operates compliant credential vault, encrypts for business using their public key | Yes — implements encryption   |
+| **Business** | 공개키 등록, 암호화 자격증명 수신, 로컬 복호화                                   | Yes — 플랫폼 등록 필요        |
+| **Platform** | 규정 준수 credential vault 운영, 비즈니스 공개키로 암호화                        | Yes — 암호화 구현 필요        |
 
-### Pattern Flow
+### 패턴 플로우
 
 ```text
 +-----------------+                              +------------+
@@ -90,54 +90,59 @@ Compliance requirements vary by credential type.
 
 ---
 
-## Business Integration
+## Business 통합
 
-### Prerequisites
+### 사전 조건
 
-#### CRITICAL: Compliance Required for Card Credentials
+#### CRITICAL: 카드 자격증명은 규정 준수 필수
 
-Before accepting this handler, businesses must register their public encryption
-key with the platform.
+이 핸들러를 수락하기 전에,
+비즈니스는 플랫폼에 공개 암호화 키를 등록해야 합니다.
 
-While businesses receive only encrypted `EncryptedCredential` payloads during
-checkout, they decrypt these payloads locally to obtain raw credentials for
-payment processing. **For card credentials**, businesses MUST be **PCI DSS
-compliant** because they will handle raw PANs. This includes:
+checkout 시 비즈니스는 암호화된 `EncryptedCredential` payload만 수신하지만,
+결제 처리를 위해 로컬에서 복호화하여 원본 자격증명을 얻습니다.
+**카드 자격증명의 경우**, 비즈니스는 원본 PAN을 처리하게 되므로
+PCI DSS를 **MUST** 준수해야 합니다. 여기에는 다음이 포함됩니다.
 
-* Secure key management for decryption keys
-* Secure handling of raw credentials after decryption
-* For cards: Compliance with all PCI DSS requirements for handling Primary Account Numbers (PANs)
+* 복호화 키의 안전한 키 관리
+* 복호화 이후 원본 자격증명의 안전한 처리
+* 카드의 경우 PAN 처리 관련 PCI DSS 전체 준수
 
 **Prerequisites Output:**
 
 | Field                   | Description                                                |
 | :---------------------- | :--------------------------------------------------------- |
-| `identity.access_token` | Business identifier assigned by platform during onboarding |
-| Public key registered   | Platform stores business's public key for encryption       |
+| `identity.access_token` | 온보딩 시 플랫폼이 할당한 비즈니스 식별자                 |
+| Public key registered   | 플랫폼이 암호화용 비즈니스 공개키를 저장                  |
 
 ### Handler Configuration
 
-Businesses advertise the platform's handler. The `business_id` field identifies
-the business, which the platform uses to look up the correct public key for
-encryption.
+비즈니스는 플랫폼 handler를 광고합니다.
+`business_id`는 암호화에 사용할 공개키를 조회하기 위한 비즈니스 식별자입니다.
 
-The only supported instrument schema is [CardPaymentInstrument](https://ucp.dev/schemas/shopping/types/card_payment_instrument.json), the only supported checkout credential schema is `EncryptedCredential`, and the only supported source credential schema is [CardCredential](https://ucp.dev/schemas/shopping/types/card_credential.json).
+지원되는 instrument schema는
+[CardPaymentInstrument](https://ucp.dev/schemas/shopping/types/card_payment_instrument.json)만이며,
+지원되는 checkout credential schema는 `EncryptedCredential`만,
+지원되는 source credential schema는
+[CardCredential](https://ucp.dev/schemas/shopping/types/card_credential.json)만입니다.
 
-**Note:** The `EncryptedCredential` shape would be formally defined in the handler's schema (referenced via the `schema` field in the handler declaration).
+**참고:** `EncryptedCredential` 구조는
+핸들러 선언의 `schema` 필드가 가리키는 handler schema에 정식 정의되어야 합니다.
 
-**Note:** `CardCredential` contains raw PANs. For card credentials, the
-platform's vaulting service must be **PCI DSS compliant** when handling these
-credentials. Businesses receive only encrypted payloads but must be PCI DSS
-compliant once they decrypt card credentials locally. Other credential types
-have their own compliance requirements.
+**참고:** `CardCredential`에는 원본 PAN이 포함됩니다.
+카드 자격증명의 경우,
+플랫폼 vaulting service는 해당 자격증명 처리 시 PCI DSS를 **MUST** 준수해야 합니다.
+비즈니스는 암호화 payload만 수신하지만,
+카드 자격증명을 로컬 복호화하는 순간 PCI DSS 준수가 필요합니다.
+다른 자격증명 타입은 각 타입별 규제 요건을 따릅니다.
 
 #### Business Config (Discovery)
 
 | Field           | Type   | Required | Description                                         |
 | :-------------- | :----- | :------- | :-------------------------------------------------- |
-| `environment`   | string | Yes      | API environment (`sandbox` or `production`)         |
-| `business_id`   | string | Yes      | Business identifier assigned by platform            |
-| `public_key_id` | string | Yes      | Identifier for the business's registered public key |
+| `environment`   | string | Yes      | API 환경 (`sandbox` 또는 `production`)              |
+| `business_id`   | string | Yes      | 플랫폼이 할당한 비즈니스 식별자                     |
+| `public_key_id` | string | Yes      | 등록된 비즈니스 공개키 식별자                       |
 
 #### Example Business Handler Declaration
 
@@ -166,14 +171,14 @@ have their own compliance requirements.
 
 #### Response Config (Checkout)
 
-The response config includes information about the encryption used.
+response config에는 사용된 암호화 정보가 포함됩니다.
 
 | Field                  | Type   | Required | Description                           |
 | :--------------------- | :----- | :------- | :------------------------------------ |
-| `environment`          | string | Yes      | API environment                       |
-| `business_id`          | string | Yes      | Business identifier                   |
-| `encryption_algorithm` | string | Yes      | Algorithm used (e.g., `RSA-OAEP-256`) |
-| `key_id`               | string | Yes      | Key identifier used for encryption    |
+| `environment`          | string | Yes      | API 환경                              |
+| `business_id`          | string | Yes      | 비즈니스 식별자                       |
+| `encryption_algorithm` | string | Yes      | 사용 알고리즘 (예: `RSA-OAEP-256`)    |
+| `key_id`               | string | Yes      | 암호화에 사용된 키 식별자             |
 
 #### Example Response Config
 
@@ -188,48 +193,49 @@ The response config includes information about the encryption used.
 }
 ```
 
-### Processing Payments
+### 결제 처리
 
-Upon receiving a checkout with an encrypted credential:
+암호화 자격증명이 포함된 checkout을 수신하면 다음을 수행합니다.
 
-1. **Validate Handler:** Confirm `instrument.handler_id` matches the expected handler ID
-2. **Decrypt Credential:** Use business's private key to decrypt the credential
-3. **Verify Binding:** Confirm the decrypted `checkout_id` matches the current checkout
-4. **Process Payment:** Use the decrypted credential to complete payment
-5. **Return Response:** Respond with the finalized checkout state
+1. **Validate Handler:** `instrument.handler_id`가 기대 handler ID와 일치하는지 확인
+2. **Decrypt Credential:** 비즈니스 private key로 credential 복호화
+3. **Verify Binding:** 복호화된 `checkout_id`가 현재 checkout과 일치하는지 확인
+4. **Process Payment:** 복호화된 credential로 결제 처리
+5. **Return Response:** 최종 checkout 상태 반환
 
 ---
 
-## Platform Integration
+## Platform 통합
 
-### Prerequisites
+### 사전 조건
 
-This handler is implemented by platforms that operate compliant credential
-vaults and can encrypt credentials for businesses. To implement, platforms must:
+이 핸들러는 규정 준수 credential vault를 운영하고,
+비즈니스용 자격증명 암호화를 수행할 수 있는 플랫폼이 구현합니다.
+구현을 위해 플랫폼은 다음을 충족해야 합니다.
 
-1. Maintain compliance for credential storage and handling (e.g., PCI DSS for cards)
-2. Store business public keys during onboarding
-3. Encrypt credentials using the correct business's key based on handler identity
+1. 자격증명 저장·처리 규정 준수 유지(예: 카드의 경우 PCI DSS)
+2. 온보딩 시 비즈니스 공개키 저장
+3. 핸들러 identity 기반으로 올바른 비즈니스 키를 사용해 암호화
 
 **Implementation Requirements:**
 
 | Requirement | Description                                                      |
 | :---------- | :--------------------------------------------------------------- |
-| Key storage | Map business identities to their public keys                     |
-| Encryption  | Encrypt credentials + binding context with business's public key |
+| Key storage | 비즈니스 identity와 공개키 매핑 관리                             |
+| Encryption  | 비즈니스 공개키로 credential + binding context 암호화           |
 
 ### Handler Configuration (Platform)
 
-Platforms advertise this handler in their UCP profile's `payment_handlers`
-registry using `platform_config`.
+플랫폼은 UCP 프로필의 `payment_handlers` 레지스트리에서
+`platform_config`를 사용해 이 핸들러를 광고합니다.
 
 #### Platform Config (Discovery)
 
 | Field                  | Type   | Required | Description                                                |
 | :--------------------- | :----- | :------- | :--------------------------------------------------------- |
-| `environment`          | string | Yes      | API environment (`sandbox` or `production`)                |
-| `platform_id`          | string | Yes      | Platform identifier                                        |
-| `supported_algorithms` | array  | Yes      | Encryption algorithms supported (e.g., `["RSA-OAEP-256"]`) |
+| `environment`          | string | Yes      | API 환경 (`sandbox` 또는 `production`)                     |
+| `platform_id`          | string | Yes      | 플랫폼 식별자                                              |
+| `supported_algorithms` | array  | Yes      | 지원 암호화 알고리즘 (예: `['RSA-OAEP-256']`)             |
 
 #### Example Platform Handler Declaration
 
@@ -256,25 +262,22 @@ registry using `platform_config`.
 }
 ```
 
-### Credential Encryption
+### Credential 암호화
 
-The platform application orchestrates the payment flow but
-**never has access to raw credentials**. Instead:
+플랫폼 애플리케이션은 결제 흐름을 오케스트레이션하지만,
+**원본 자격증명에는 접근하지 않습니다**.
+대신 다음 흐름으로 처리됩니다.
 
-1. The platform's **compliant vaulting service** receives the raw credential
-   from the user
-2. The vaulting service encrypts the credential along with binding context using
-   the business's public key
-3. The vaulting service returns the encrypted payload to the platform application
-4. The platform application includes this encrypted payload in the checkout submission
+1. 플랫폼의 **규정 준수 vaulting service**가 사용자로부터 원본 credential 수신
+2. vaulting service가 비즈니스 공개키로 credential과 binding context를 암호화
+3. vaulting service가 암호화 payload를 플랫폼 애플리케이션에 반환
+4. 플랫폼 애플리케이션이 checkout 제출에 이 암호화 payload 포함
 
-This separation ensures the platform application itself never handles or has
-access to raw PANs.
+이 분리 구조는 플랫폼 애플리케이션 자체가 원본 PAN을 처리하지 않도록 보장합니다.
 
-### Submitting Checkout
+### Checkout 제출
 
-Platform application submits the checkout with the encrypted credential
-(received from its vaulting service):
+플랫폼 애플리케이션은 vaulting service에서 받은 암호화 credential로 checkout을 제출합니다.
 
 ```json
 POST /checkout-sessions/{checkout_id}/complete
@@ -314,14 +317,14 @@ Content-Type: application/json
 
 | Requirement | Description |
 | :---------- | :---------- |
-| **Compliance (Platform)** | Platform vaulting services MUST be compliant with relevant standards for the credential type (e.g., PCI DSS for cards handling raw PANs) |
-| **Compliance (Business)** | Businesses MUST be compliant with relevant standards for decryption and handling of raw credentials locally (e.g., PCI DSS for cards) |
-| **No platform app credential access** | Platform applications MUST NOT handle raw credentials—only the compliant vaulting service does |
-| **Asymmetric encryption** | Platform's credential vault encrypts with business's public key; only business can decrypt |
-| **Binding embedded** | `checkout_id` MUST be included in encrypted payload to prevent replay |
-| **Key rotation** | Businesses SHOULD rotate keys periodically; platform must support key updates |
-| **No credential storage** | Platform does not store encrypted credentials; encryption is one-way |
-| **HTTPS required** | All checkout submissions must use TLS |
+| **Compliance (Platform)** | 플랫폼 vaulting service는 원본 PAN을 처리하는 카드 시나리오에서 PCI DSS 등 자격증명 타입별 관련 표준을 **MUST** 준수해야 합니다. |
+| **Compliance (Business)** | 비즈니스는 로컬에서 원본 자격증명 복호화·처리를 수행하므로 자격증명 타입별 관련 표준(예: 카드의 PCI DSS)을 **MUST** 준수해야 합니다. |
+| **No platform app credential access** | 플랫폼 애플리케이션은 원본 자격증명을 **MUST NOT** 처리해야 하며, 규정 준수 vaulting service만 처리해야 합니다. |
+| **Asymmetric encryption** | 플랫폼 credential vault는 비즈니스 공개키로 암호화하고, 비즈니스만 복호화할 수 있어야 합니다. |
+| **Binding embedded** | 재사용 공격 방지를 위해 암호화 payload에는 `checkout_id`가 **MUST** 포함되어야 합니다. |
+| **Key rotation** | 비즈니스는 키를 주기적으로 교체하는 것을 **SHOULD** 권장하며, 플랫폼은 키 업데이트를 지원해야 합니다. |
+| **No credential storage** | 플랫폼은 암호화 credential을 저장하지 않으며, 암호화는 일방향 처리입니다. |
+| **HTTPS required** | 모든 checkout 제출은 TLS를 사용해야 합니다. |
 
 ---
 
