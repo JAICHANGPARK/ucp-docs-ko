@@ -14,16 +14,18 @@
    limitations under the License.
 -->
 
-# Checkout Capability - A2A Binding
+# Checkout Capability - A2A 바인딩
 
-This document specifies the Agent2Agent Protocol (A2A) binding for
-[Checkout Capability](checkout.md).
+이 문서는 [Checkout Capability](checkout.md)의
+Agent2Agent Protocol(A2A) 바인딩을 명세합니다.
 
 ## Transport Discovery
 
-Businesses that support A2A transport must specify the agent card endpoint as
-part of `services` in UCP Profile at `/.well-known/ucp`. This allows capable
-platforms to interact with the business services over A2A Protocol.
+A2A transport를 지원하는 비즈니스는
+`/.well-known/ucp`의 UCP Profile 내 `services`에
+agent card endpoint를 명시해야 합니다.
+이를 통해 해당 기능을 지원하는 플랫폼이
+A2A Protocol을 통해 비즈니스 서비스와 상호작용할 수 있습니다.
 
 ```json
 {
@@ -43,40 +45,43 @@ platforms to interact with the business services over A2A Protocol.
 }
 ```
 
-## Shopping Agent Profile Advertisement
+## 쇼핑 에이전트 프로필 광고
 
-Shopping platforms interacting with the business agent must
-send their profile URI as `UCP-Agent` request headers with every request.
+비즈니스 에이전트와 상호작용하는 쇼핑 플랫폼은
+모든 요청에서 `UCP-Agent` 요청 헤더로
+자신의 profile URI를 전송해야 합니다.
 
 ```text
 UCP-Agent: profile="https://agent.example/profiles/v2025-11/shopping-agent.json"
 Content-Type: application/json
 ```
 
-### Header Mapping Reference
+### 헤더 매핑 레퍼런스
 
-The following table defines the required headers for enabling an A2A Agent
-to communicate UCP data types with platforms.
+다음 표는 A2A Agent가 플랫폼에 UCP 데이터 타입을 전달하기 위해
+필요한 헤더를 정의합니다.
 
 | Header Name        | Description                                |
 | :----------------- | :----------------------------------------- |
-| `UCP-Agent`        | Shopping platform application profile URI. |
-| `X-A2A-Extensions` | UCP Extension URI (specified below).       |
+| `UCP-Agent`        | 쇼핑 플랫폼 애플리케이션 profile URI       |
+| `X-A2A-Extensions` | UCP Extension URI (아래 명시)              |
 
-## A2A Interactions
+## A2A 상호작용
 
-The A2A Protocol provides a strong foundation for inter-agent communication.
-[A2A extensions](https://a2a-protocol.org/latest/topics/extensions/) enable communication between agents with structured data
-types. This enables businesses to build AI applications to leverage UCP data
-types for communication with platforms.
+A2A Protocol은 에이전트 간 통신의 강력한 기반을 제공합니다.
+[A2A extensions](https://a2a-protocol.org/latest/topics/extensions/)은
+구조화된 데이터 타입을 사용한 에이전트 간 통신을 가능하게 합니다.
+이를 통해 비즈니스는 플랫폼과의 통신에서 UCP 데이터 타입을 활용하는
+AI 애플리케이션을 구축할 수 있습니다.
 
-The URI for UCP A2A extension: `https://ucp.dev/specification/reference?v=2026-01-11`
+UCP A2A extension URI는 다음과 같습니다.
+`https://ucp.dev/specification/reference?v=2026-01-11`
 
-Businesses supporting UCP must advertise the extension and any optional
-capabilities in their A2A Agent Card to allow platforms to activate
-the extension.
+UCP를 지원하는 비즈니스는
+A2A Agent Card에 extension과 선택 capability를 광고해야 하며,
+이를 통해 플랫폼이 extension을 활성화할 수 있어야 합니다.
 
-An example:
+예시:
 
 ```json
 {
@@ -102,57 +107,57 @@ An example:
 }
 ```
 
-### Agent2Agent Negotiation
+### Agent2Agent 협상
 
-The business agents can leverage A2A `Message` objects for allowing interaction
-with shopping agents/platforms. The A2A `Message` object returned by
-the agent will return structured data in `DataPart` objects within the message.
-Platforms must pass the business agent generated `contextId` for
-subsequent turns in a session to preserve the current context.
+비즈니스 에이전트는 A2A `Message` 객체를 활용해
+쇼핑 에이전트/플랫폼과 상호작용할 수 있습니다.
+에이전트가 반환하는 A2A `Message` 객체는
+메시지 내부 `DataPart`에 구조화 데이터를 담습니다.
+플랫폼은 세션 내 후속 턴에서 현재 컨텍스트를 유지하기 위해,
+비즈니스 에이전트가 생성한 `contextId`를 전달해야 합니다.
 
-Business agents may also leverage A2A `Task` objects for scenarios where
-applicable. In such scenarios, the business agent will return `Task` objects
-with appropriate payload for interaction with the platforms.
-Platforms must pass the server generated `taskId` along with the
-`contextId` for subsequent turns until the task is completed.
+필요한 시나리오에서 비즈니스 에이전트는 A2A `Task` 객체를 사용할 수 있습니다.
+이 경우 비즈니스 에이전트는 상호작용에 필요한 payload와 함께 `Task` 객체를 반환합니다.
+플랫폼은 task 완료 전까지 후속 턴에
+서버가 생성한 `taskId`와 `contextId`를 함께 전달해야 합니다.
 
-Platforms must be capable of handling further negotiation in the
-same session even after a task reaches a terminal state (e.g. user places an
-order and wants to place another order in the same context or if the task
-reaches a failed state due to an exception). Platforms must reset the
-`taskId` once a task reaches terminal state to allow further interactions with
-the agent, although the current `contextId` can be reused for subsequent
-interactions.
+플랫폼은 task가 종료 상태에 도달한 이후에도
+동일 세션에서 추가 협상을 처리할 수 있어야 합니다
+(예: 사용자가 주문 완료 후 동일 컨텍스트에서 추가 주문,
+혹은 예외로 인해 task가 실패 상태가 된 경우).
+Task가 종료 상태에 도달하면,
+플랫폼은 에이전트와 추가 상호작용을 위해 `taskId`를 초기화해야 하며,
+`contextId`는 후속 상호작용에서 재사용할 수 있습니다.
 
-## Request Idempotency
+## 요청 멱등성(Request Idempotency)
 
-Business agents must leverage the `messageId` sent as part of the A2A `Message`
-to detect duplicate messages from platform retries.
+비즈니스 에이전트는 플랫폼 재시도로 인한 중복 메시지를 감지하기 위해,
+A2A `Message`의 `messageId`를 활용해야 합니다.
 
-## Checkout Functionality
+## Checkout 기능
 
-The Checkout capability allows consumers to manage items in a checkout session
-and complete the purchase process. The business agent typically integrates
-with the business's checkout APIs for offering this functionality.
+Checkout capability는 소비자가 checkout 세션의 아이템을 관리하고
+구매 절차를 완료할 수 있게 합니다.
+비즈니스 에이전트는 일반적으로 이 기능 제공을 위해
+비즈니스 checkout API와 연동합니다.
 
-The extension defines the data schema for representing the Checkout
-functionality by business agent for any checkout related actions, completing or
-canceling the checkout. `Checkout` entity is a profile of an A2A `Message`.
-The Checkout entity must be returned by the business agent to the platform
-that activated UCP-A2A Extension in an A2A `Message`'s `DataPart`.
-The checkout object **MUST** be returned as part of a `DataPart` object with
-key `a2a.ucp.checkout`.
+이 extension은 checkout 관련 액션, checkout 완료 또는 취소 시
+비즈니스 에이전트가 Checkout 기능을 표현하는 데이터 스키마를 정의합니다.
+`Checkout` 엔터티는 A2A `Message`의 profile입니다.
+Checkout 엔터티는 UCP-A2A Extension을 활성화한 플랫폼으로
+반드시 반환되어야 하며,
+A2A `Message`의 `DataPart`에 포함되어야 합니다.
+checkout 객체는 key `a2a.ucp.checkout`를 가진
+`DataPart` 객체의 일부로 **MUST** 반환되어야 합니다.
 
 **Request format:**
-Agentic applications can accept natural language input from users interacting
-with the agent to identify the user's intent, negotiate with the user to
-capture any required information and then invoke the appropriate tools to
-perform the operation. Inputs from platforms can be sent to the remote business
-agent as an A2A `Message`.
+에이전트 애플리케이션은 사용자의 자연어 입력을 받아 의도를 파악하고,
+필요 정보 협상을 거쳐 적절한 도구를 호출해 작업을 수행할 수 있습니다.
+플랫폼 입력은 A2A `Message`로 원격 비즈니스 에이전트에 전달할 수 있습니다.
 
-Examples:
+예시:
 
-- Natural language input
+- 자연어 입력
 
 ```json
 {
@@ -171,7 +176,7 @@ Examples:
 }
 ```
 
-- Structured inputs on user actions
+- 사용자 액션 기반 구조화 입력
 
 ```json
 {
@@ -196,8 +201,7 @@ Examples:
 ```
 
 **Response format:**
-Following is an example response from a business agent implementing
-Checkout functionality:
+다음은 Checkout 기능을 구현한 비즈니스 에이전트 응답 예시입니다.
 
 ```json
 {
@@ -220,19 +224,19 @@ Checkout functionality:
 }
 ```
 
-### Checkout Completion
+### Checkout 완료
 
-When a user is ready to make a payment, `payment` must be submitted
-to the business agent to complete the checkout process. `payment` is a
-structured data type specified as part of UCP. When processing a payment to
-complete the checkout, `payment` must be submitted to the business
-agent
-as a `DataPart` with attribute name `a2a.ucp.checkout.payment`. Any
-associated risk signals should be sent with attribute
-name `a2a.ucp.checkout.risk_signals`.
+사용자가 결제할 준비가 되면 checkout 완료를 위해
+`payment`를 비즈니스 에이전트에 제출해야 합니다.
+`payment`는 UCP에 정의된 구조화 데이터 타입입니다.
+결제 처리 시 `payment`는
+속성 이름 `a2a.ucp.checkout.payment`를 갖는 `DataPart`로 제출되어야 합니다.
+연관 risk signal은
+속성 이름 `a2a.ucp.checkout.risk_signals`로 전송해야 합니다.
 
-Upon completion of the checkout process, the business agent must return the
-checkout object containing an `order` attribute with `id` and `permalink_url`.
+checkout 완료 후,
+비즈니스 에이전트는 `order` 속성(`id`, `permalink_url`)을 포함한
+checkout 객체를 반환해야 합니다.
 
 **Request format:**
 
@@ -265,8 +269,7 @@ checkout object containing an `order` attribute with `id` and `permalink_url`.
 ```
 
 **Response format:**
-Following is an example response from a business agent implementing
-Checkout functionality:
+다음은 Checkout 기능을 구현한 비즈니스 에이전트 응답 예시입니다.
 
 ```json
 {
@@ -290,20 +293,21 @@ Checkout functionality:
 
 ```
 
-#### AP2 based Checkout Completion
+#### AP2 기반 Checkout 완료
 
-Business agents can implement AP2 mandates extension that enables secure
-exchange of user intents and authorizations for Agent-to-Agent payment
-interactions. Businesses that support AP2 mandates extension for UCP must
-specify this in the UCP discovery document and the A2A agent card.
-The AP2 mandates extension is considered implicitly active when a platform and
-business agent advertise AP2 mandates extension in their respective profiles.
+비즈니스 에이전트는 에이전트 간 결제 상호작용에서
+사용자 의도와 권한을 안전하게 교환할 수 있도록
+AP2 mandates extension을 구현할 수 있습니다.
+UCP용 AP2 mandates extension을 지원하는 비즈니스는
+UCP discovery 문서와 A2A agent card에 이를 명시해야 합니다.
+플랫폼과 비즈니스 에이전트가 각 프로필에서 AP2 mandates extension을 광고하면,
+AP2 mandates extension은 암묵적으로 활성화된 것으로 간주됩니다.
 
-When AP2 mandates extension is enabled, the business agent must create a
-detached JWS for the checkout object and must return the generated signature
-as part of the `DataPart` as `ap2.merchant_authorization`.
-This will allow the platform to cryptographically verify the
-checkout payload against the business's public keys.
+AP2 mandates extension이 활성화되면,
+비즈니스 에이전트는 checkout 객체에 대해 detached JWS를 생성하고,
+생성된 서명을 `DataPart`의 `ap2.merchant_authorization`으로 반환해야 합니다.
+이를 통해 플랫폼은 비즈니스 공개키를 사용해
+checkout payload를 암호학적으로 검증할 수 있습니다.
 
 ```json
 {
@@ -331,16 +335,15 @@ checkout payload against the business's public keys.
 }
 ```
 
-When the user confirms the payment on a platform, the user signed
-checkout and payment mandate objects must be sent as `DataPart`s
-to the business agent for completing checkout. The `payment` which
-includes the payment mandate must be submitted as part of a `DataPart`
-with attribute name `a2a.ucp.checkout.payment`. Signed checkout mandate
-must be specified in the `DataPart` as `ap2.checkout_mandate`. The `token`
-attribute of `payment.instruments[*].credential` contains the payment mandate.
-Refer to [AP2 Mandates Extension](ap2-mandates.md) documentation for more
-details about verification and processing of the mandates to complete the
-checkout.
+사용자가 플랫폼에서 결제를 확정하면,
+사용자 서명 checkout mandate와 payment mandate 객체를
+checkout 완료를 위해 `DataPart`로 비즈니스 에이전트에 전송해야 합니다.
+payment mandate를 포함한 `payment`는
+속성 이름 `a2a.ucp.checkout.payment`인 `DataPart`로 제출해야 하며,
+서명된 checkout mandate는 `ap2.checkout_mandate`로 지정해야 합니다.
+`payment.instruments[*].credential`의 `token` 속성에는 payment mandate가 들어갑니다.
+checkout 완료를 위한 mandate 검증/처리 상세는
+[AP2 Mandates Extension](ap2-mandates.md) 문서를 참고하세요.
 
 **Request format:**
 
