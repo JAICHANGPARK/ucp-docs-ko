@@ -14,87 +14,86 @@
    limitations under the License.
 -->
 
-# Order Capability
+# 주문(Order) Capability
 
-* **Capability Name:** `dev.ucp.shopping.order`
+* **Capability 이름:** `dev.ucp.shopping.order`
 
-## Overview
+## 개요
 
-Orders represent confirmed transactions resulting from a successful checkout
-submission. It provides a complete record of what was purchased, how
-it will be delivered, and what has happened since order placement.
+주문은 체크아웃 제출이 성공적으로 완료된 뒤 확정된 거래를 나타냅니다.
+무엇을 구매했는지, 어떻게 전달될 예정인지, 주문 생성 이후 어떤 일이 있었는지를
+하나의 완전한 기록으로 제공합니다.
 
-### Key Concepts
+### 핵심 개념
 
-Orders have three main components:
+주문은 크게 3가지 구성요소를 가집니다.
 
-**Line Items** — what was purchased at checkout:
+**라인 아이템(Line Items)** - 체크아웃에서 무엇을 구매했는지:
 
-* Includes current quantity counts (total, fulfilled)
+* 현재 수량 카운트(총 수량, 이행 수량)를 포함
 
-**Fulfillment** — how items get delivered:
+**이행(Fulfillment)** - 아이템이 어떻게 전달되는지:
 
-* **Expectations** — buyer-facing *promises* about when/how items will arrive
-* **Events** (append-only log) — what actually happened (e.g. 👕 was shipped)
+* **기대치(Expectations)** - 구매자에게 보여지는 "언제/어떻게 도착하는지"에 대한 *약속*
+* **이벤트(append-only log)** - 실제로 어떤 일이 발생했는지 (예: 👕 배송됨)
 
-**Adjustments** (append-only log) — post-order events independent of fulfillment:
+**조정(Adjustments, append-only log)** - 이행과 독립적인 주문 이후 이벤트:
 
-* Typically money movements (refunds, returns, credits, disputes, cancellations)
-* Can be any post-order change
-* Can happen before, during, or after fulfillment
+* 보통 금액 이동(환불, 반품, 크레딧, 분쟁, 취소)
+* 주문 이후 발생하는 어떤 변경도 가능
+* 이행 이전/중간/이후 어느 시점에도 발생 가능
 
-## Data Model
+## 데이터 모델
 
-### Line Items
+### 라인 아이템
 
-Line items reflect what was purchased at checkout and their current state:
+라인 아이템은 체크아웃에서 구매한 항목과 현재 상태를 나타냅니다.
 
-* Item details (product, price, quantity ordered)
-* Quantity counts and status are derived
+* 아이템 상세(상품, 가격, 주문 수량)
+* 수량 카운트와 상태는 파생(derived)됨
 
-### Fulfillment
+### 이행(Fulfillment)
 
-Fulfillment tracks how items are delivered to the buyer.
+이행은 아이템이 구매자에게 전달되는 방식을 추적합니다.
 
-#### Expectations
+#### 기대치(Expectations)
 
-**Expectations** are buyer-facing groupings of items (e.g., "package 📦"). They represent:
+**기대치**는 구매자 관점의 아이템 묶음(예: "패키지 📦")으로, 다음을 나타냅니다.
 
-* What items are grouped together
-* Where they're going (`destination`)
-* How they're being delivered (`method_type`)
-* When they'll arrive (`description`, `fulfillable_on`)
+* 어떤 아이템이 함께 묶였는지
+* 어디로 가는지(`destination`)
+* 어떤 방식으로 전달되는지(`method_type`)
+* 언제 도착하는지(`description`, `fulfillable_on`)
 
-Expectations can be split, merged, or adjusted post-order. For example:
+기대치는 주문 이후 분할/병합/조정될 수 있습니다. 예를 들면:
 
-* Group everything by delivery date: "what is coming when"
-* Use a single expectation with a wide date range for flexibility
-* The goal is **setting buyer expectations** - for the best buyer experience
+* 배송일 기준으로 묶기: "무엇이 언제 오는지"
+* 유연성을 위해 넓은 날짜 범위의 단일 기대치 사용
+* 목표는 **구매자 기대치 설정**이며, 이는 좋은 구매 경험을 위한 핵심입니다.
 
-#### Fulfillment Events
+#### 이행 이벤트(Fulfillment Events)
 
-**Fulfillment Events** are an append-only log tracking physical shipments:
+**이행 이벤트**는 실제 배송 상태를 추적하는 append-only 로그입니다.
 
-* Reference line items by ID and quantity
-* Include tracking information
-* Type is an open string field - businesses can use any values that make sense
-  (common examples: `processing`, `shipped`, `in_transit`, `delivered`,
+* 라인 아이템 ID와 수량을 참조
+* 트래킹 정보를 포함
+* `type`은 개방형 문자열 필드로, 비즈니스가 필요에 맞게 정의 가능
+  (일반 예시: `processing`, `shipped`, `in_transit`, `delivered`,
   `failed_attempt`, `canceled`, `undeliverable`, `returned_to_sender`)
 
-### Adjustments
+### 조정(Adjustments)
 
-**Adjustments** are an append-only log of events that exist independently of
-fulfillment:
+**조정**은 이행과 독립적으로 존재하는 append-only 이벤트 로그입니다.
 
-* Type is an open string field - businesses can use any values that make sense
-  (typically money movements like `refund`, `return`, `credit`,
-  `price_adjustment`, `dispute`, `cancellation`)
-* Can be any post-order change
-* Optionally link to line items (or order-level for things like shipping refunds)
-* Include amount when relevant
-* Can happen at any time regardless of fulfillment status
+* `type`은 개방형 문자열 필드로, 비즈니스가 필요에 맞게 정의 가능
+  (보통 `refund`, `return`, `credit`,
+  `price_adjustment`, `dispute`, `cancellation` 같은 금액 이동)
+* 주문 이후 변경이면 어떤 것이든 포함 가능
+* 필요 시 라인 아이템에 연결 가능(또는 배송비 환불 같은 주문 단위 이벤트)
+* 관련 시 금액(`amount`) 포함
+* 이행 상태와 무관하게 어느 시점에나 발생 가능
 
-## Schema
+## 스키마
 
 ### Order
 
@@ -102,12 +101,12 @@ fulfillment:
 
 ### Order Line Item
 
-Line items reflect what was purchased at checkout and their current state.
-Status and quantity counts should reflect the event logs.
+라인 아이템은 체크아웃에서 구매한 내용과 현재 상태를 반영합니다.
+상태 및 수량 카운트는 이벤트 로그를 기준으로 계산되어야 합니다.
 
 {{ schema_fields('order_line_item', 'order') }}
 
-**Quantity Structure:**
+**수량 구조:**
 
 ```json
 {
@@ -116,7 +115,7 @@ Status and quantity counts should reflect the event logs.
 }
 ```
 
-**Status Derivation:**
+**상태 파생 규칙:**
 
 ```text
 if (fulfilled == total) → "fulfilled"
@@ -126,35 +125,32 @@ else → "processing"
 
 ### Expectation
 
-Expectations are buyer-facing groupings representing when/how items will be
-delivered. They represent the current promise to the buyer and can be
-split, merged, or adjusted post-order.
+기대치는 아이템이 언제/어떻게 전달되는지에 대한 구매자 관점의 묶음입니다.
+이는 구매자에게 제공하는 현재 약속을 나타내며, 주문 이후 분할/병합/조정될 수 있습니다.
 
 {{ schema_fields('expectation', 'order') }}
 
 ### Fulfillment Event
 
-Events are append-only records tracking actual shipments. The `type` field is
-an open string - businesses can use any values that make sense for their
-fulfillment process.
+이벤트는 실제 배송 과정을 기록하는 append-only 레코드입니다. `type` 필드는
+개방형 문자열로, 비즈니스가 이행 프로세스에 맞춰 값을 정의할 수 있습니다.
 
 {{ schema_fields('fulfillment_event', 'order') }}
 
-Examples: `processing`, `shipped`, `in_transit`, `delivered`, `failed_attempt`,
-`canceled`, `undeliverable`, `returned_to_sender`, etc.
+예시: `processing`, `shipped`, `in_transit`, `delivered`, `failed_attempt`,
+`canceled`, `undeliverable`, `returned_to_sender` 등.
 
 ### Adjustment
 
-Adjustments are polymorphic events that exist independently of fulfillment.
-The `type` field is an open string - businesses can use any values that make
-sense to them.
+조정은 이행과 독립적으로 존재하는 다형성(polymorphic) 이벤트입니다.
+`type` 필드는 개방형 문자열로, 비즈니스 요구에 맞게 정의할 수 있습니다.
 
 {{ schema_fields('adjustment', 'order') }}
 
-Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
-`cancellation`, etc.
+예시: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
+`cancellation` 등.
 
-## Example
+## 예시
 
 ```json
 {
@@ -252,30 +248,29 @@ Examples: `refund`, `return`, `credit`, `price_adjustment`, `dispute`,
 }
 ```
 
-## Events
+## 이벤트
 
-Businesses send order status changes as events after order placement.
+비즈니스는 주문 생성 이후 주문 상태 변경을 이벤트로 전송합니다.
 
-| Event Mechanism                             | Method | Endpoint              | Description                                            |
-| :------------------------------------------ | :----- | :-------------------- | :----------------------------------------------------- |
-| [Order Event Webhook](#order-event-webhook) | `POST` | Platform-provided URL | Business sends order lifecycle events to the platform. |
+| 이벤트 메커니즘 | 메서드 | 엔드포인트 | 설명 |
+| :-------------- | :----- | :--------- | :--- |
+| [Order Event Webhook](#order-event-webhook) | `POST` | 플랫폼 제공 URL | 비즈니스가 주문 라이프사이클 이벤트를 플랫폼으로 전송 |
 
 ### Order Event Webhook
 
-Businesses POST order events to a webhook URL provided by the platform
-during partner onboarding. The URL format is platform-specific.
+비즈니스는 파트너 온보딩 중 플랫폼이 제공한 웹훅 URL로 주문 이벤트를 POST합니다.
+URL 형식은 플랫폼마다 다를 수 있습니다.
 
 {{ method_fields('order_event_webhook', 'rest.openapi.json', 'order') }}
 
-### Webhook URL Configuration
+### 웹훅 URL 설정
 
-The platform provides its webhook URL in the order capability's `config` field
-during capability negotiation. The business discovers this URL from the
-platform's profile and uses it to send order lifecycle events.
+플랫폼은 capability 협상 시 order capability의 `config` 필드에 웹훅 URL을 제공합니다.
+비즈니스는 플랫폼 프로필에서 이 URL을 발견(discover)하여 주문 라이프사이클 이벤트 전송에 사용합니다.
 
 {{ extension_schema_fields('order.json#/$defs/platform_schema', 'order') }}
 
-**Example:**
+**예시:**
 
 ```json
 {
@@ -290,56 +285,54 @@ platform's profile and uses it to send order lifecycle events.
 }
 ```
 
-### Webhook Signature Verification
+### 웹훅 서명 검증
 
-Webhook payloads **MUST** be signed by the business and verified by the platform
-to ensure authenticity and integrity.
+웹훅 페이로드는 진위성과 무결성을 보장하기 위해 비즈니스가 **반드시(MUST)** 서명하고,
+플랫폼이 **반드시(MUST)** 검증해야 합니다.
 
-#### Signing (Business)
+#### 서명 (Business)
 
-1. Select a key from the `signing_keys` array in UCP profile.
-2. Create a detached JWT (RFC 7797) over the request body using the selected key.
-3. Include the JWT in the `Request-Signature` header.
-4. Include the key ID in the JWT header's `kid` claim to allow the receiver to
-    identify which key to use for verification.
+1. UCP 프로필의 `signing_keys` 배열에서 키를 선택합니다.
+2. 선택한 키로 요청 본문에 대한 detached JWT(RFC 7797)를 생성합니다.
+3. JWT를 `Request-Signature` 헤더에 포함합니다.
+4. 수신자가 검증 키를 식별할 수 있도록 JWT 헤더의 `kid` 클레임에 키 ID를 포함합니다.
 
-#### Verification (Platform)
+#### 검증 (Platform)
 
-1. Extract the `Request-Signature` header from the incoming webhook request.
-2. Parse the JWT header to retrieve the `kid` (key ID).
-3. Fetch the business's UCP profile from `/.well-known/ucp` (cache as appropriate).
-4. Locate the key in `signing_keys` with the matching `kid`.
-5. Verify the JWT signature against the request body using the public key.
-6. If verification fails, reject the webhook with an appropriate error response.
+1. 수신한 웹훅 요청에서 `Request-Signature` 헤더를 추출합니다.
+2. JWT 헤더를 파싱해 `kid`(키 ID)를 읽습니다.
+3. `/.well-known/ucp`에서 비즈니스의 UCP 프로필을 가져옵니다(적절히 캐시 가능).
+4. `signing_keys`에서 `kid`가 일치하는 키를 찾습니다.
+5. 공개키로 요청 본문에 대한 JWT 서명을 검증합니다.
+6. 검증 실패 시 적절한 오류 응답으로 웹훅을 거부합니다.
 
-#### Key Rotation
+#### 키 로테이션
 
-The `signing_keys` array supports multiple keys to enable zero-downtime
-rotation:
+`signing_keys` 배열은 무중단(zero-downtime) 키 로테이션을 위해 다중 키를 지원합니다.
 
-* **Adding a new key:** Add the new key to `signing_keys`, then start signing
-    with it. Verifiers will find it by `kid`.
-* **Removing an old key:** After sufficient time for all in-flight webhooks to
-    be delivered, remove the old key from `signing_keys`.
+* **새 키 추가:** 새 키를 `signing_keys`에 추가한 뒤 해당 키로 서명을 시작합니다.
+  검증자는 `kid`로 키를 찾을 수 있습니다.
+* **기존 키 제거:** 전송 중(in-flight) 웹훅이 충분히 전달된 뒤,
+  `signing_keys`에서 이전 키를 제거합니다.
 
-## Guidelines
+## 가이드라인
 
 **Platform:**
 
-* **MUST** respond quickly with a 2xx HTTP status code to acknowledge receipt
-* Process events asynchronously after responding
+* 수신 확인을 위해 빠르게 2xx HTTP 상태 코드를 **반드시(MUST)** 응답
+* 응답 후 비동기로 이벤트 처리
 
 **Business:**
 
-* **MUST** sign all webhook payloads using a key from their `signing_keys`
-  array (published in `/.well-known/ucp`). The signature **MUST** be included
-  in the `Request-Signature` header as a detached JWT (RFC 7797).
-* **MUST** send "Order created" event with fully populated order entity
-* **MUST** send full order entity on updates (not incremental deltas)
-* **MUST** retry failed webhook deliveries
-* **MUST** include business identifier in webhook path or headers
+* 모든 웹훅 페이로드를 자신의 `signing_keys` 배열
+  (`/.well-known/ucp`에 게시) 중 하나의 키로 **반드시(MUST)** 서명해야 합니다.
+  서명은 detached JWT(RFC 7797) 형식으로 `Request-Signature` 헤더에 **반드시(MUST)** 포함되어야 합니다.
+* "Order created" 이벤트를 완전한 order 엔터티와 함께 **반드시(MUST)** 전송
+* 업데이트 시 증분(delta)이 아닌 전체 order 엔터티를 **반드시(MUST)** 전송
+* 실패한 웹훅 전송을 **반드시(MUST)** 재시도
+* 웹훅 경로 또는 헤더에 business 식별자를 **반드시(MUST)** 포함
 
-## Entities
+## 엔터티
 
 ### Item Response
 
