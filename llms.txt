@@ -1,0 +1,75 @@
+# Universal Commerce Protocol (UCP) 한국어 문서
+
+> Universal Commerce Protocol(UCP)은 생성형 AI 에이전트가 사용자를 대신해 안전하고 신뢰할 수 있으며 분산형·프라이버시 보호 방식으로 결제를 수행할 수 있게 하는 프로토콜입니다. UCP는 A2A, MCP 같은 에이전트 프로토콜 생태계와 함께 동작하며 글로벌 결제 시나리오를 포괄합니다.
+
+
+## Introduction
+
+- [홈](https://jaichangpark.github.io/ucp-docs-ko/index.md)
+- [핵심 개념](https://jaichangpark.github.io/ucp-docs-ko/documentation/core-concepts/index.md)
+
+## UCP and AP2
+
+- [UCP와 AP2](https://jaichangpark.github.io/ucp-docs-ko/documentation/ucp-and-ap2/index.md)
+
+## Playground
+
+- [플레이그라운드](https://jaichangpark.github.io/ucp-docs-ko/playground/index.md)
+
+## Roadmap
+
+- [로드맵](https://jaichangpark.github.io/ucp-docs-ko/documentation/roadmap/index.md)
+
+## Specification Overview
+
+- [개요](https://jaichangpark.github.io/ucp-docs-ko/specification/overview/index.md)
+
+## Checkout Capability
+
+- [개요](https://jaichangpark.github.io/ucp-docs-ko/specification/checkout/index.md)
+- [HTTP/REST 바인딩](https://jaichangpark.github.io/ucp-docs-ko/specification/checkout-rest/index.md)
+- [MCP 바인딩](https://jaichangpark.github.io/ucp-docs-ko/specification/checkout-mcp/index.md)
+- [A2A 바인딩](https://jaichangpark.github.io/ucp-docs-ko/specification/checkout-a2a/index.md)
+
+## Checkout Extensions
+
+- [AP2 위임 확장](https://jaichangpark.github.io/ucp-docs-ko/specification/ap2-mandates/index.md)
+- [구매자 동의 확장](https://jaichangpark.github.io/ucp-docs-ko/specification/buyer-consent/index.md)
+- [할인 확장](https://jaichangpark.github.io/ucp-docs-ko/specification/discount/index.md)
+- [임베디드 체크아웃 바인딩](https://jaichangpark.github.io/ucp-docs-ko/specification/embedded-checkout/index.md)
+- [주문 이행 확장](https://jaichangpark.github.io/ucp-docs-ko/specification/fulfillment/index.md)
+
+## Cart Capability
+
+- [개요](https://jaichangpark.github.io/ucp-docs-ko/specification/cart/index.md)
+- [HTTP/REST 바인딩](https://jaichangpark.github.io/ucp-docs-ko/specification/cart-rest/index.md)
+- [MCP 바인딩](https://jaichangpark.github.io/ucp-docs-ko/specification/cart-mcp/index.md)
+
+## Order Capability
+
+- [주문 기능](https://jaichangpark.github.io/ucp-docs-ko/specification/order/index.md)
+
+## Identity Linking Capability
+
+- [신원 연결 기능](https://jaichangpark.github.io/ucp-docs-ko/specification/identity-linking/index.md)
+
+## Payment Handlers
+
+- [가이드](https://jaichangpark.github.io/ucp-docs-ko/specification/payment-handler-guide/index.md)
+- [템플릿](https://jaichangpark.github.io/ucp-docs-ko/specification/payment-handler-template/index.md)
+- [토큰화 가이드](https://jaichangpark.github.io/ucp-docs-ko/specification/tokenization-guide/index.md)
+
+## Payment Handler Examples
+
+- [프로세서 토크나이저](https://jaichangpark.github.io/ucp-docs-ko/specification/examples/processor-tokenizer-payment-handler/index.md)
+- [플랫폼 토크나이저](https://jaichangpark.github.io/ucp-docs-ko/specification/examples/platform-tokenizer-payment-handler/index.md)
+- [암호화 자격증명](https://jaichangpark.github.io/ucp-docs-ko/specification/examples/encrypted-credential-handler/index.md)
+
+## Schema Authoring
+
+- [스키마 작성](https://jaichangpark.github.io/ucp-docs-ko/documentation/schema-authoring/index.md)
+
+## Reference
+
+- [레퍼런스](https://jaichangpark.github.io/ucp-docs-ko/specification/reference/index.md)
+
