@@ -164,7 +164,7 @@ checkout 응답에 embedded service binding이 없으면
 (service-level discovery에서 embedded 지원을 광고했더라도),
 해당 checkout은 `continue_url` 기반 리다이렉트 연속만 지원합니다.
 
-### 임베디드 Checkout URL 로딩
+### 임베디드 체크아웃 URL 로딩
 
 Host가 embedded service binding이 포함된 checkout 응답을 받으면,
 `continue_url`을 임베디드 컨텍스트로 로드해 ECP 세션을 시작할 수 있습니다(**MAY**).
@@ -221,7 +221,7 @@ https://example.com/checkout/abc123?ec_version=2026-01-11&ec_auth=eyJ...
 
 참고: 모든 쿼리 파라미터 값은 RFC 3986에 따라 URL 인코딩되어야 합니다.
 
-#### 위임(Delegation)
+#### 위임
 
 선택 파라미터 `ec_delegate`는 구매자가 Embedded Checkout UI에서 직접 처리하는 대신
 host가 네이티브로 처리하고 싶은 연산을 선언합니다.
@@ -277,7 +277,7 @@ HTTP client hint를 활용할 수 있으며,
 https://example.com/checkout/abc123?ec_version=2026-01-11&ec_color_scheme=dark
 ```
 
-#### 위임(Delegation) 협상
+#### 위임 협상
 
 Delegation은 business 정책에서 최종 수락으로 좁혀지는 체인을 따릅니다.
 
@@ -300,7 +300,7 @@ config.delegate ⊇ ec_delegate ⊇ ec.ready delegate
 Delegation은 host와 Embedded Checkout 사이의 구속력 있는 계약을 형성합니다.
 다만 business 정책에 따라 Embedded Checkout은 인증/승인된 host에만 delegation을 제한할 수 있습니다(**MAY**).
 
-#### 위임(Delegation) 수락
+#### 위임 수락
 
 Embedded Checkout은 다음 기준으로 수용 delegation을 결정합니다.
 
@@ -408,7 +408,7 @@ checkout이 embedded 모드로 렌더링될 때는
 
 ### 통신 채널
 
-#### 웹 기반 Host 통신 채널
+#### 웹 기반 호스트 통신 채널
 
 host가 웹 애플리케이션일 때는 host와 checkout window 간 `postMessage`로 통신이 시작됩니다.
 host는 임베디드 window의 `postMessage`를 수신해야 하며(**MUST**),
@@ -419,7 +419,7 @@ host는 임베디드 window의 `postMessage`를 수신해야 하며(**MUST**),
 host가 `MessagePort`로 응답한 경우 이후 모든 메시지는 해당 채널을 통해 전송되어야 합니다(**MUST**).
 그렇지 않으면 host와 business는 origin 검증을 포함해 `window` 객체 간 `postMessage()`를 계속 사용해야 합니다(**MUST**).
 
-#### 네이티브 Host 통신 채널
+#### 네이티브 호스트 통신 채널
 
 host가 네이티브 앱일 때는 웹/네이티브 환경 간 `postMessage` 통신이 가능하도록
 Embedded Checkout에 전역 객체를 주입해야 합니다(**MUST**).
@@ -459,7 +459,7 @@ Embedded Checkout은 `ec.ready` 전송 전에 이 전역 객체를 초기화하�
 | **Lifecycle**    | checkout 상태 전이 알림                                 | Notification | `ec.start`, `ec.complete`                                                            |
 | **State Change** | checkout 필드 변경 알림                                 | Notification | `ec.line_items.change`, `ec.buyer.change`, `ec.payment.change`, `ec.messages.change` |
 
-#### Extension 메시지
+#### 확장 메시지
 
 확장은 추가 메시지 정의를 통해 Embedded 프로토콜을 확장할 수 있습니다(**MAY**).
 확장 메시지는 다음 네이밍 규칙을 따라야 합니다(**MUST**).
@@ -1022,14 +1022,14 @@ Embedded Checkout은 이를 병합이 아닌 PUT 스타일 교체로 처리해
    (**[AP2 extension](https://ap2-extension.org/)** 참고),
    host는 신뢰 UI에서 `payment_mandate`를 생성합니다.
 
-## Fulfillment 확장
+## 주문 이행(Fulfillment) 확장
 
 fulfillment 확장은 host가 주소 선택을 위임받아
 네이티브 주소 선택기 경험을 제공하는 방식을 정의합니다.
 checkout URL에 `ec_delegate=fulfillment.address_change`가 포함되면,
 host는 배송지 선택 제어권을 갖고 결과 주소 업데이트를 Embedded Checkout에 반환합니다.
 
-### Fulfillment 개요 및 Host 선택
+### 주문 이행 개요 및 호스트 선택
 
 fulfillment delegation에는 두 가지 패턴이 있습니다.
 
@@ -1054,7 +1054,7 @@ host가 checkout URL에 `ec_delegate=fulfillment.address_change`를 포함해
 - `ec.fulfillment.address_change_request`에 대해 구매자 주소 선택/입력을 위한 네이티브 UI 제공 후 응답
 - 선택된 주소를 UCP PostalAddress 형식으로 응답
 
-### Fulfillment 메시지 API 레퍼런스
+### 주문 이행 메시지 API 레퍼런스
 
 #### `ec.fulfillment.change`
 
@@ -1206,9 +1206,9 @@ embedded checkout의 delegation 요청에 대한 응답은 오류로 귀결될 �
 | `invalid_state_error` | 핸드셰이크 순서가 올바르지 않음                                                                                                               |
 | `not_allowed_error`   | 요청에 유효한 User Activation이 없음([비의도적 결제 요청 방지](#prevention-of-unsolicited-payment-requests) 참고)                           |
 
-### 웹 기반 Host 보안
+### 웹 기반 호스트 보안
 
-#### Content Security Policy (CSP)
+#### 콘텐츠 보안 정책(CSP)
 
 보안을 위해 양측은 적절한
 **[Content Security Policy(CSP)](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP)**
@@ -1232,7 +1232,7 @@ embedded checkout의 delegation 요청에 대한 응답은 오류로 귀결될 �
           (예: `frame-src <merchant_origin>;`)
           이는 중간 iframe 콘텐츠 제공 시 HTTP 헤더로 설정할 수 있습니다.
 
-#### Iframe Sandbox 속성
+#### 아이프레임 sandbox 속성
 
 모든 business iframe은 권한 제한을 위해 sandbox 처리되어야 합니다(**MUST**).
 다음 sandbox 속성 적용이 권장되며(**SHOULD**),
@@ -1242,7 +1242,7 @@ host와 business는 추가 권한을 협상할 수 있습니다(**MAY**).
 <iframe sandbox="allow-scripts allow-forms allow-same-origin"></iframe>
 ```
 
-#### Credentialless Iframe
+#### 크리덴셜리스(credentialless) 아이프레임
 
 host는 iframe에 `credentialless` 속성을 사용해 새 임시 컨텍스트로 로드하는 것이 권장됩니다(**SHOULD**).
 이를 통해 business가 컨텍스트 간 사용자 활동을 연계하거나 기존 세션에 접근하는 것을 방지해
@@ -1252,7 +1252,7 @@ host는 iframe에 `credentialless` 속성을 사용해 새 임시 컨텍스트�
 <iframe credentialless src="https://business.example.com/checkout"></iframe>
 ```
 
-#### 엄격한 Origin 검증
+#### 엄격한 origin 검증
 
 프레임 간 모든 `postMessage` 통신에 대해 `origin`을 엄격히 검증해야 합니다.
 
@@ -1269,29 +1269,29 @@ host는 토큰 발급 전에 사용자 확인 UI를 표시하는 것이 권장�
 
 아래 스키마는 Embedded Checkout 프로토콜과 확장에서 사용하는 데이터 구조를 정의합니다.
 
-### Checkout
+### 체크아웃(Checkout)
 
 line item, totals, buyer 정보를 포함한 거래의 현재 상태를 나타내는 핵심 객체입니다.
 
 {{ schema_fields('checkout_resp', 'checkout') }}
 
-### Order
+### 주문(Order)
 
 checkout이 성공적으로 완료되었을 때 반환되는 확인 정보 객체입니다.
 
 {{ schema_fields('order', 'order') }}
 
-### Payment
+### 결제(Payment)
 
 {{ schema_fields('payment_resp', 'embedded-checkout')}}
 
-### Payment Instrument
+### 결제 수단(Payment Instrument)
 
 구매자가 사용할 수 있는 특정 결제 수단(예: 특정 카드, 계좌, 지갑 credential)을 나타냅니다.
 
 {{ schema_fields('payment_instrument', 'embedded-checkout') }}
 
-### Payment Handler Response
+### 결제 핸들러 응답
 
 특정 결제 수단을 인증/처리하는 processor 또는 wallet provider(예: Google Pay, Stripe, 은행 앱)의 응답 구조를 나타냅니다.
 

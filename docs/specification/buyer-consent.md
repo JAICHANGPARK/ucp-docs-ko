@@ -29,7 +29,7 @@
 
 이 확장은 `create_checkout` 및 `update_checkout` 작업에 포함될 수 있습니다.
 
-## Discovery
+## 디스커버리
 
 비즈니스는 프로필에서 동의 지원 여부를 광고합니다.
 
@@ -56,7 +56,7 @@
 
 ## 스키마 정의
 
-### Consent 객체
+### 동의(Consent) 객체
 
 {{ extension_schema_fields('buyer_consent.json#/$defs/consent', 'buyer-consent') }}
 
@@ -64,7 +64,7 @@
 
 플랫폼은 checkout 작업 시 `buyer` 객체 안에 consent를 포함합니다.
 
-### 예시: 동의를 포함한 Create Checkout
+### 예시: 동의를 포함한 체크아웃 생성
 
 ```json
 POST /checkouts
@@ -95,7 +95,7 @@ POST /checkouts
 }
 ```
 
-### 예시: 동의를 포함한 Checkout Response
+### 예시: 동의를 포함한 체크아웃 응답
 
 ```json
 {

@@ -14,7 +14,7 @@
    limitations under the License.
 -->
 
-# AP2 Mandates 확장
+# 에이피투(AP2) 위임 확장
 
 ## 개요
 
@@ -52,7 +52,7 @@ AP2 전용 필드는 요청/응답 모두에서 `ap2` 객체 아래에 중첩됩
 이 확장은 표준 UCP 협상 프로토콜을 따릅니다. business와 platform 양측 capability의
 **교집합(Capability Intersection)** 에 나타날 때만 활성화됩니다.
 
-### Business 프로필 광고
+### 비즈니스 프로필 광고
 
 business는 `/.well-known/ucp`의 `capabilities` 목록에
 `dev.ucp.shopping.ap2_mandate`를 추가하여 지원을 선언합니다.
@@ -86,7 +86,7 @@ business는 `/.well-known/ucp`의 `capabilities` 목록에
 }
 ```
 
-### Platform 프로필 광고
+### 플랫폼 프로필 광고
 
 platform도 자신의 프로필에서 지원을 선언합니다. platform이 trusted platform provider
 모델로 동작한다면, platform은 프로필 최상위 `signing_keys` 배열에 최소 1개 이상의 키를
@@ -127,7 +127,7 @@ platform도 자신의 프로필에서 지원을 선언합니다. platform이 tru
 | `ES384` | P-384 곡선 + SHA-384 기반 ECDSA |
 | `ES512` | P-521 곡선 + SHA-512 기반 ECDSA |
 
-### Business Authorization
+### 비즈니스 승인(Business Authorization)
 
 business는 checkout 응답 본문의 `ap2.merchant_authorization`에
 **JWS Detached Content** 형식
@@ -185,7 +185,7 @@ sign_checkout(checkout, private_key, kid, alg="ES256"):
     return checkout
 ```
 
-### Mandate 구조
+### 위임(Mandate) 구조
 
 mandate는 Key Binding(`+kb`)이 포함된 **SD-JWT** 자격증명입니다.
 platform은 서로 구분되는 두 가지 mandate 아티팩트를 **반드시(MUST)** 생성해야 합니다.
@@ -215,14 +215,14 @@ JCS는 JSON 데이터를 바이트 단위로 결정론적 표현으로 만들어
 **정규화 규칙:** business 서명 계산 시 `ap2` 필드를 전체 제외합니다.
 이 규칙은 향후 AP2 필드 확장을 자동으로 수용합니다.
 
-## Mandate 흐름
+## 위임(Mandate) 흐름
 
 `dev.ucp.shopping.ap2_mandate` capability가 협상되면 세션은 아래 흐름으로 고정됩니다.
 암호학적 무결성을 위해 양측은 이 단계를 **반드시(MUST)** 준수해야 하며,
 단계를 우회하거나 mandate 없는 완료 요청을 제출하려는 시도는 세션 실패로
 **반드시(MUST)** 처리되어야 합니다.
 
-### 1단계: Checkout 생성 및 서명
+### 1단계: 체크아웃 생성 및 서명
 
 platform이 세션을 시작합니다. business는 응답 본문에
 `ap2.merchant_authorization`이 포함된 `Checkout` 객체를 반환합니다.
@@ -282,7 +282,7 @@ verify_merchant_authorization(checkout, merchant_profile):
     return verify(encoded_signature, signing_input, public_key, header.alg)
 ```
 
-### 2단계: 사용자 동의 및 Mandate 생성
+### 2단계: 사용자 동의 및 위임 생성
 
 사용자가 구매를 확정하면, platform은 암호학적으로 검증 가능한 mandate 생성을
 **반드시(MUST)** 유도해야 합니다.
@@ -306,7 +306,7 @@ platform은 OpenID4VP 같은 프로토콜을 통해 프레젠테이션을 요청
 
 business는 자격증명 발급자(은행)를 신뢰하고 사용자 Key Binding(+kb) 서명을 검증합니다.
 
-### 3단계: 제출 (`complete_checkout`)
+### 3단계: 제출(`complete_checkout`)
 
 mandate 생성이 완료되면 platform은 완료 요청에 mandate를 포함해 제출합니다.
 
@@ -349,7 +349,7 @@ mandate 생성이 완료되면 platform은 완료 요청에 mandate를 포함해
 
 ## 검증 및 처리
 
-### Business 검증
+### 비즈니스 검증
 
 business는 `complete` 요청 수신 시 다음을 **반드시(MUST)** 수행해야 합니다.
 
@@ -384,7 +384,7 @@ business는 `complete` 요청 수신 시 다음을 **반드시(MUST)** 수행해
 2. **약관 일치 검증:**
    내장 checkout 약관(id, totals, line items)이 현재 세션 상태와 일치하는지 확인합니다.
 
-### PSP 검증
+### 피에스피(PSP) 검증
 
 business는 `token`(복합 객체)을 Payment Handler/PSP로 전달합니다.
 PSP는 [AP2 Protocol Specification](https://ap2-protocol.org/specification)에 따라
@@ -392,27 +392,27 @@ PSP는 [AP2 Protocol Specification](https://ap2-protocol.org/specification)에 �
 
 ## 스키마
 
-### Business Authorization
+### 비즈니스 승인(Business Authorization)
 
 {{ extension_schema_fields('ap2_mandate.json#/$defs/merchant_authorization', 'ap2-mandates') }}
 
-### AP2 Checkout Response
+### 에이피투(AP2) 체크아웃 응답
 
 checkout 응답에 포함되는 `ap2` 객체입니다.
 
 {{ extension_schema_fields('ap2_mandate.json#/$defs/ap2_with_merchant_authorization', 'ap2-mandates') }}
 
-### Checkout Mandate
+### 체크아웃 위임(Checkout Mandate)
 
 {{ extension_schema_fields('ap2_mandate.json#/$defs/checkout_mandate', 'ap2-mandates') }}
 
-### AP2 Complete Request
+### 에이피투(AP2) 완료 요청
 
 COMPLETE checkout 요청에 포함되는 `ap2` 객체입니다.
 
 {{ extension_schema_fields('ap2_mandate.json#/$defs/ap2_with_checkout_mandate', 'ap2-mandates') }}
 
-### Error Codes
+### 오류 코드
 
 {{ extension_schema_fields('ap2_mandate.json#/$defs/error_code', 'ap2-mandates') }}
 

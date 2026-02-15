@@ -14,7 +14,7 @@
    limitations under the License.
 -->
 
-# Platform Tokenizer Payment Handler
+# 플랫폼 토크나이저 결제 핸들러
 
 * **Handler Name:** `com.example.platform_tokenizer`
 * **Type:** Payment Handler Example
@@ -44,7 +44,7 @@
 * **PSP 유연성:** 비즈니스가 detokenization을 PSP에 위임할 수 있어,
   비즈니스 시스템에서 민감 데이터를 배제할 수 있습니다.
 
-### QuickStart
+### 빠른 시작(QuickStart)
 
 | If you are a...                        | Start here                                    |
 | :------------------------------------- | :-------------------------------------------- |
@@ -140,11 +140,11 @@
 
 ---
 
-## Business 통합
+## 비즈니스 통합
 
 ### 사전 조건
 
-#### CRITICAL: 보안 및 규정 준수 필수
+#### 중요: 보안 및 규정 준수 필수
 
 이 핸들러를 수락하기 전에,
 비즈니스는 플랫폼에 등록하여 `/detokenize` 호출용 인증 자격증명을 발급받아야 합니다.
@@ -167,7 +167,7 @@
 | `identity.access_token`    | 온보딩 시 플랫폼이 할당한 비즈니스 식별자                    |
 | Authentication credentials | `/detokenize` 호출 인증용 API key 또는 OAuth token           |
 
-### Handler 구성
+### 핸들러 구성
 
 비즈니스는 플랫폼의 토큰화 handler를 광고합니다.
 `config`에는 토큰 바인딩을 위한 플랫폼 측 비즈니스 identity가 포함됩니다.
@@ -183,14 +183,14 @@ checkout에는 [TokenCredential](https://ucp.dev/schemas/shopping/types/token_cr
 처리 자격증명 타입의 관련 표준을 **MUST** 준수해야 합니다
 (예: 카드의 경우 PCI DSS).
 
-#### Business Config (Discovery)
+#### 비즈니스 구성(디스커버리)
 
 | Field         | Type   | Required | Description                                 |
 | :------------ | :----- | :------- | :------------------------------------------ |
 | `environment` | string | Yes      | API 환경 (`sandbox` 또는 `production`)      |
 | `business_id` | string | Yes      | 플랫폼이 할당한 비즈니스 식별자             |
 
-#### Example Business Handler Declaration
+#### 비즈니스 핸들러 선언 예시
 
 ```json
 {
@@ -214,7 +214,7 @@ checkout에는 [TokenCredential](https://ucp.dev/schemas/shopping/types/token_cr
 }
 ```
 
-#### Response Config (Checkout)
+#### 응답 구성(체크아웃)
 
 response config에는 런타임 토큰 라이프사이클 정보가 포함됩니다.
 
@@ -224,7 +224,7 @@ response config에는 런타임 토큰 라이프사이클 정보가 포함됩니
 | `business_id`       | string  | Yes      | 비즈니스 식별자              |
 | `token_ttl_seconds` | integer | No       | 토큰 TTL(초)                 |
 
-#### Example Response Config
+#### 응답 구성 예시
 
 ```json
 {
@@ -248,7 +248,7 @@ response config에는 런타임 토큰 라이프사이클 정보가 포함됩니
 
 Option B는 [PSP Integration](#psp-integration) 섹션을 참고하세요.
 
-#### Detokenize Request Example (Business)
+#### 역토큰화 요청 예시(비즈니스)
 
 ```json
 POST https://provider.platform.example.com/ucp/detokenize
@@ -269,7 +269,7 @@ Authorization: Bearer {business_api_key}
 
 ---
 
-## Platform 통합
+## 플랫폼 통합
 
 ### 사전 조건
 
@@ -291,12 +291,12 @@ Authorization: Bearer {business_api_key}
 | Participant allowlist  | 온보딩된 business/PSP만 credential provider의 `/detokenize` 호출 허용                   |
 | Binding verification   | payment credential provider가 detokenize 시 `checkout_id` 및 호출자 identity 검증       |
 
-### Handler Configuration (Platform)
+### 핸들러 구성(플랫폼)
 
 플랫폼은 UCP 프로필의 `payment_handlers` 레지스트리에서
 `platform_config`를 사용해 이 핸들러를 광고합니다.
 
-#### Platform Config (Discovery)
+#### 플랫폼 구성(디스커버리)
 
 | Field                       | Type    | Required | Description                                 |
 | :-------------------------- | :------ | :------- | :------------------------------------------ |
@@ -304,7 +304,7 @@ Authorization: Bearer {business_api_key}
 | `platform_id`               | string  | Yes      | 플랫폼 식별자                               |
 | `default_token_ttl_seconds` | integer | No       | 비즈니스에 제공하는 기본 토큰 TTL           |
 
-#### Example Platform Handler Declaration
+#### 플랫폼 핸들러 선언 예시
 
 ```json
 {
@@ -329,7 +329,7 @@ Authorization: Bearer {business_api_key}
 }
 ```
 
-### Token 생성
+### 토큰 생성
 
 플랫폼 애플리케이션은 결제 플로우를 오케스트레이션하지만,
 **민감 결제 데이터에는 접근하지 않습니다**.
@@ -343,7 +343,7 @@ Authorization: Bearer {business_api_key}
 
 이 분리 구조를 통해 플랫폼 앱은 민감 결제 수단 정보에 직접 접근하지 않습니다.
 
-### Checkout 제출
+### 체크아웃 제출
 
 플랫폼 애플리케이션은 payment credential provider에서 받은 토큰으로 checkout을 제출합니다.
 
@@ -378,11 +378,11 @@ Content-Type: application/json
 
 ---
 
-## PSP 통합
+## 피에스피(PSP) 통합
 
 ### 사전 조건
 
-#### CRITICAL: 보안 및 규정 준수 필수
+#### 중요: 보안 및 규정 준수 필수
 
 PSP가 비즈니스를 대신해 detokenize를 수행하기 전에,
 처리 대상 비즈니스 목록을 포함해 플랫폼에 등록해야 합니다.
@@ -402,7 +402,7 @@ PSP는 처리 자격증명 타입의 관련 보안 표준을 **MUST** 준수해�
 | Authentication credentials | `/detokenize` 호출 인증용 API key 또는 OAuth token           |
 | Business associations      | 이 PSP가 detokenize 가능한 비즈니스 identity 목록            |
 
-### Detokenization 플로우
+### 역토큰화 플로우
 
 비즈니스가 토큰을 PSP에 전달하면 PSP는 다음을 수행합니다.
 
@@ -411,7 +411,7 @@ PSP는 처리 자격증명 타입의 관련 보안 표준을 **MUST** 준수해�
    플랫폼의 **payment credential provider** `/detokenize` endpoint 호출
 3. 반환된 credential로 결제 처리
 
-#### Detokenize Request Example (PSP)
+#### 역토큰화 요청 예시(PSP)
 
 ```json
 POST https://provider.platform.example.com/ucp/detokenize
@@ -441,7 +441,7 @@ PSP는 비즈니스를 대신해 호출하므로,
 
 ---
 
-## Security Considerations
+## 보안 고려사항
 
 | Requirement | Description |
 | :---------- | :---------- |
@@ -460,7 +460,7 @@ PSP는 비즈니스를 대신해 호출하므로,
 
 ---
 
-## References
+## 참고자료
 
 * **Pattern:** [Tokenization Payment Handler](https://ucp.dev/specification/payment-handler-guide)
 * **API Pattern:** `https://ucp.dev/handlers/tokenization/openapi.json`

@@ -14,13 +14,13 @@
    limitations under the License.
 -->
 
-# Cart Capability - REST 바인딩
+# 장바구니 기능 - REST 바인딩
 
 이 문서는 [Cart Capability](cart.md)의 REST 바인딩을 정의합니다.
 
 ## 프로토콜 기본 사항
 
-### Discovery
+### 디스커버리
 
 business는 `/.well-known/ucp`의 UCP 프로필을 통해 REST 전송 사용 가능 여부를 광고합니다.
 
@@ -56,13 +56,13 @@ business는 `/.well-known/ucp`의 UCP 프로필을 통해 REST 전송 사용 가
 }
 ```
 
-### Base URL
+### 기본 URL
 
 모든 UCP REST 엔드포인트는 business의 base URL을 기준으로 하며,
 이 URL은 `/.well-known/ucp` UCP 프로필에서 탐색됩니다.
 cart capability 엔드포인트는 business 프로필의 `rest.endpoint` 필드에 정의됩니다.
 
-### Content Types
+### 콘텐츠 타입
 
 * **요청(Request)**: `application/json`
 * **응답(Response)**: `application/json`
@@ -84,7 +84,7 @@ cart capability 엔드포인트는 business 프로필의 `rest.endpoint` 필드�
 | [Update Cart](#update-cart) | `PUT` | `/carts/{id}` | cart 세션 갱신 |
 | [Cancel Cart](#cancel-cart) | `POST` | `/carts/{id}/cancel` | cart 세션 취소 |
 
-### Create Cart
+### 장바구니 생성 { #create-cart }
 
 #### 입력 스키마
 
@@ -173,7 +173,7 @@ cart capability 엔드포인트는 business 프로필의 `rest.endpoint` 필드�
     }
     ```
 
-### Get Cart
+### 장바구니 조회 { #get-cart }
 
 #### 입력 스키마
 
@@ -271,7 +271,7 @@ cart capability 엔드포인트는 business 프로필의 `rest.endpoint` 필드�
     }
     ```
 
-### Update Cart
+### 장바구니 업데이트 { #update-cart }
 
 #### 입력 스키마
 
@@ -383,7 +383,7 @@ cart capability 엔드포인트는 business 프로필의 `rest.endpoint` 필드�
     }
     ```
 
-### Cancel Cart
+### 장바구니 취소 { #cancel-cart }
 
 #### 입력 스키마
 

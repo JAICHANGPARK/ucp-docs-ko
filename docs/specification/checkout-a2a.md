@@ -14,12 +14,12 @@
    limitations under the License.
 -->
 
-# Checkout Capability - A2A 바인딩
+# 체크아웃 기능 - A2A 바인딩
 
 이 문서는 [Checkout Capability](checkout.md)의
 Agent2Agent Protocol(A2A) 바인딩을 명세합니다.
 
-## Transport Discovery
+## 전송 디스커버리
 
 A2A transport를 지원하는 비즈니스는
 `/.well-known/ucp`의 UCP Profile 내 `services`에
@@ -66,7 +66,7 @@ Content-Type: application/json
 | `UCP-Agent`        | 쇼핑 플랫폼 애플리케이션 profile URI       |
 | `X-A2A-Extensions` | UCP Extension URI (아래 명시)              |
 
-## A2A 상호작용
+## 에이전트 간(A2A) 상호작용
 
 A2A Protocol은 에이전트 간 통신의 강력한 기반을 제공합니다.
 [A2A extensions](https://a2a-protocol.org/latest/topics/extensions/)은
@@ -107,7 +107,7 @@ A2A Agent Card에 extension과 선택 capability를 광고해야 하며,
 }
 ```
 
-### Agent2Agent 협상
+### 에이전트 간 협상
 
 비즈니스 에이전트는 A2A `Message` 객체를 활용해
 쇼핑 에이전트/플랫폼과 상호작용할 수 있습니다.
@@ -129,12 +129,12 @@ Task가 종료 상태에 도달하면,
 플랫폼은 에이전트와 추가 상호작용을 위해 `taskId`를 초기화해야 하며,
 `contextId`는 후속 상호작용에서 재사용할 수 있습니다.
 
-## 요청 멱등성(Request Idempotency)
+## 요청 멱등성
 
 비즈니스 에이전트는 플랫폼 재시도로 인한 중복 메시지를 감지하기 위해,
 A2A `Message`의 `messageId`를 활용해야 합니다.
 
-## Checkout 기능
+## 체크아웃 기능
 
 Checkout capability는 소비자가 checkout 세션의 아이템을 관리하고
 구매 절차를 완료할 수 있게 합니다.
@@ -224,7 +224,7 @@ checkout 객체는 key `a2a.ucp.checkout`를 가진
 }
 ```
 
-### Checkout 완료
+### 체크아웃 완료
 
 사용자가 결제할 준비가 되면 checkout 완료를 위해
 `payment`를 비즈니스 에이전트에 제출해야 합니다.
@@ -293,7 +293,7 @@ checkout 객체를 반환해야 합니다.
 
 ```
 
-#### AP2 기반 Checkout 완료
+#### 에이피투(AP2) 기반 체크아웃 완료
 
 비즈니스 에이전트는 에이전트 간 결제 상호작용에서
 사용자 의도와 권한을 안전하게 교환할 수 있도록

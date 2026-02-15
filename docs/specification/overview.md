@@ -14,7 +14,7 @@
    limitations under the License.
 -->
 
-# Universal Commerce Protocol (UCP) 공식 명세
+# 유니버설 커머스 프로토콜(UCP) 공식 명세
 
 ## 상위 가이드라인
 
@@ -29,7 +29,7 @@
   [RFC 3339](https://www.rfc-editor.org/rfc/rfc3339.html){ target="_blank" } 사용
 - 금액 형식: 소수 단위(minor units, cents)
 
-## Discovery, 거버넌스, 협상
+## 디스커버리, 거버넌스, 협상
 
 UCP는 server-selects 아키텍처를 채택합니다. business(서버)가 양측 capability 교집합에서
 프로토콜 버전과 capability를 선택합니다. business/platform 프로필은 양측에서 캐시될 수 있어
@@ -63,7 +63,7 @@ UCP는 reverse-domain 네이밍으로 capability 식별자에 거버넌스 권�
 | `dev.ucp.common.identity_linking`   | ucp.dev     | common   | identity_linking |
 | `com.example.payments.installments` | example.com | payments | installments     |
 
-#### Spec URL 바인딩
+#### 명세 URL 바인딩
 
 모든 capability에는 `spec` 및 `schema` 필드가 **필수(REQUIRED)** 입니다.
 이 URL들의 origin은 네임스페이스 권한과 **일치해야 합니다(MUST)**.
@@ -279,7 +279,7 @@ Platform은 다음 순서로 스키마를 해석해야 합니다(**MUST**).
 
 ### 프로필 구조
 
-#### Business 프로필
+#### 비즈니스 프로필
 
 Business는 `/.well-known/ucp`에 profile을 게시합니다. 예시는 다음과 같습니다.
 
@@ -379,7 +379,7 @@ Business는 `/.well-known/ucp`에 profile을 게시합니다. 예시는 다음�
 `ucp` 객체는 버전, services, capabilities, payment handlers 등 프로토콜 메타데이터를 담습니다.
 `signing_keys` 배열은 webhook 및 기타 인증 메시지의 서명 검증에 쓰이는 공개키(JWK 형식)를 포함합니다.
 
-#### Platform 프로필
+#### 플랫폼 프로필
 
 Platform profile도 유사한 구조이며, 암호학적 검증이 필요한 capability를 위해 서명 키를 포함합니다.
 capability는 capability별 설정(예: callback URL, feature flag)을 위한 `config` 객체를 포함할 수 있습니다(**MAY**).
@@ -508,7 +508,7 @@ Content-Type: application/json
 
 ### 협상 프로토콜 { #negotiation-protocol }
 
-#### Platform 요구사항
+#### 플랫폼 요구사항
 
 1. **프로필 광고**: Platform은 전송 방식에 맞는 메커니즘으로 모든 요청에 profile URI를 포함해야 합니다(**MUST**).
 2. **Discovery**: Platform은 요청 시작 전 `/.well-known/ucp`에서 business profile을 조회할 수 있습니다(**MAY**).
@@ -516,7 +516,7 @@ Content-Type: application/json
 3. **네임스페이스 검증**: Platform은 capability `spec` URI origin이 네임스페이스 권한과 일치하는지 검증해야 합니다(**MUST**).
 4. **스키마 해석**: Platform은 요청 전에 협상된 capability의 스키마를 조회·조합해야 합니다(**MUST**).
 
-#### Business 요구사항
+#### 비즈니스 요구사항
 
 1. **프로필 해석**: Business는 platform profile URI가 포함된 요청을 받으면 캐시가 없는 경우 profile을 조회·검증해야 합니다(**MUST**).
 2. **Capability 교집합 계산**: Business는 platform과 business capability의 교집합을 계산해야 합니다(**MUST**).
@@ -725,7 +725,7 @@ Business는 상황에 가장 적합한 URL을 제공하는 것이 좋습니다(*
     대응 HTTP 상태 코드(예: rate limit의 `429`)를 반환해야 합니다(**MUST**).
     오류 유형의 1차 신호는 HTTP 상태 코드입니다.
 
-#### 응답의 Capability 선언 { #capability-declaration-in-responses }
+#### 응답의 기능(Capability) 선언 { #capability-declaration-in-responses }
 
 응답의 `capabilities` 레지스트리는 현재 활성 capability를 나타냅니다.
 
@@ -753,7 +753,7 @@ Business는 상황에 가장 적합한 URL을 제공하는 것이 좋습니다(*
 }
 ```
 
-#### 응답 Capability 선택 { #response-capability-selection }
+#### 응답 기능(Capability) 선택 { #response-capability-selection }
 
 Business는 `ucp.capabilities`에 아래 조건을 모두 만족하는 capability만 포함해야 합니다(**MUST**).
 
@@ -831,7 +831,7 @@ UCP 결제 모델에서 자주 헷갈리는 지점은 책임 분리입니다.
 | **Business**                     | **핸들러 구성**               | 사용할 핸들러를 선택하고 UCP Checkout 응답에 **구체 구성값**(공개키, Merchant ID 등)을 제공합니다.<br>*예: `이 공개키로 'com.psp-x.tokenization' 기반 Visa 결제를 허용`*                                                                                         |
 | **Platform**                     | **프로토콜 실행**             | Business config를 읽고, 결제 자격증명 제공자 명세의 로직을 실행해 토큰을 획득합니다.<br>*예: `Business가 지정한 SDK를 호출해 토큰 획득`*                                                                                                                        |
 
-### Checkout 라이프사이클의 결제
+### 체크아웃 라이프사이클의 결제
 
 결제가 필요한 경우 UCP 내 결제 흐름은
 **Negotiation**, **Acquisition**, **Completion**의 3단계 라이프사이클을 따릅니다.
@@ -1125,7 +1125,7 @@ POST /checkout-sessions/{id}/complete
 
 ### PCI-DSS 범위 관리
 
-#### Platform 범위
+#### 플랫폼 범위
 
 대부분의 platform 구현은 다음 방식으로 **PCI-DSS 범위를 회피**할 수 있습니다.
 
@@ -1134,7 +1134,7 @@ POST /checkout-sessions/{id}/complete
 - 자격증명을 직접 사용 가능한 형태로 보유하지 않고 전달만 수행
 - 원시 자격증명이 platform을 통과하지 않는 PSP 토큰화 handler 사용
 
-#### Business 범위
+#### 비즈니스 범위
 
 Business는 다음 방식으로 PCI 범위를 최소화할 수 있습니다.
 
@@ -1225,7 +1225,7 @@ UCP는 REST 패턴 기반으로 **HTTP/1.1** 이상을 지원합니다.
 - **Methods:** 구현체는 표준 HTTP 메서드(예: 생성 `POST`, 조회 `GET`)를 사용해야 합니다(**MUST**).
 - **Status Codes:** 구현체는 표준 HTTP 상태 코드(예: 200, 201, 400, 401, 500)를 사용해야 합니다(**MUST**).
 
-### Model Context Protocol(MCP)
+### 모델 컨텍스트 프로토콜(MCP)
 
 UCP는 JSON-RPC 기반의 **[MCP 프로토콜](https://modelcontextprotocol.io/specification/)** 을 지원합니다.
 
@@ -1280,19 +1280,19 @@ UCP MCP 서버는 다음을 따릅니다.
 }
 ```
 
-### Agent-to-Agent Protocol (A2A)
+### 에이전트 간 프로토콜(A2A)
 
 Business는 UCP를 A2A 확장으로 지원하는 A2A 에이전트를 노출할 수 있습니다(**MAY**).
 이를 통해 구조화된 UCP 데이터 타입으로 platform과 통합할 수 있습니다.
 
-### Embedded Protocol (EP)
+### 임베디드 프로토콜(EP)
 
 Business는 적격 host에 임베디드 인터페이스를 제공할 수 있습니다(**MAY**).
 사용자 상호작용 이벤트를 수신하고 주요 사용자 동작을 위임할 수 있습니다.
 
 시작점은 business가 반환하는 `continue_url`입니다.
 
-## 표준 Capability
+## 표준 기능(Capability)
 
 UCP는 다음과 같은 표준 capability 집합을 정의합니다.
 
@@ -1346,7 +1346,7 @@ UCP는 **AP2 Mandates Extension**(`dev.ucp.shopping.ap2_mandate`)을 지원합�
 UCP는 `YYYY-MM-DD` 형식의 날짜 기반 버저닝을 사용합니다.
 이를 통해 시간순 정렬과 버전 비교를 명확하게 수행할 수 있습니다.
 
-### 버전 Discovery 및 협상
+### 버전 디스커버리 및 협상
 
 UCP는 강한 하위 호환성을 우선합니다.
 특정 버전을 구현한 business는 해당 버전 또는 그 이전 버전을 사용하는 platform 요청을 처리하는 것이 권장됩니다(**SHOULD**).
@@ -1456,13 +1456,13 @@ Business는 platform 버전을 검증하고 호환 여부를 판단해야 합니
 - Business는 위와 동일한 로직으로 capability 버전 호환성을 검증해야 합니다(**MUST**).
 - 전송 계층은 자체 버전 처리 메커니즘을 정의할 수 있습니다(**MAY**).
 
-#### UCP Capability (`dev.ucp.*`)
+#### UCP 기능(`dev.ucp.*`)
 
 UCP 작성 capability는 기본적으로 프로토콜 릴리스와 함께 버저닝됩니다.
 단, 프로토콜 릴리스 주기 외에서 비호환 변경이 필요하면
 개별 capability를 독립 버저닝할 수 있습니다(**MAY**).
 
-#### Vendor Capability (`com.{vendor}.*`)
+#### 벤더 기능(`com.{vendor}.*`)
 
 `dev.ucp.*` 외 네임스페이스의 capability는 완전히 독립적으로 버저닝됩니다.
 벤더는 자체 릴리스 주기와 버전 전략을 통제합니다.

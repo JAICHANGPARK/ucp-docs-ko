@@ -84,9 +84,9 @@
   Number sections starting from 3. Add more sections as needed for additional participants.
 -->
 
-## Business Integration
+## 비즈니스 통합(Business Integration)
 
-### Prerequisites
+### 사전 요구사항
 
 비즈니스는 이 핸들러를 광고(advertise)하기 전에 다음을 **반드시(MUST)** 완료해야 합니다.
 
@@ -120,13 +120,13 @@
 | `platform_config` | 플랫폼 발견(discovery) | {플랫폼 전용 필드 설명} |
 | `response_config` | 체크아웃 응답 | {런타임 필드 설명} |
 
-#### Business Config 필드
+#### 비즈니스 구성(Business Config) 필드
 
 | 필드 | 타입 | 필수 | 설명 |
 | :--- | :--- | :--- | :--- |
 | {field} | {type} | {Yes/No} | {description} |
 
-#### Response Config 필드
+#### 응답 구성(Response Config) 필드
 
 | 필드 | 타입 | 필수 | 설명 |
 | :--- | :--- | :--- | :--- |
@@ -170,9 +170,9 @@
 
 ---
 
-## Platform Integration
+## 플랫폼 통합(Platform Integration)
 
-### Prerequisites
+### 사전 요구사항
 
 플랫폼은 이 핸들러를 사용하기 전에 다음을 **반드시(MUST)** 완료해야 합니다.
 
@@ -191,7 +191,7 @@
 플랫폼은 UCP 프로필의 `payment_handlers` 레지스트리에
 `platform_config`를 사용해 이 핸들러 지원 정보를 게시합니다.
 
-#### Platform Config 필드
+#### 플랫폼 구성(Platform Config) 필드
 
 | 필드 | 타입 | 필수 | 설명 |
 | :--- | :--- | :--- | :--- |
@@ -261,7 +261,7 @@
 
 {모든 단계에 대해 계속 작성...}
 
-#### N단계: 체크아웃 완료
+#### 마지막 단계: 체크아웃 완료
 
 플랫폼은 구성된 결제 instrument를 사용해 체크아웃 완료를 제출합니다.
 
@@ -299,9 +299,9 @@ Content-Type: application/json
   following the same pattern as Business and Platform integration.
 -->
 
-## {Participant} Integration
+## {Participant} 통합
 
-### Prerequisites
+### 사전 요구사항
 
 이 핸들러 흐름에 참여하기 전에 {participants}는 다음을 **반드시(MUST)** 완료해야 합니다.
 

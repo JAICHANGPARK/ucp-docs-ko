@@ -14,7 +14,7 @@
    limitations under the License.
 -->
 
-# Fulfillment 확장
+# 주문 이행(Fulfillment) 확장
 
 ## 개요
 
@@ -55,43 +55,43 @@ fulfillment는 실물 전달이 필요한 아이템에만 적용됩니다.
 
 ### 엔터티
 
-#### Fulfillment
+#### 주문 이행(Fulfillment)
 
 {{ schema_fields('types/fulfillment_resp', 'fulfillment') }}
 
-#### Fulfillment Method Response
+#### 주문 이행 방식 응답
 
 {{ schema_fields('types/fulfillment_method_resp', 'fulfillment') }}
 
-#### Fulfillment Destination Response
+#### 주문 이행 목적지 응답
 
 {{ schema_fields('types/fulfillment_destination_resp', 'fulfillment') }}
 
-#### Shipping Destination Response
+#### 배송 목적지 응답
 
 {{ schema_fields('types/shipping_destination_resp', 'fulfillment') }}
 
-#### Retail Location Response
+#### 오프라인 매장 위치 응답
 
 {{ schema_fields('types/retail_location_resp', 'fulfillment') }}
 
-#### Fulfillment Group Response
+#### 주문 이행 그룹 응답
 
 {{ schema_fields('types/fulfillment_group_resp', 'fulfillment') }}
 
-#### Fulfillment Option Response
+#### 주문 이행 옵션 응답
 
 {{ schema_fields('types/fulfillment_option_resp', 'fulfillment') }}
 
-#### Fulfillment Available Method Response
+#### 주문 이행 가능 방식 응답
 
 {{ schema_fields('types/fulfillment_available_method_resp', 'fulfillment') }}
 
-#### Total Response
+#### 합계 응답
 
 {{ schema_fields('types/total_resp', 'fulfillment') }}
 
-#### Postal Address
+#### 우편 주소(Postal Address)
 
 {{ schema_fields('postal_address', 'fulfillment') }}
 
@@ -170,7 +170,7 @@ platform은 이를 그대로 렌더링하면 됩니다.
 | `groups[].options[]`  | `total`       | Yes      | 소수 단위 가격(아직 확정 전이면 null 가능) |
 | `available_methods[]` | `description` | No       | 대체 가능 방법에 대한 독립 설명 |
 
-### Business 책임
+### 비즈니스 책임
 
 **`options[].title`에 대해:**
 
@@ -197,7 +197,7 @@ platform은 이를 그대로 렌더링하면 됩니다.
   반환하는 것이 **SHOULD**
 * platform은 제공된 순서 그대로 렌더링하는 것이 **SHOULD**
 
-### Platform 책임
+### 플랫폼 책임
 
 platform은 fulfillment를 범용 렌더링 가능한 구조로 취급하는 것이 **SHOULD** 합니다.
 
@@ -215,7 +215,7 @@ platform은 인식 가능한 method 타입에 대해 향상 UX를 제공할 수 
 platform은 business checkout으로 핸드오프하기 위해 `continue_url`을 사용하는 것이
 **SHOULD** 됩니다.
 
-## Available Methods
+## 사용 가능한 방식(Available Methods)
 
 available methods는 특정 아이템이 특정 method로 이행 가능한지,
 그리고 언제 가능한지를 나타냅니다. 사용 사례 예시:
@@ -269,7 +269,7 @@ platform은 business checkout으로 핸드오프하기 위해 `continue_url`을 
 business와 platform은 각자의 프로필에서 fulfillment 제약을 선언합니다.
 business는 platform 프로필을 조회해 이에 맞는 응답을 생성합니다.
 
-### Platform 프로필
+### 플랫폼 프로필
 
 platform은 `platform_schema`를 사용해 렌더링 capability를 선언합니다.
 
@@ -287,7 +287,7 @@ config를 생략하거나 `supports_multi_group: false`로 설정한 platform은
 { "dev.ucp.shopping.fulfillment": [{"version": "2026-01-11", "config": { "supports_multi_group": true }}] }
 ```
 
-### Business 프로필
+### 비즈니스 프로필
 
 business는 `merchant_config`를 사용해 자신이 지원하는 fulfillment 구성을 선언합니다.
 
@@ -314,7 +314,7 @@ business는 `merchant_config`를 사용해 자신이 지원하는 fulfillment �
 위 예시는 shipping이 다중 주소를 지원하고,
 장바구니에서 shipping+pickup 혼합이 가능함을 의미합니다.
 
-### Business 응답 동작
+### 비즈니스 응답 동작
 
 **`supports_multi_group: false`(기본값)일 때:**
 
