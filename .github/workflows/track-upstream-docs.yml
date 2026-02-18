@@ -56,7 +56,7 @@ jobs:
         if: steps.collect.outputs.has_changes == 'true'
         uses: peter-evans/create-pull-request@v7
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PR_BOT_TOKEN || secrets.GITHUB_TOKEN }}
           commit-message: "docs(track): upstream changes ${{ steps.collect.outputs.base_sha_short }}..${{ steps.collect.outputs.head_sha_short }}"
           branch: ${{ steps.collect.outputs.branch_name }}
           delete-branch: true
